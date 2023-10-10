@@ -17,6 +17,7 @@ import { Routes } from "@/presentation/web/routes";
 
 // REST Controller
 import { AuthController } from "@/presentation/web/controllers/auth-controller";
+import { UserController } from "@/presentation/web/controllers/user-controller";
 
 // Infrastructures
 import { SQLiteDataSource } from "@/infra/sqlite/data-source";
@@ -44,6 +45,7 @@ container.bind<Routes>(Routes).toSelf().inSingletonScope();
 
 // REST Controller Binding
 container.bind<AuthController>(AuthController).toSelf().inSingletonScope();
+container.bind<UserController>(UserController).toSelf().inSingletonScope();
 
 // Infrastructure Binding
 container.bind<SQLiteDataSource>(SQLiteDataSource).toSelf().inSingletonScope();

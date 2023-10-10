@@ -1,23 +1,19 @@
 {
   "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
     "incremental": true,
-    "tsBuildInfoFile": "./.tsbuildinfo" /* Specify the path to .tsbuildinfo incremental compilation file. */,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
+    "tsBuildInfoFile": "./../../../.tsbuildinfo" /* Specify the path to .tsbuildinfo incremental compilation file. */,
+    "target": "ES5",
+    "lib": ["dom", "dom.iterable", "esnext"],
     "jsx": "preserve",
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "rootDir": "./../../../",
+    "experimentalDecorators": true /* Enable experimental support for legacy experimental decorators. */,
+    "emitDecoratorMetadata": true /* Emit design-type metadata for decorated declarations in source files. */,
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "baseUrl": "./../../../src/",
     "paths": {
       "@/*": ["./*"]
@@ -25,14 +21,29 @@
     "types": [
       "reflect-metadata"
     ] /* Specify type package names to be included without being referenced in a source file. */,
-    "experimentalDecorators": true /* Enable experimental support for legacy experimental decorators. */,
-    "emitDecoratorMetadata": true /* Emit design-type metadata for decorated declarations in source files. */,
-    "noEmit": true
+    "resolveJsonModule": true,
+    "allowArbitraryExtensions": true /* Enable importing files with any extension, provided a declaration file is present. */,
+    "allowJs": true,
+    "removeComments": true /* Disable emitting comments. */,
+    "noEmit": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
+    "strict": true,
+    "strictFunctionTypes": false /* When assigning functions, check to ensure parameters and the return values are subtype-compatible. */,
+    "strictBindCallApply": false /* Check that the arguments for 'bind', 'call', and 'apply' methods match the original function. */,
+    "rootDir": "./../../../",
+    "skipLibCheck": true
   },
   "include": [
-    "../../../src/**/*.{ts,js,tsx,jsx,json}",
-    "../../../dist/**/*.{ts,js,json,tsx,jsx}",
-    "../../../dist/presentation/web/.next/types/**/*.ts"
+    "next-env.d.ts",
+    "../../../dist/presentation/web/.next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "ts-node": {
+    "swc": true,
+    "require": ["tsconfig-paths/register"]
+  }
 }

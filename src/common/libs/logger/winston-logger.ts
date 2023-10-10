@@ -55,13 +55,13 @@ export class WinstonLogger implements Logger {
   public getWinston(): winston.Logger {
     return this.logger;
   }
-  private mapToString(...item: unknown[]) {
+  private mapToString(item: unknown[]) {
     return item.map((item) => {
       if (item instanceof AppError || typeof item === "string") {
         return item;
       } else {
-        return JSON.stringify(item);
+        return JSON.stringify(item, null, 4);
       }
-    });
+    }).join("\n");
   }
 }

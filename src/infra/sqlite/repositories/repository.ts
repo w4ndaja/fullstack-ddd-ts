@@ -23,16 +23,19 @@ export class Repository<I> implements IRepository<I> {
       skip: calcSkip(page, limit),
       take: limit,
       where: {
-        deletedAt: IsNull(),
+        deletedAt: null,
       },
       order: {
-        createdAt: "DESC",
+        createdAt: -1,
       },
     });
     return {
       page,
       limit,
-      data: <I[]>data,
+      data: <I[]>data.map((item) => ({
+        ...item,
+        deletedAt: item.deletedAt !== "null" ? item.deletedAt : null,
+      })),
       totalRow,
     };
   }

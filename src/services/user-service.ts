@@ -18,11 +18,12 @@ export class UserService {
     @inject(TYPES.Logger) private logger: Logger
   ) {}
   public async findAll(param: IBaseGetParam): Promise<IGenericPaginatedData<IUser>> {
-    const users = await this._userRepository.findAll(param);
-    return GenericPaginatedData.create({
-      ...users,
-      data: users.data.map((item) => User.create(item).unmarshall()),
+    const usersDto = await this._userRepository.findAll(param);
+    const users = GenericPaginatedData.create({
+      ...usersDto,
+      data: usersDto.data.map((item) => User.create(item).unmarshall()),
     }).unmarshall();
+    return users;
   }
   public async findById(id: IUser["id"]): Promise<IUser> {
     const user = await this._userRepository.findById(id);

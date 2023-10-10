@@ -19,7 +19,7 @@ export class WebServer {
   private port: number;
   private app: NextServer;
   private declare server: Server;
-  private prepared: Promise<boolean>;
+  private prepared: Promise<void>;
   constructor(
     @inject(TYPES.Logger) private logger: Logger,
     private routes: Routes,
@@ -33,10 +33,7 @@ export class WebServer {
       dir: config.presentation.dir,
     });
     const app = express();
-    this.prepared = new Promise(async (res, rej) => {
-      await this.app.prepare();
-      res(true);
-    });
+    this.prepared = this.app.prepare();
     app.use(cors());
     app.use(config.app.apiUrlPrefix, json());
     app.use(config.app.apiUrlPrefix, (req: Request, res: Response, next: NextFunction) => {

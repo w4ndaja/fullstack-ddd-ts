@@ -49,7 +49,7 @@ export class Auth extends Entity<IAuth> {
     return this._props.userId;
   }
   get expiredAt(): number | null {
-    return this._props.expiredAt;
+    return this._props.expiredAt || null;
   }
   get expired(): boolean {
     return this._props.expired || (this._props.expiredAt ? Date.now() > this._props.expiredAt : false);

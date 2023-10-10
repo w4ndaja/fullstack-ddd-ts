@@ -58,7 +58,7 @@ export class Entity<I> {
       id: this.id,
       createdAt: this.createdAt.getTime(),
       updatedAt: this.updatedAt.getTime(),
-      deletedAt: this.deletedAt?.getTime(),
+      deletedAt: this.deletedAt?.getTime() || null,
     };
   }
 

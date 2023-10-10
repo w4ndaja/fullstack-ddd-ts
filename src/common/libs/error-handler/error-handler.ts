@@ -22,7 +22,7 @@ export class ErrorHandler {
     }
   }
   public handleTrustedError(error: AppError): AppError {
-    this.logger.error(error);
+    this.logger.error(error.toJson(), error.stack);
     return error;
   }
   public handleUntrustedError(error: Error): AppError {
