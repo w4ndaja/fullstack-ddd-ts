@@ -1,2 +1,2 @@
-export * from './base-get-param'
-export * from './generic-paginated-data'
+export * from './config';
+export * from './error-code';

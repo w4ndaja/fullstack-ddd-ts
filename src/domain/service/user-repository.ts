@@ -1,5 +1,7 @@
-import { User } from "../model/user";
-import { BaseRepository } from "./base/base-repository";
+import type { IRepository } from "./repository";
+import { IUser } from "@/domain/model";
 
-export interface UserRepository extends BaseRepository<User> {
+export interface IUserRepository extends IRepository<IUser> {
+  // TODO: add other method here for other result than basic CRUD
+  findByUsername(username: string): Promise<IUser>;
 }
