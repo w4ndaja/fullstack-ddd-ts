@@ -39,9 +39,9 @@
   ],
   "typings": "dist/index.d.ts",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon",
-    "dev:rest": "cross-env NODE_ENV=development nodemon --watch 'src/**/*' -e ts,tsx",
-    "build:next": "next build src/presentation/web && tsc && tsc-alias",
+    "dev:fe": "cross-env NODE_ENV=development nodemon",
+    "dev": "cross-env NODE_ENV=development nodemon --watch 'src/**/*' -e ts,tsx",
+    "build:fe": "next build src/presentation/web && tsc && tsc-alias",
     "build": "tsc && tsc-alias",
     "start": "cross-env NODE_ENV=production node dist/index.js",
     "lint-next": "next lint src/presentation/web",
