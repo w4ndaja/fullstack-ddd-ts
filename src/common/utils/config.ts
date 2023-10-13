@@ -1,7 +1,7 @@
 import dotEnv from "dotenv";
 import path from "path";
 import { getEnvFileName } from "@/common/libs/config/get-env-file-name";
-
+let port: string | undefined = process.env.PORT;
 dotEnv.config({
   override: true,
   path: path.join(process.cwd(), getEnvFileName()),
@@ -13,7 +13,7 @@ export const config = {
     env: process.env.NODE_ENV || "production",
     name: process.env.APP_NAME || "Fullstack WEB TS APP",
     host: process.env.HOST || "0.0.0.0",
-    port: Number(process.env.PORT) || 3000,
+    port: Number(port || process.env.PORT) || 3000,
     privateKey: process.env.PRIVATE_KEY || path.join(process.cwd(), "private-key.pem"),
     publicKey: process.env.PUBLIC_KEY || path.join(process.cwd(), "public-key.pem"),
     appUrlPrefix: process.env.APP_URL_PREFIX || "/",
@@ -31,7 +31,9 @@ export const config = {
       baseUrl: process.env.AHM_REST_BASE_URL,
     },
     sqlite: {
-      database: process.env.SQLITE_PATH || "C:/Users/User/code/mine/fullstack-ts-scaffold/storage/db/sqlite.db",
+      database:
+        process.env.SQLITE_PATH ||
+        "C:/Users/User/code/mine/fullstack-ts-scaffold/storage/db/sqlite.db",
     },
   },
   storageDir: process.env.STORAGE_DIR || defaultStorageDir,

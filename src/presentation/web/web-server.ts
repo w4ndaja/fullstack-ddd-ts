@@ -9,53 +9,61 @@ import { parse } from "url";
 import next from "next";
 import { inject, injectable } from "inversify";
 import { NextServer } from "next/dist/server/next";
-import express, { NextFunction, Request, Response } from "express";
+import express, { NextFunction, Request, Response, Express } from "express";
 import cors from "cors";
 import { json } from "body-parser";
 import multer from "multer";
 import path from "path";
+import { SocketServer } from "./socket/socket-server";
 
 @injectable()
 export class WebServer {
   private host: string;
   private port: number;
-  private app: NextServer;
-  private declare server: Server;
-  private prepared: Promise<void>;
+  private feServer: NextServer;
+  private httpServer: Server;
+  private fePrepared: Promise<void>;
+  private restServer: Express;
   constructor(
     @inject(TYPES.Logger) private logger: Logger,
     private routes: Routes,
-    private errorHandler: ErrorHandler
+    private errorHandler: ErrorHandler,
+    private socketServer: SocketServer
   ) {
     this.host = config.app.host;
     this.port = config.app.port;
-    const dev = config.app.env !== "production";
-    this.app = next({
-      dev,
+    this.restServer = express();
+    this.feServer = next({
+      dev: config.app.env !== "production",
       dir: config.presentation.dir,
     });
-    const app = express();
-    this.prepared = this.app.prepare();
+    this.fePrepared = this.feServer.prepare();
     const upload = multer({ dest: path.join(process.cwd(), "storage") });
-    app.use(config.app.apiUrlPrefix, cors());
-    app.use(config.app.apiUrlPrefix, upload.any());
-    app.use(config.app.apiUrlPrefix, json());
-    app.use(config.app.apiUrlPrefix, (req: Request, res: Response, next: NextFunction) => {
-      this.logger.info(`${req.method}::${req.url}`);
-      next();
-    });
-    app.use(config.app.apiUrlPrefix, this.routes.getRouter());
-    app.use(config.app.apiUrlPrefix, this.restErrorHandler.bind(this));
-    app.use("/", this.frontEndHandler.bind(this));
+    this.restServer.use(
+      config.app.apiUrlPrefix,
+      (req: Request, res: Response, next: NextFunction) => {
+        this.logger.info(`${req.method}::${req.url}`);
+        next();
+      }
+    );
+    this.restServer.use(config.app.apiUrlPrefix, cors());
+    this.restServer.use(config.app.apiUrlPrefix, upload.any());
+    this.restServer.use(config.app.apiUrlPrefix, json());
+    this.restServer.use(config.app.apiUrlPrefix, this.routes.getRouter());
+    this.restServer.use(config.app.apiUrlPrefix, this.restErrorHandler.bind(this));
+    this.restServer.use("/", this.frontEndHandler.bind(this));
 
-    this.server = createServer(app);
-    this.server.listen(this.port);
+    this.httpServer = createServer(this.restServer);
+
+    this.socketServer.setServer(this.httpServer);
+    this.httpServer.listen(this.port);
+
     logger.info(`Server listening at http://${this.host}:${this.port} as ${config.app.env}`);
-    this.prepared.then(() => {});
   }
 
   private async frontEndHandler(req: Request, res: Response, next: NextFunction) {
-    return this.app.getRequestHandler()(req, res, parse(req.url!, true));
+    await this.fePrepared;
+    return this.feServer.getRequestHandler()(req, res, parse(req.url!, true));
   }
 
   private async restErrorHandler(err: AppError, req: Request, res: Response, next: NextFunction) {
