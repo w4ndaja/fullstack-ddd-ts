@@ -8,9 +8,11 @@ import { ErrorCode } from "@/common/utils/error-code";
 export class ErrorHandler {
   constructor(@inject(TYPES.Logger) private logger: Logger) {
     process.on("uncaughtException", (e) => {
+      console.error(e);
       this.logger.error(e);
     });
     process.on("unhandledRejection", (e) => {
+      console.error(e);
       this.logger.error(e);
     });
   }

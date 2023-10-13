@@ -2,6 +2,7 @@ import type { Logger } from "@/common/libs/logger/logger";
 import { config } from "@/common/utils/config";
 import { Routes } from "./routes";
 import { AppError, ErrorHandler } from "@/common/libs/error-handler";
+import { TYPES } from "@/ioc/types";
 
 import { Server, createServer } from "http";
 import { parse } from "url";
@@ -11,7 +12,8 @@ import { NextServer } from "next/dist/server/next";
 import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import { json } from "body-parser";
-import { TYPES } from "@/ioc/types";
+import multer from "multer";
+import path from "path";
 
 @injectable()
 export class WebServer {
@@ -34,7 +36,9 @@ export class WebServer {
     });
     const app = express();
     this.prepared = this.app.prepare();
-    app.use(cors());
+    const upload = multer({ dest: path.join(process.cwd(), "storage") });
+    app.use(config.app.apiUrlPrefix, cors());
+    app.use(config.app.apiUrlPrefix, upload.any());
     app.use(config.app.apiUrlPrefix, json());
     app.use(config.app.apiUrlPrefix, (req: Request, res: Response, next: NextFunction) => {
       this.logger.info(`${req.method}::${req.url}`);

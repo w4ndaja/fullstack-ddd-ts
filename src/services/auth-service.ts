@@ -7,7 +7,7 @@ import { Auth } from "@/domain/model/auth";
 import { TYPES } from "@/ioc/types";
 
 import { inject, injectable } from "inversify";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { User } from "@/domain/model";
 import { Logger } from "@/common/libs/logger";
 
