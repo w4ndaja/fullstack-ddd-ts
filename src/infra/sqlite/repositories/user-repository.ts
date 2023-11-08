@@ -11,7 +11,7 @@ export class UserRepository extends Repository<IUser> implements IUserRepository
   constructor() {
     super(UserSqlite);
   }
-  async findByUsername(username: string): Promise<IUser> {
+  async findByUsernameOrEmail(username: string): Promise<IUser> {
     await this.datasource.waitUntilInitialized;
     const sqliteResult = await this.repository.findOneBy({
       username,

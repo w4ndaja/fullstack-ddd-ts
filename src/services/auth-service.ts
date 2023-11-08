@@ -10,6 +10,7 @@ import { inject, injectable } from "inversify";
 import jwt from "jsonwebtoken";
 import { User } from "@/domain/model";
 import { Logger } from "@/common/libs/logger";
+import { ERoles } from "@/common/utils/roles";
 
 @injectable()
 export class AuthService {
@@ -26,7 +27,7 @@ export class AuthService {
    */
   public async validate(username: string, password: string): Promise<IAuth> {
     // Get User by username and match their password unless throw an unauthorized error
-    const userDto = await this.userRepository.findByUsername(username).catch((res) => null);
+    const userDto = await this.userRepository.findByUsernameOrEmail(username).catch((res) => null);
     if (!userDto) throw new AppError(ErrorCode.UNAUTHORIZED, "Username not Found");
     const user = User.create(userDto);
     if (!user || !user.checkPassword(password)) {
@@ -40,6 +41,7 @@ export class AuthService {
     });
     auth.token = await this.generateToken(auth.id);
     const _auth = auth.unmarshall();
+    console.log(auth.user.hasRole(ERoles.SUPER_ADMIN))
 
     await this.authRepository.save(_auth);
     return _auth;

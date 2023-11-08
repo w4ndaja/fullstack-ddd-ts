@@ -1,4 +1,4 @@
 export type IAuthValidateParamDto = {
-  username:string;
+  email:string;
   password:string;
 }

@@ -7,7 +7,7 @@ import { IUser } from "@/domain/model";
 @injectable()
 export class UserRepository implements IUserRepository {
   constructor(private firebaseAdmin: FirebaseAdmin) {}
-  findByUsername(username: string): Promise<IUser> {
+  findByUsernameOrEmail(username: string): Promise<IUser> {
     throw new Error("Method not implemented.");
   }
   onChange(callback: (user: IUser) => void): void {

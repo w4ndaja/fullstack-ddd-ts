@@ -4,18 +4,18 @@ import { z } from "zod";
 
 export class AuthValidateParamMapper {
   public static fromRest({
-    username,
+    email,
     password,
   }: {
-    username: string;
+    email: string;
     password: string;
   }): IAuthValidateParamDto {
     const validated = validateObject(
       {
-        username: z.string(),
+        email: z.string().email(),
         password: z.string(),
       },
-      { username, password }
+      { email, password }
     );
     return validated;
   }

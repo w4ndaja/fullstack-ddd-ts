@@ -13,10 +13,9 @@ import { User } from "@/domain/model";
  */
 @injectable()
 export class UserService {
-  constructor(
-    @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
-    @inject(TYPES.Logger) private logger: Logger
-  ) {}
+  @inject(TYPES.UserRepository) private declare _userRepository: IUserRepository;
+  @inject(TYPES.Logger) private declare logger: Logger;
+
   public async findAll(param: IBaseGetParam): Promise<IGenericPaginatedData<IUser>> {
     const usersDto = await this._userRepository.findAll(param);
     const users = GenericPaginatedData.create({
@@ -25,10 +24,12 @@ export class UserService {
     }).unmarshall();
     return users;
   }
+
   public async findById(id: IUser["id"]): Promise<IUser> {
     const user = await this._userRepository.findById(id);
     return user;
   }
+
   public async save(param: IUserCreate): Promise<IUser> {
     const userEntity = User.create(param);
     if (!param.id && param.password && param.password.length !== 60) {
@@ -38,6 +39,7 @@ export class UserService {
     const userPersist = await this._userRepository.save(_userEntity);
     return userPersist;
   }
+
   public async destroy(id: IUser["id"]): Promise<IUser> {
     const user = User.create(await this._userRepository.findById(id));
     user.delete();

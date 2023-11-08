@@ -14,7 +14,7 @@ import cors from "cors";
 import { json } from "body-parser";
 import multer from "multer";
 import path from "path";
-import { SocketServer } from "./socket/socket-server";
+// import { SocketServer } from "./socket/socket-server";
 
 @injectable()
 export class WebServer {
@@ -28,7 +28,7 @@ export class WebServer {
     @inject(TYPES.Logger) private logger: Logger,
     private routes: Routes,
     private errorHandler: ErrorHandler,
-    private socketServer: SocketServer
+    // private socketServer: SocketServer
   ) {
     this.host = config.app.host;
     this.port = config.app.port;
@@ -55,7 +55,7 @@ export class WebServer {
 
     this.httpServer = createServer(this.restServer);
 
-    this.socketServer.setServer(this.httpServer);
+    // this.socketServer.setServer(this.httpServer);
     this.httpServer.listen(this.port);
 
     logger.info(`Server listening at http://${this.host}:${this.port} as ${config.app.env}`);

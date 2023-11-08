@@ -52,12 +52,17 @@ export class Auth extends Entity<IAuth> {
     return this._props.expiredAt || null;
   }
   get expired(): boolean {
-    return this._props.expired || (this._props.expiredAt ? Date.now() > this._props.expiredAt : false);
+    return (
+      this._props.expired || (this._props.expiredAt ? Date.now() > this._props.expiredAt : false)
+    );
   }
   get lastLoginAt(): number {
     return this._props.lastLoginAt;
   }
   get user(): User {
+    if (this._props.user instanceof User) {
+      return this._props.user;
+    }
     return User.create(this._props.user);
   }
   get token(): string {

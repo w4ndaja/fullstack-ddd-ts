@@ -16,8 +16,8 @@ export class AuthController extends Router {
     this.routes.get(`/validate-token`, asyncWrapper(this.validateToken.bind(this)));
   }
   private async validateCredentials(req: Request, res: Response, next: NextFunction) {
-    const { username, password } = AuthValidateParamMapper.fromRest(req.body);
-    const auth = await this.authService.validate(username, password);
+    const { email, password } = AuthValidateParamMapper.fromRest(req.body);
+    const auth = await this.authService.validate(email, password);
     res.json(RestMapper.dtoToRest(auth));
   }
   private async validateToken(req: Request, res: Response, next: NextFunction) {
