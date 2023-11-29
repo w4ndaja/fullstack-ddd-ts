@@ -32,7 +32,7 @@ export class Repository<I> implements IRepository<I> {
     return {
       page,
       limit,
-      data: <I[]>data.map((item) => ({
+      data: <I[]>data.map(({ _id, ...item }) => ({
         ...item,
         deletedAt: item.deletedAt !== "null" ? item.deletedAt : null,
       })),
@@ -43,7 +43,10 @@ export class Repository<I> implements IRepository<I> {
   async findById(id: string): Promise<I> {
     await this.datasource.waitUntilInitialized;
     const resultSqlite = await this.repository.findOneBy({ id });
-    if (resultSqlite) return <I>resultSqlite;
+    if (resultSqlite) {
+      const { _id, ...data } = resultSqlite;
+      return <I>data;
+    }
     throw new Error("NOT FOUND");
   }
 

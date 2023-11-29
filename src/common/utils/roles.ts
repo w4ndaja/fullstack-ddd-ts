@@ -1,4 +1,7 @@
-export enum ERoles {
+export enum EROLES {
   ADMIN = "ADMIN",
   SUPER_ADMIN = "SUPER_ADMIN",
+  STUDENT = "STUDENT",
+  MENTOR = "MENTOR",
+  ORGANISATION = "ORGANISATION",
 }

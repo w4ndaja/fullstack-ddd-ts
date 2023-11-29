@@ -1,7 +1,7 @@
-import { ERoles } from "@/common/utils/roles";
+import { EROLES } from "@/common/utils/roles";
 import { Entity, IEntityCreate, IEntity } from "./entity";
 import bcrypt from "bcrypt";
-import { EPermissions } from "@/common/utils/permissions";
+import { EPERMISSIONS } from "@/common/utils/permissions";
 
 export type IUser = IEntity<{
   fullname: string | null;
@@ -74,45 +74,45 @@ export class User extends Entity<IUser> {
     this._props.password = bcrypt.hashSync(password, 10);
   }
 
-  get roles(): ERoles[] {
-    return <ERoles[]>this._props.roles || [];
+  get roles(): EROLES[] {
+    return <EROLES[]>this._props.roles || [];
   }
 
-  set roles(roles: ERoles[]) {
+  set roles(roles: EROLES[]) {
     this._props.roles = roles;
   }
 
-  get permissions(): EPermissions[] {
-    return <EPermissions[]>this._props.permissions || [];
+  get permissions(): EPERMISSIONS[] {
+    return <EPERMISSIONS[]>this._props.permissions || [];
   }
 
-  set permissions(permissions: ERoles[]) {
+  set permissions(permissions: EROLES[]) {
     this._props.permissions = permissions;
   }
 
-  public hasRole(role: ERoles): boolean {
-    if(role === ERoles.SUPER_ADMIN) return true;
+  public hasRole(role: EROLES): boolean {
+    if(role === EROLES.SUPER_ADMIN) return true;
     return this.roles.includes(role);
   }
 
-  public setRole(role: ERoles): void {
+  public setRole(role: EROLES): void {
     if (!this.hasRole(role)) {
       this.roles.push(role);
     }
   }
 
-  public hasPermission(permission: EPermissions): boolean {
-    if(this.hasRole(ERoles.SUPER_ADMIN)) return true;
+  public hasPermission(permission: EPERMISSIONS): boolean {
+    if(this.hasRole(EROLES.SUPER_ADMIN)) return true;
     return this.permissions.includes(permission);
   }
 
-  public setPermission(permission: EPermissions): void {
+  public setPermission(permission: EPERMISSIONS): void {
     if (!this.hasPermission(permission)) {
       this.permissions.push(permission);
     }
   }
 
-  public removeRole(role: ERoles): void {
+  public removeRole(role: EROLES): void {
     if (this.hasRole(role)) {
       this.roles = this.roles.filter((r) => r !== role);
     }

@@ -1,4 +1,4 @@
-export enum EPermissions {
+export enum EPERMISSIONS {
   // USER
   "CREATE_USER" = "CREATE_USER",
   "DELETE_USER" = "DELETE_USER",

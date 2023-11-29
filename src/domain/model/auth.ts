@@ -8,7 +8,7 @@ export type IAuth = IEntity<{
   expiredAt: number | null;
   expired: boolean;
   lastLoginAt: number;
-  user: IUser;
+  user: Omit<IUser, "password">;
   token?: string;
 }>;
 
@@ -17,7 +17,7 @@ export type IAuthCreate = IEntityCreate<{
   expiredAt?: number | null;
   expired: boolean;
   lastLoginAt?: number | null;
-  user?: IUser;
+  user?: Omit<IUser, "password">;
   token?: string;
 }>;
 
@@ -32,13 +32,14 @@ export class Auth extends Entity<IAuth> {
     return new Auth(props);
   }
   public unmarshall(): IAuth {
+    const { password, ...user } = this.user.unmarshall();
     return {
       id: this.id,
       userId: this.userId,
       expiredAt: this.expiredAt,
       expired: this.expired,
       lastLoginAt: this.lastLoginAt,
-      user: this.user.unmarshall(),
+      user: user,
       token: this.token,
       createdAt: this._props.createdAt,
       updatedAt: this._props.updatedAt,

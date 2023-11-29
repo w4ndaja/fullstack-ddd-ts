@@ -10,10 +10,10 @@ import { inject, injectable } from "inversify";
 import jwt from "jsonwebtoken";
 import { User } from "@/domain/model";
 import { Logger } from "@/common/libs/logger";
-import { ERoles } from "@/common/utils/roles";
 
 @injectable()
 export class AuthService {
+  public auth: Auth | null = null;
   constructor(
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
     @inject(TYPES.AuthRepository) private authRepository: IAuthRepository,
@@ -41,9 +41,8 @@ export class AuthService {
     });
     auth.token = await this.generateToken(auth.id);
     const _auth = auth.unmarshall();
-    console.log(auth.user.hasRole(ERoles.SUPER_ADMIN))
-
     await this.authRepository.save(_auth);
+    this.auth = auth;
     return _auth;
   }
   /**
@@ -60,6 +59,7 @@ export class AuthService {
     }
     const newAuth = Auth.create(authDto);
     const newAuthDto = newAuth.unmarshall();
+    this.auth = newAuth;
     return newAuthDto;
   }
   /**
@@ -73,6 +73,7 @@ export class AuthService {
       await this.authRepository.findAliveAuth(authId, token),
       await this.authRepository.destroy(authId),
     ]);
+    this.auth = null;
   }
   /**
    * Generates a JWT token for the given user ID.
