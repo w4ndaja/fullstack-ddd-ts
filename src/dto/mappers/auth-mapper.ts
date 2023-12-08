@@ -9,8 +9,8 @@ export class AuthMapper {
     return {
       token: auth.token || "",
       user: {
-        fullname: auth.user.fullname,
-        username: auth.user.username,
+        fullname: auth.user.fullname || "",
+        username: auth.user.username || "",
       },
     };
   }
