@@ -1,7 +1,7 @@
 module.exports = {
     apps : [
         {
-          name: "fullstack-ts",
+          name: "camy-dev",
           script: "./dist/index.js",
           watch: true,
           env: {
