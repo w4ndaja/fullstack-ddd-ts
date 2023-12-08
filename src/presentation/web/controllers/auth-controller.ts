@@ -12,21 +12,27 @@ import { AuthValidateParamMapper } from "@/dto/mappers/auth/auth-validate-param-
 export class AuthController extends Router {
   constructor(private authService: AuthService) {
     super("/auth");
-    this.routes.post(`/validate-credential`, asyncWrapper(this.validateCredentials.bind(this)));
-    this.routes.get(`/validate-token`, asyncWrapper(this.validateToken.bind(this)));
+    this.routes.post(`/login`, asyncWrapper(this.login.bind(this)));
+    this.routes.get(`/check-token`, asyncWrapper(this.checkToken.bind(this)));
+    this.routes.post("/register", asyncWrapper(this.register.bind(this)));
   }
-  private async validateCredentials(req: Request, res: Response, next: NextFunction) {
+  private async login(req: Request, res: Response, next: NextFunction) {
     const { email, password } = AuthValidateParamMapper.fromRest(req.body);
-    const auth = await this.authService.validate(email, password);
+    const auth = await this.authService.login(email, password);
     res.json(RestMapper.dtoToRest(auth));
   }
-  private async validateToken(req: Request, res: Response, next: NextFunction) {
+  private async checkToken(req: Request, res: Response, next: NextFunction) {
     try {
       const [, token] = <string[]>req.get("Authorization")?.split("Bearer ");
-      const auth = await this.authService.validateToken(token);
+      const auth = await this.authService.checkToken(token);
       res.json(RestMapper.dtoToRest(auth));
     } catch (e) {
       throw new AppError(ErrorCode.UNAUTHORIZED, "Invalid token");
     }
+  }
+  private async register(req: Request, res: Response, next: NextFunction) {
+    const { email, password } = AuthValidateParamMapper.fromRest(req.body);
+    const auth = await this.authService.register(email, password);
+    res.json(RestMapper.dtoToRest(auth));
   }
 }

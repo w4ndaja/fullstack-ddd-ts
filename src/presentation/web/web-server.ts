@@ -27,8 +27,7 @@ export class WebServer {
   constructor(
     @inject(TYPES.Logger) private logger: Logger,
     private routes: Routes,
-    private errorHandler: ErrorHandler,
-    // private socketServer: SocketServer
+    private errorHandler: ErrorHandler // private socketServer: SocketServer
   ) {
     this.host = config.app.host;
     this.port = config.app.port;

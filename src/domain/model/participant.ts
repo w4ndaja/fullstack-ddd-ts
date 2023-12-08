@@ -1,59 +1,64 @@
 import { Entity, IEntity, IEntityCreate } from "./entity";
 import { IUser, User } from "./user";
 
-export type IIntroVideo = {
-  url: string;
-  provider: string;
-};
-
-export type IClient = IEntity<{
+export type IParticipant = IEntity<{
+  userId: IUser["id"];
   username: string;
-  fullname: string;
-  hasUnreadNotification: boolean;
-  avatarUrl: string;
   followerCount: number;
   followingCount: number;
+  fullname: string;
   bio: string;
   gender: string;
-  introVideoUrl: IIntroVideo;
+  avatarUrl: string;
+  introVideo: {
+    service: string;
+    url: string;
+  };
+  hasUnreadNotif: boolean;
+  balance: number;
   user?: IUser;
-  userId: IUser["id"];
 }>;
 
-export type IClientCreate = IEntityCreate<{
+export type IParticipantCreate = IEntityCreate<{
+  userId: IUser["id"];
   username: string;
-  fullname: string;
-  hasUnreadNotification?: boolean;
-  avatarUrl?: string;
   followerCount?: number;
   followingCount?: number;
+  fullname: string;
   bio: string;
   gender: string;
-  introVideoUrl?: IIntroVideo;
+  avatarUrl?: string;
+  introVideo?: {
+    service: string;
+    url: string;
+  };
+  hasUnreadNotif?: boolean;
+  balance?: number;
   user?: IUser;
-  userId: IUser["id"];
 }>;
 
-export class Client extends Entity<IClient> {
-  constructor(props: IClientCreate) {
+export class Participant extends Entity<IParticipant> {
+  constructor(props: IParticipantCreate) {
     super(props);
   }
-  public static create(props: IClientCreate): Client {
-    return new Client(props);
+  public static create(props: IParticipantCreate): Participant {
+    return new Participant(props);
   }
-  public unmarshall(): IClient {
+  public unmarshall(): IParticipant {
     return {
       id: this.id,
+      userId: this.userId,
       username: this.username,
-      fullname: this.fullname,
-      hasUnreadNotification: this.hasUnreadNotification,
-      avatarUrl: this.avatarUrl,
       followerCount: this.followerCount,
       followingCount: this.followingCount,
+      fullname: this.fullname,
       bio: this.bio,
-      introVideoUrl: this.introVideoUrl,
+      gender: this.gender,
+      avatarUrl: this.avatarUrl,
+      introVideo: this.introVideo,
+      hasUnreadNotif: this.hasUnreadNotification,
+      balance: this.balance,
       user: this.user?.unmarshall(),
-      userId: this.userId,
       createdAt: this.createdAt.getTime(),
       updatedAt: this.updatedAt.getTime(),
       deletedAt: this.deletedAt?.getTime() || null,
@@ -67,7 +72,7 @@ export class Client extends Entity<IClient> {
     return this._props.fullname;
   }
   get hasUnreadNotification(): boolean {
-    return this._props.hasUnreadNotification;
+    return this._props.hasUnreadNotif;
   }
   get avatarUrl(): string {
     return this._props.avatarUrl;
@@ -81,8 +86,11 @@ export class Client extends Entity<IClient> {
   get bio(): string {
     return this._props.bio;
   }
-  get introVideoUrl(): IIntroVideo {
-    return this._props.introVideoUrl;
+  get introVideo(): { service: string; url: string } {
+    return this._props.introVideo;
+  }
+  get gender(): string {
+    return this._props.gender;
   }
   get user(): User | undefined {
     if (this._props.user instanceof User) {
@@ -92,5 +100,8 @@ export class Client extends Entity<IClient> {
   }
   get userId(): IUser["id"] {
     return this._props.userId;
+  }
+  get balance(): number {
+    return this._props.balance;
   }
 }

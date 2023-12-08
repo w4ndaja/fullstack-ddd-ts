@@ -10,6 +10,7 @@ import { inject, injectable } from "inversify";
 import jwt from "jsonwebtoken";
 import { User } from "@/domain/model";
 import { Logger } from "@/common/libs/logger";
+import { EROLES } from "@/common/utils/roles";
 
 @injectable()
 export class AuthService {
@@ -25,7 +26,7 @@ export class AuthService {
    * @param password password of client
    * @returns plain Object of Auth
    */
-  public async validate(username: string, password: string): Promise<IAuth> {
+  public async login(username: string, password: string): Promise<IAuth> {
     // Get User by username and match their password unless throw an unauthorized error
     const userDto = await this.userRepository.findByUsernameOrEmail(username).catch((res) => null);
     if (!userDto) throw new AppError(ErrorCode.UNAUTHORIZED, "Username not Found");
@@ -46,12 +47,37 @@ export class AuthService {
     return _auth;
   }
   /**
+   * register
+   */
+  public async register(email: string, password: string): Promise<IAuth> {
+    const userEntity = User.create({
+      email: email,
+      roles: [EROLES.PARTICIPANT],
+    });
+    userEntity.password = password;
+    const existUser = await this.userRepository.findByUsernameOrEmail(email);
+    if (existUser) throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "User Already Exist");
+    const userDto = userEntity.unmarshall();
+    this.userRepository.save(userDto);
+    const auth = Auth.create({
+      userId: userDto.id,
+      expired: false,
+      user: userDto,
+    });
+    auth.token = await this.generateToken(auth.id);
+    const _auth = auth.unmarshall();
+    this.authRepository.save(_auth);
+    this.auth = auth;
+    return _auth;
+  }
+
+  /**
    * Validates a given token and returns the authenticated user.
    * @param token - The token to be validated.
    * @returns The authenticated user.
    * @throws AppError with ErrorCode.UNAUTHORIZED if the token is invalid or not found.
    */
-  public async validateToken(token: string): Promise<IAuth> {
+  public async checkToken(token: string): Promise<IAuth> {
     const authId = await this.verifyToken(token);
     const authDto = await this.authRepository.findAliveAuth(authId, token);
     if (!authDto) {
@@ -67,7 +93,7 @@ export class AuthService {
    * @param token - The token to invalidate.
    * @returns A Promise that resolves when the token is invalidated.
    */
-  public async invalidate(token: string): Promise<void> {
+  public async logout(token: string): Promise<void> {
     const authId = this.verifyToken(token);
     await Promise.all([
       await this.authRepository.findAliveAuth(authId, token),

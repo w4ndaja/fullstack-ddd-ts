@@ -1,8 +1,8 @@
 import "reflect-metadata";
 import { EROLES } from "@/common/utils/roles";
-import { Client, User } from "@/domain/model";
+import { Participant, User } from "@/domain/model";
 import { container } from "@/ioc/container";
-import { ClientService, UserService } from "@/services";
+import { UserService } from "@/services";
 import { EGENDERS } from "@/common/utils/genders";
 
 const userSuperAdmin = User.create({
@@ -19,13 +19,13 @@ userAdmin.password = "password";
 
 const userClient1 = User.create({
   email: "client001@admin.com",
-  roles: [EROLES.STUDENT],
+  roles: [EROLES.PARTICIPANT],
 });
 userClient1.password = "password";
 
 const userClient2 = User.create({
   email: "client002@admin.com",
-  roles: [EROLES.STUDENT],
+  roles: [EROLES.PARTICIPANT],
 });
 userClient2.password = "password";
 
@@ -41,14 +41,14 @@ const userOrganization = User.create({
 });
 userOrganization.password = "password";
 
-const client1 = Client.create({
+const client1 = Participant.create({
   username: "client1",
   fullname: "Dummy Client 001",
   bio: "I'm dummy client",
   gender: EGENDERS.FEMALE.toString(),
   userId: userClient1.id,
 });
-const client2 = Client.create({
+const client2 = Participant.create({
   username: "client2",
   fullname: "Dummy Client 002",
   bio: "I'm dummy client",
@@ -57,7 +57,6 @@ const client2 = Client.create({
 });
 
 const userService = container.get<UserService>(UserService);
-const clientService = container.get<ClientService>(ClientService);
 
 Promise.all([
   userService.save(userSuperAdmin.unmarshall()),
@@ -66,8 +65,6 @@ Promise.all([
   userService.save(userClient2.unmarshall()),
   userService.save(userMentor.unmarshall()),
   userService.save(userOrganization.unmarshall()),
-  clientService.save(client1.unmarshall()),
-  clientService.save(client2.unmarshall()),
 ]).then((result) => {
   console.log(result);
 });

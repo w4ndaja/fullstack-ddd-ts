@@ -5,5 +5,4 @@ export const TYPES = {
   // Repository symbols
   UserRepository: Symbol.for("UserRepository"),
   AuthRepository: Symbol.for("AuthRepository"),
-  ClientRepository: Symbol.for("ClientRepository"),
 };

@@ -11,7 +11,7 @@ export class UserRepository extends Repository<IUser> implements IUserRepository
     super("users");
   }
 
-  async findByUsernameOrEmail(username: string): Promise<IUser> {
+  async findByUsernameOrEmail(username: string): Promise<IUser|null> {
     const collection = await this.collection.findOne({
       $or: [
         {
@@ -23,7 +23,7 @@ export class UserRepository extends Repository<IUser> implements IUserRepository
       ],
     });
     if (!collection) {
-      throw new AppError(ErrorCode.NOT_FOUND, `User with username:${username} not found!`);
+      return null
     }
     const { _id, ...data } = collection;
     return <IUser>data;
