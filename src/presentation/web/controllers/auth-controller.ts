@@ -25,6 +25,11 @@ export class AuthController extends Router {
       asyncWrapper(this.authMiddleware.authenticated.bind(this.authMiddleware)),
       asyncWrapper(this.profile.bind(this))
     );
+    this.routes.put(
+      "/profile",
+      asyncWrapper(this.authMiddleware.authenticated.bind(this.authMiddleware)),
+      asyncWrapper(this.updateProfile.bind(this))
+    );
   }
   private async login(req: Request, res: Response, next: NextFunction) {
     const { email, password } = AuthValidateParamMapper.fromRest(req.body);
@@ -43,6 +48,10 @@ export class AuthController extends Router {
   }
   private async profile(req: Request, res: Response, next: NextFunction) {
     const profile = await this.profileService.getProfile();
+    return res.json(RestMapper.dtoToRest(<object>profile));
+  }
+  private async updateProfile(req: Request, res: Response, next: NextFunction) {
+    const profile = await this.profileService.updateProfile(req.body);
     return res.json(RestMapper.dtoToRest(<object>profile));
   }
 }
