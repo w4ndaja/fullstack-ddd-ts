@@ -1,6 +1,7 @@
 import { Entity, IEntity, IEntityCreate } from "./entity";
 
 export type IMentor = IEntity<{
+  userId: string;
   username: string;
   fullname: string;
   avatarUrl: string;
@@ -45,6 +46,7 @@ export type IMentor = IEntity<{
 }>;
 
 export type IMentorCreate = IEntityCreate<{
+  userId: string;
   username: string;
   fullname: string;
   avatarUrl: string;
@@ -98,6 +100,7 @@ export class Mentor extends Entity<IMentor> {
   public unmarshall(): IEntity<IMentor> {
     return {
       id: this.id,
+      userId: this.userId,
       username: this.username,
       fullname: this.fullname,
       avatarUrl: this.avatarUrl,
@@ -119,6 +122,9 @@ export class Mentor extends Entity<IMentor> {
       updatedAt: this.updatedAt.getTime(),
       deletedAt: this.deletedAt?.getTime() || null,
     };
+  }
+  get userId(): string {
+    return this._props.userId;
   }
   get username(): string {
     return this._props.username;
@@ -195,70 +201,57 @@ export class Mentor extends Entity<IMentor> {
   get joinedAt(): number {
     return this._props.joinedAt;
   }
+  set userId(value: string) {
+    this._props.userId = value;
+  }
   set username(value: string) {
     this._props.username = value;
   }
-
   set fullname(value: string) {
     this._props.fullname = value;
   }
-
   set avatarUrl(value: string) {
     this._props.avatarUrl = value;
   }
-
   set className(value: string[]) {
     this._props.className = value;
   }
-
   set bankInfo(value: { accountName: string; accountNo: string; name: string }) {
     this._props.bankInfo = value;
   }
-
   set company(value: { name: string }) {
     this._props.company = value;
   }
-
   set graduateFrom(value: { name: string; region: string }) {
     this._props.graduateFrom = value;
   }
-
   set introVideo(value: { service: string; url: string }) {
     this._props.introVideo = value;
   }
-
   set availableClasses(value: string[]) {
     this._props.availableClasses = value;
   }
-
   set upcomingClasses(value: { type: string; classDate: number; duration: number }[]) {
     this._props.upcomingClasses = value;
   }
-
   set highlightedUpcomingClass(value: { type: string; className: string; thumbnailUrl: string }) {
     this._props.highlightedUpcomingClass = value;
   }
-
   set liveClasses(value: { thumbnailUrl: string; className: string; classDate: number }[]) {
     this._props.liveClasses = value;
   }
-
   set isOnline(value: boolean) {
     this._props.isOnline = value;
   }
-
   set reviewPoint(value: number) {
     this._props.reviewPoint = value;
   }
-
   set price(value: number) {
     this._props.price = value;
   }
-
   set isCertified(value: boolean) {
     this._props.isCertified = value;
   }
-
   set joinedAt(value: number) {
     this._props.joinedAt = value;
   }

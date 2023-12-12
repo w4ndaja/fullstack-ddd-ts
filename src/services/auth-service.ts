@@ -14,7 +14,7 @@ import { EROLES } from "@/common/utils/roles";
 
 @injectable()
 export class AuthService {
-  public auth: Auth | null = null;
+  private _auth: Auth | null = null;
   constructor(
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
     @inject(TYPES.AuthRepository) private authRepository: IAuthRepository,
@@ -43,7 +43,7 @@ export class AuthService {
     auth.token = await this.generateToken(auth.id);
     const _auth = auth.unmarshall();
     await this.authRepository.save(_auth);
-    this.auth = auth;
+    this._auth = auth;
     return _auth;
   }
   /**
@@ -67,7 +67,7 @@ export class AuthService {
     auth.token = await this.generateToken(auth.id);
     const _auth = auth.unmarshall();
     this.authRepository.save(_auth);
-    this.auth = auth;
+    this._auth = auth;
     return _auth;
   }
 
@@ -83,9 +83,10 @@ export class AuthService {
     if (!authDto) {
       throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized", "Token Invalid");
     }
-    const newAuth = Auth.create(authDto);
+    const userDto = await this.userRepository.findById(authDto.userId);
+    const newAuth = Auth.create({ ...authDto, user: userDto });
     const newAuthDto = newAuth.unmarshall();
-    this.auth = newAuth;
+    this._auth = newAuth;
     return newAuthDto;
   }
   /**
@@ -99,7 +100,7 @@ export class AuthService {
       await this.authRepository.findAliveAuth(authId, token),
       await this.authRepository.destroy(authId),
     ]);
-    this.auth = null;
+    this._auth = null;
   }
   /**
    * Generates a JWT token for the given user ID.
@@ -116,5 +117,9 @@ export class AuthService {
    */
   private verifyToken(token: string): string {
     return String(jwt.verify(token, this.authRepository.publicKey));
+  }
+
+  public get auth(): Auth | null {
+    return this._auth;
   }
 }

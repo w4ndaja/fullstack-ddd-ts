@@ -1,35 +1,39 @@
+import { EBookStatus } from "@/common/utils/book-status";
 import { Entity, IEntity, IEntityCreate } from "./entity";
+import { IParticipant, Participant } from "./participant";
+import { AppError } from "@/common/libs/error-handler";
+import { ErrorCode } from "@/common/utils";
 
 export type IBook = IEntity<{
   bookId: string;
   status: string;
   participantId: string;
-  mentor: Mentor;
-  type: string;
-  classDate: number;
-  schedule: Schedule;
+  mentor: Mentor | null;
+  className: string;
+  duration: number;
   payment: Payment;
   expiredDate: number;
   acceptedAt: number | null;
   rejectedAt: number | null;
   canceledAt: number | null;
-  canceledBy: string | null;
+  canceledByUserId: string | null;
+  participant?: IParticipant;
 }>;
 
 export type IBookCreate = IEntityCreate<{
   bookId: string;
   status: string;
   participantId: string;
-  mentor: Mentor;
-  type: string;
-  classDate: number;
-  schedule: Schedule;
+  mentor: Mentor | null;
+  className: string;
+  duration: number;
   payment: Payment;
   expiredDate: number;
   acceptedAt?: number | null;
   rejectedAt?: number | null;
   canceledAt?: number | null;
-  canceledBy?: string | null;
+  canceledByUserId?: string | null;
+  participant?: IParticipant;
 }>;
 
 interface Payment {
@@ -53,6 +57,8 @@ interface Schedule {
 }
 
 interface Mentor {
+  userId: string;
+  mentorId: string;
   name: string;
   avatarUrl: string;
 }
@@ -71,18 +77,18 @@ export class Book extends Entity<IBook> {
       status: this.status,
       participantId: this.participantId,
       mentor: this.mentor,
-      type: this.type,
-      classDate: this.classDate,
-      schedule: this.schedule,
+      className: this.className,
+      duration: this.duration,
       payment: this.payment,
       expiredDate: this.expiredDate,
       acceptedAt: this.acceptedAt,
       canceledAt: this.canceledAt,
-      canceledBy: this.canceledBy,
+      canceledByUserId: this.canceledByUserId,
       rejectedAt: this.rejectedAt,
       createdAt: this.createdAt.getTime(),
       updatedAt: this.updatedAt.getTime(),
       deletedAt: this.deletedAt?.getTime() || null,
+      participant: this.participant?.unmarshall(),
     };
   }
   get bookId(): string {
@@ -94,17 +100,14 @@ export class Book extends Entity<IBook> {
   get participantId(): string {
     return this._props.participantId;
   }
-  get mentor(): Mentor {
+  get mentor(): Mentor | null {
     return this._props.mentor;
   }
-  get type(): string {
-    return this._props.type;
+  get className(): string {
+    return this._props.className;
   }
-  get classDate(): number {
-    return this._props.classDate;
-  }
-  get schedule(): Schedule {
-    return this._props.schedule;
+  get duration(): number {
+    return this._props.duration;
   }
   get payment(): Payment {
     return this._props.payment;
@@ -118,11 +121,14 @@ export class Book extends Entity<IBook> {
   get canceledAt(): number | null {
     return this._props.canceledAt;
   }
-  get canceledBy(): string | null {
-    return this._props.canceledBy;
+  get canceledByUserId(): string | null {
+    return this._props.canceledByUserId;
   }
   get rejectedAt(): number | null {
     return this._props.rejectedAt;
+  }
+  get participant(): Participant | undefined {
+    return this._props.participant ? Participant.create(this._props.participant) : undefined;
   }
   set bookId(value: string) {
     this._props.bookId = value;
@@ -140,16 +146,12 @@ export class Book extends Entity<IBook> {
     this._props.mentor = value;
   }
 
-  set type(value: string) {
-    this._props.type = value;
+  set className(value: string) {
+    this._props.className = value;
   }
 
-  set classDate(value: number) {
-    this._props.classDate = value;
-  }
-
-  set schedule(value: Schedule) {
-    this._props.schedule = value;
+  set duration(value: number) {
+    this._props.duration = value;
   }
 
   set payment(value: Payment) {
@@ -168,10 +170,56 @@ export class Book extends Entity<IBook> {
     this._props.canceledAt = value;
   }
 
-  set canceledBy(value: string | null) {
-    this._props.canceledBy = value;
+  set canceledByUserId(value: string | null) {
+    this._props.canceledByUserId = value;
   }
   set rejectedAt(value: number | null) {
     this._props.rejectedAt = value;
+  }
+  set participant(value: Participant | undefined) {
+    this._props.participant = value?.unmarshall();
+  }
+  public setPrice(duration: number, price: number) {
+    this.duration = duration;
+    this.payment.subTotal = duration * price;
+    this.payment.total = this.payment.subTotal + this.payment.adminFee + this.payment.tax;
+  }
+
+  public accept() {
+    if (this.status !== EBookStatus.PENDING.toString())
+      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not pending");
+    this.acceptedAt = Date.now();
+    this.status = EBookStatus.WAITINGPAYMENT.toString();
+    return this;
+  }
+
+  public reject(canceledBy: string) {
+    if (this.status === EBookStatus.PENDING.toString()) {
+      this.rejectedAt = Date.now();
+      this.status = EBookStatus.REJECTED.toString();
+      this.canceledByUserId = canceledBy;
+    } else {
+      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not pending");
+    }
+    return this;
+  }
+
+  public setPaid() {
+    if (this.status !== EBookStatus.WAITINGPAYMENT.toString())
+      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not waiting payment");
+    this.payment.paidAt = Date.now();
+    this.status = EBookStatus.OCCURRING.toString();
+    return this;
+  }
+
+  public cancel(canceledBy: string) {
+    if (this.status === EBookStatus.PENDING.toString()) {
+      this.canceledAt = Date.now();
+      this.status = EBookStatus.CANCELED.toString();
+      this.canceledByUserId = canceledBy;
+    } else {
+      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not pending");
+    }
+    return this;
   }
 }
