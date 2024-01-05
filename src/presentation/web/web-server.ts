@@ -9,7 +9,7 @@ import { parse } from "url";
 import next from "next";
 import { inject, injectable } from "inversify";
 import { NextServer } from "next/dist/server/next";
-import express, { NextFunction, Request, Response, Express } from "express";
+import express, { NextFunction, Request, Response, Express, static as static_ } from "express";
 import cors from "cors";
 import { json } from "body-parser";
 import multer from "multer";
@@ -50,6 +50,7 @@ export class WebServer {
     this.restServer.use(config.app.apiUrlPrefix, json());
     this.restServer.use(config.app.apiUrlPrefix, this.routes.getRouter());
     this.restServer.use(config.app.apiUrlPrefix, this.restErrorHandler.bind(this));
+    this.restServer.use("/storage", static_(path.join(config.storageDir, "public")));
     this.restServer.use("/", this.frontEndHandler.bind(this));
 
     this.httpServer = createServer(this.restServer);

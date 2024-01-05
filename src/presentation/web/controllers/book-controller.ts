@@ -16,7 +16,7 @@ export class BookController extends Router {
     this.routes.put("/:bookId/cancel", asyncWrapper(this.cancel.bind(this)));
     this.routes.put("/:bookId/set-paid", asyncWrapper(this.setPaid.bind(this)));
     this.routes.get("/:bookId/detail", asyncWrapper(this.detail.bind(this)));
-    this.routes.get("/:bookId/finish", asyncWrapper(this.finish.bind(this)));
+    this.routes.put("/:bookId/finish", asyncWrapper(this.finish.bind(this)));
   }
   private async book(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { mentorId, duration, className, paymentMethod, paymentAccountNo } = <any>req.body;
