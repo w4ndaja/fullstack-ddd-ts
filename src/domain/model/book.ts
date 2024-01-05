@@ -280,7 +280,7 @@ export class Book extends Entity<IBook> {
 
   public finish(userId: string) {
     if (this.status !== EBookStatus.OCCURRING.toString()) {
-      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not pending");
+      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not occuring");
     }
     this._props.finishedAt = Date.now();
     this._props.status = EBookStatus.FINISHED;
