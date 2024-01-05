@@ -20,7 +20,7 @@ export class BookService {
   ) {}
   async book(
     mentorId: string,
-    duration: number,
+    sessions: string[],
     className: string,
     paymentMethod: string,
     paymentAccountNo: string
@@ -39,7 +39,7 @@ export class BookService {
         avatarUrl: mentorDto.avatarUrl,
       },
       className: className,
-      duration: duration,
+      duration: 0,
       payment: {
         method: paymentMethod,
         adminFee: 0,
@@ -53,8 +53,11 @@ export class BookService {
         status: PaymentStatus.PENDING.toString(),
       },
       expiredDate: Date.now() + 86400000 * 2,
+      participantName: auth?.user?.fullname || "",
+      sessions: sessions,
     });
-    bookEntity.setPrice(duration, mentorDto.price);
+    this.logger.info("Auth", auth)
+    bookEntity.setPrice(sessions.length, mentorDto.price);
     const bookDto = bookEntity.unmarshall();
     await this.bookRepository.save(bookDto);
     return bookDto;
@@ -137,5 +140,17 @@ export class BookService {
     if (!bookDto) throw new AppError(ErrorCode.NOT_FOUND, "Not found");
     const bookEntity = Book.create(bookDto);
     return bookEntity.unmarshall();
+  }
+
+  async finish(bookId: string): Promise<IBook> {
+    const auth = this.authService.auth;
+    if (!auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
+    const bookDto = await this.bookRepository.findById(bookId);
+    if (!bookDto) throw new AppError(ErrorCode.NOT_FOUND, "Not found");
+    const bookEntity = Book.create(bookDto);
+    bookEntity.finish(auth.userId);
+    const bookUpdateDto = bookEntity.unmarshall();
+    await this.bookRepository.save(bookUpdateDto);
+    return bookUpdateDto;
   }
 }

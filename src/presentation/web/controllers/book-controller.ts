@@ -16,6 +16,7 @@ export class BookController extends Router {
     this.routes.put("/:bookId/cancel", asyncWrapper(this.cancel.bind(this)));
     this.routes.put("/:bookId/set-paid", asyncWrapper(this.setPaid.bind(this)));
     this.routes.get("/:bookId/detail", asyncWrapper(this.detail.bind(this)));
+    this.routes.get("/:bookId/finish", asyncWrapper(this.finish.bind(this)));
   }
   private async book(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { mentorId, duration, className, paymentMethod, paymentAccountNo } = <any>req.body;
@@ -62,6 +63,12 @@ export class BookController extends Router {
   private async detail(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { bookId } = req.params;
     const book = await this.bookService.detail(bookId);
+    res.json(RestMapper.dtoToRest(book));
+  }
+
+  private async finish(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const { bookId } = req.params;
+    const book = await this.bookService.finish(bookId);
     res.json(RestMapper.dtoToRest(book));
   }
 }

@@ -21,6 +21,7 @@ import { AuthController } from "@/presentation/web/controllers/auth-controller";
 import { UserController } from "@/presentation/web/controllers/user-controller";
 import { MentorController } from "@/presentation/web/controllers/mentor-controller";
 import { BookController } from "@/presentation/web/controllers/book-controller";
+import { BannerController } from "@/presentation/web/controllers/banner-controller";
 
 // REST Middleware
 import { AuthMiddleware } from "@/presentation/web/middlewares/auth-middleware";
@@ -39,6 +40,7 @@ import {
   IBookRepository,
   IMentorRepository,
   IParticipantRepository,
+  IBannerRepository,
 } from "@/domain/service";
 
 // Repository Implementation
@@ -48,11 +50,19 @@ import {
   BookRepository,
   MentorRepository,
   ParticipantRepository,
+  BannerRepository,
 } from "@/infra/mongodb";
 // import { UserRepository, AuthRepository } from "@/infra/sqlite/repositories";
 
 // Services
-import { UserService, AuthService, ProfileService, MentorService, BookService } from "@/services";
+import {
+  UserService,
+  AuthService,
+  ProfileService,
+  MentorService,
+  BookService,
+  BannerService,
+} from "@/services";
 
 const container = new Container({ skipBaseClassChecks: true });
 // Main App Binding
@@ -68,6 +78,7 @@ container.bind<AuthController>(AuthController).toSelf();
 container.bind<UserController>(UserController).toSelf();
 container.bind<MentorController>(MentorController).toSelf();
 container.bind<BookController>(BookController).toSelf();
+container.bind<BannerController>(BannerController).toSelf();
 
 // REST Middleware Binding
 container.bind<AuthMiddleware>(AuthMiddleware).toSelf();
@@ -84,6 +95,7 @@ container.bind<IAuthRepository>(TYPES.AuthRepository).to(AuthRepository);
 container.bind<IBookRepository>(TYPES.BookRepository).to(BookRepository);
 container.bind<IMentorRepository>(TYPES.MentorRepository).to(MentorRepository);
 container.bind<IParticipantRepository>(TYPES.ParticipantRepository).to(ParticipantRepository);
+container.bind<IBannerRepository>(TYPES.BannerRepository).to(BannerRepository);
 
 // Service Bind
 container.bind<AuthService>(AuthService).toSelf().inRequestScope();
@@ -91,5 +103,6 @@ container.bind<UserService>(UserService).toSelf();
 container.bind<ProfileService>(ProfileService).toSelf();
 container.bind<MentorService>(MentorService).toSelf();
 container.bind<BookService>(BookService).toSelf();
+container.bind<BannerService>(BannerService).toSelf();
 
 export { container };

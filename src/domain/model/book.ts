@@ -18,6 +18,12 @@ export type IBook = IEntity<{
   canceledAt: number | null;
   canceledByUserId: string | null;
   participant?: IParticipant;
+  participantName: string;
+  sessions: string[];
+  finishedAt: number | null;
+  finishedBy: string | null;
+  review: string;
+  rating: number;
 }>;
 
 export type IBookCreate = IEntityCreate<{
@@ -26,7 +32,7 @@ export type IBookCreate = IEntityCreate<{
   participantId: string;
   mentor: Mentor | null;
   className: string;
-  duration: number;
+  duration?: number;
   payment: Payment;
   expiredDate: number;
   acceptedAt?: number | null;
@@ -34,6 +40,12 @@ export type IBookCreate = IEntityCreate<{
   canceledAt?: number | null;
   canceledByUserId?: string | null;
   participant?: IParticipant;
+  participantName: string;
+  sessions: string[];
+  finishedAt?: number | null;
+  finishedBy?: string | null;
+  review?: string;
+  rating?: number;
 }>;
 
 interface Payment {
@@ -89,6 +101,12 @@ export class Book extends Entity<IBook> {
       updatedAt: this.updatedAt.getTime(),
       deletedAt: this.deletedAt?.getTime() || null,
       participant: this.participant?.unmarshall(),
+      participantName: this.participantName,
+      sessions: this.sessions,
+      finishedAt: this.finishedAt,
+      finishedBy: this.finishedBy,
+      review: this.review,
+      rating: this.rating,
     };
   }
   get bookId(): string {
@@ -179,9 +197,46 @@ export class Book extends Entity<IBook> {
   set participant(value: Participant | undefined) {
     this._props.participant = value?.unmarshall();
   }
-  public setPrice(duration: number, price: number) {
-    this.duration = duration;
-    this.payment.subTotal = duration * price;
+  set sessions(v: string[]) {
+    this._props.sessions = v;
+  }
+  get sessions(): string[] {
+    return this._props.sessions;
+  }
+  set finishedAt(v: number | null) {
+    this._props.finishedAt = v;
+  }
+  get finishedAt(): number | null {
+    return this._props.finishedAt;
+  }
+  set participantName(v: string) {
+    this._props.participantName = v;
+  }
+  get participantName(): string {
+    return this._props.participantName;
+  }
+  set finishedBy(v: string | null) {
+    this._props.finishedBy = v;
+  }
+  get finishedBy(): string | null {
+    return this._props.finishedBy;
+  }
+  set review(v: string) {
+    this._props.review = v;
+  }
+  get review(): string {
+    return this._props.review;
+  }
+  set rating(v: number) {
+    this._props.rating = v;
+  }
+  get rating(): number {
+    return this._props.rating;
+  }
+
+  public setPrice(sessionCount: number, price: number) {
+    this.duration = sessionCount * 60;
+    this.payment.subTotal = sessionCount * price;
     this.payment.total = this.payment.subTotal + this.payment.adminFee + this.payment.tax;
   }
 
@@ -220,6 +275,16 @@ export class Book extends Entity<IBook> {
     } else {
       throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not pending");
     }
+    return this;
+  }
+
+  public finish(userId: string) {
+    if (this.status !== EBookStatus.OCCURRING.toString()) {
+      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not pending");
+    }
+    this._props.finishedAt = Date.now();
+    this._props.status = EBookStatus.FINISHED;
+    this._props.finishedBy = userId;
     return this;
   }
 }

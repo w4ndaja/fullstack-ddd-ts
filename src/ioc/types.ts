@@ -8,5 +8,5 @@ export const TYPES = {
   ParticipantRepository: Symbol.for("ParticipantRepository"),
   BookRepository: Symbol.for("BookRepository"),
   MentorRepository: Symbol.for("MentorRepository"),
-
+  BannerRepository: Symbol.for("BannerRepository"),
 };

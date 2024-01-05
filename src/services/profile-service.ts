@@ -44,13 +44,6 @@ export class ProfileService {
               accountNo: (<IMentor>data).bankInfo.accountNo,
               name: (<IMentor>data).bankInfo.name,
             },
-            company: {
-              name: (<IMentor>data).company.name,
-            },
-            graduateFrom: {
-              name: (<IMentor>data).graduateFrom.name,
-              region: (<IMentor>data).graduateFrom.region,
-            },
             introVideo: {
               service: (<IMentor>data).introVideo.service,
               url: (<IMentor>data).introVideo.url,
@@ -58,6 +51,20 @@ export class ProfileService {
             availableClasses: (<IMentor>data).availableClasses,
             isOnline: (<IMentor>data).isOnline,
             price: (<IMentor>data).price,
+            certificates: (<IMentor>data).certificates,
+            schedules: (<IMentor>data).schedules,
+            nickname: (<IMentor>data).nickname,
+            bio: (<IMentor>data).bio,
+            gender: (<IMentor>data).gender,
+            lastEducation: (<IMentor>data).lastEducation,
+            company: {
+              name: (<IMentor>data).company.name,
+              jobRole: (<IMentor>data).company.jobRole,
+              jobLevel: (<IMentor>data).company.jobLevel,
+            },
+            providerFee: (<IMentor>data).providerFee,
+            mentorFee: (<IMentor>data).mentorFee,
+            feeAcceptedAt: (<IMentor>data).feeAcceptedAt,
           },
         });
         const mentorDto = mentorEntity.unmarshall();

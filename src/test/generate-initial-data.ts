@@ -1,12 +1,12 @@
 import "reflect-metadata";
 import { EROLES } from "@/common/utils/roles";
-import { Participant, User } from "@/domain/model";
+import { IUser, Participant, User } from "@/domain/model";
 import { container } from "@/ioc/container";
-import { UserService } from "@/services";
+import { AuthService, BookService, UserService } from "@/services";
 import { EGENDERS } from "@/common/utils/genders";
 import { IMentorRepository, IParticipantRepository } from "@/domain/service";
 import { MentorRepository, ParticipantRepository } from "@/infra/mongodb";
-import { Mentor } from "@/domain/model/mentor";
+import { IMentor, IMentorCreate, Mentor } from "@/domain/model/mentor";
 import { TYPES } from "@/ioc/types";
 
 const userSuperAdmin = User.create({
@@ -22,12 +22,14 @@ const userAdmin = User.create({
 userAdmin.password = "password";
 
 const participant1 = User.create({
+  fullname: "participant1",
   email: "participant1@admin.com",
   roles: [EROLES.PARTICIPANT],
 });
 participant1.password = "password";
 
 const participant2 = User.create({
+  fullname: "participant2",
   email: "participant2@admin.com",
   roles: [EROLES.PARTICIPANT],
 });
@@ -61,8 +63,8 @@ const participantProfile2 = Participant.create({
     url: "https://www.youtube.com/watch?v=JGwWNGJdvx8",
   },
 });
-const dummyMentorProfiles: any[] = [];
-const dummyMentorUsers: any[] = [];
+const dummyMentorProfiles: IMentor[] = [];
+const dummyMentorUsers: IUser[] = [];
 
 for (let i = 0; i < 200; i++) {
   const mentor = User.create({
@@ -81,13 +83,6 @@ for (let i = 0; i < 200; i++) {
       accountName: "Dummy Account",
       accountNo: "1234567890",
       name: "Dummy Bank",
-    },
-    company: {
-      name: "Dummy Company",
-    },
-    graduateFrom: {
-      name: "Dummy University",
-      region: "Dummy Region",
     },
     introVideo: {
       service: "YouTube",
@@ -128,15 +123,38 @@ for (let i = 0; i < 200; i++) {
     price: 200000,
     isCertified: false,
     joinedAt: Date.now(),
+    certificates: [
+      {
+        title: "string",
+        orgName: "string",
+        fileUrl: "string",
+      },
+    ],
+    rating: 5,
+    schedules: ["09:00-10:00", "10:00-11:00"],
+    nickname: "Nickname",
+    bio: "Bio 001",
+    gender: "male",
+    lastEducation: "S1",
+    company: {
+      name: "Dummy Company",
+      jobLevel: "Staff",
+      jobRole: "Pengajar",
+    },
+    providerFee: 30,
+    mentorFee: 70,
+    feeAcceptedAt: Date.now(),
   });
 
   dummyMentorUsers.push(mentor.unmarshall());
   dummyMentorProfiles.push(mentorProfile.unmarshall());
 }
 
+const authService = container.get<AuthService>(AuthService);
 const userService = container.get<UserService>(UserService);
 const participantRepository = container.get<IParticipantRepository>(TYPES.ParticipantRepository);
 const mentorRepository = container.get<IMentorRepository>(TYPES.MentorRepository);
+const bookService = container.get<BookService>(BookService);
 
 Promise.all([
   userService.save(userSuperAdmin.unmarshall()),
@@ -154,6 +172,71 @@ Promise.all([
   userService.save(userOrganization.unmarshall()),
   participantRepository.save(participantProfile1.unmarshall()),
   participantRepository.save(participantProfile2.unmarshall()),
-]).then((result) => {
-  console.log(result);
+]).then(async () => {
+  await (async () => {
+    // Finished Order
+    await authService.login(participant1.email, "password");
+    const book = await bookService.book(
+      dummyMentorProfiles[0].id,
+      dummyMentorProfiles[0].schedules,
+      dummyMentorProfiles[0].className[0],
+      "OVO",
+      "080898987878"
+    );
+    await authService.login(dummyMentorUsers[0].email, "password");
+    await bookService.accept(book.id);
+    await bookService.setPaid(book.id);
+    await bookService.finish(book.id);
+  })();
+  await (async () => {
+    // Canceled Order
+    await authService.login(participant1.email, "password");
+    const book = await bookService.book(
+      dummyMentorProfiles[0].id,
+      dummyMentorProfiles[0].schedules,
+      dummyMentorProfiles[0].className[0],
+      "OVO",
+      "080898987878"
+    );
+    await bookService.cancel(book.id);
+  })();
+  await (async () => {
+    // Rejected Order
+    await authService.login(participant1.email, "password");
+    const book = await bookService.book(
+      dummyMentorProfiles[0].id,
+      dummyMentorProfiles[0].schedules,
+      dummyMentorProfiles[0].className[0],
+      "OVO",
+      "080898987878"
+    );
+    await authService.login(dummyMentorUsers[0].email, "password");
+    await bookService.reject(book.id);
+  })();
+
+  await (async () => {
+    // Pending Order
+    await authService.login(participant1.email, "password");
+    const book = await bookService.book(
+      dummyMentorProfiles[0].id,
+      dummyMentorProfiles[0].schedules,
+      dummyMentorProfiles[0].className[0],
+      "OVO",
+      "080898987878"
+    );
+  })();
+
+  await (async () => {
+    // Waiting Payment Order
+    await authService.login(participant1.email, "password");
+    const book = await bookService.book(
+      dummyMentorProfiles[0].id,
+      dummyMentorProfiles[0].schedules,
+      dummyMentorProfiles[0].className[0],
+      "OVO",
+      "080898987878"
+    );
+    await authService.login(dummyMentorUsers[0].email, "password");
+    await bookService.accept(book.id);
+  })();
 });

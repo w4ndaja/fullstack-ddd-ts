@@ -11,13 +11,6 @@ export type IMentor = IEntity<{
     accountNo: string;
     name: string;
   };
-  company: {
-    name: string;
-  };
-  graduateFrom: {
-    name: string;
-    region: string;
-  };
   introVideo: {
     service: string;
     url: string;
@@ -43,6 +36,25 @@ export type IMentor = IEntity<{
   price: number;
   isCertified: boolean;
   joinedAt: number;
+  certificates: {
+    title: string;
+    orgName: string;
+    fileUrl: string;
+  }[];
+  rating: number;
+  schedules: string[];
+  nickname: string;
+  bio: string;
+  gender: string;
+  lastEducation: string;
+  company: {
+    name: string;
+    jobRole: string;
+    jobLevel: string;
+  };
+  providerFee: number;
+  mentorFee: number;
+  feeAcceptedAt: number | null;
 }>;
 
 export type IMentorCreate = IEntityCreate<{
@@ -56,13 +68,6 @@ export type IMentorCreate = IEntityCreate<{
     accountNo: string;
     name: string;
   };
-  company: {
-    name: string;
-  };
-  graduateFrom: {
-    name: string;
-    region: string;
-  };
   introVideo: {
     service: string;
     url: string;
@@ -88,6 +93,25 @@ export type IMentorCreate = IEntityCreate<{
   price: number;
   isCertified: boolean;
   joinedAt: number;
+  certificates: {
+    title: string;
+    orgName: string;
+    fileUrl: string;
+  }[];
+  rating: number;
+  schedules: string[];
+  nickname: string;
+  bio: string;
+  gender: string;
+  lastEducation: string;
+  company: {
+    name: string;
+    jobRole: string;
+    jobLevel: string;
+  };
+  providerFee: number;
+  mentorFee: number;
+  feeAcceptedAt: number | null;
 }>;
 
 export class Mentor extends Entity<IMentor> {
@@ -106,8 +130,6 @@ export class Mentor extends Entity<IMentor> {
       avatarUrl: this.avatarUrl,
       className: this.className,
       bankInfo: this.bankInfo,
-      company: this.company,
-      graduateFrom: this.graduateFrom,
       introVideo: this.introVideo,
       availableClasses: this.availableClasses,
       upcomingClasses: this.upcomingClasses,
@@ -118,6 +140,17 @@ export class Mentor extends Entity<IMentor> {
       price: this.price,
       isCertified: this.isCertified,
       joinedAt: this.joinedAt,
+      certificates: this.certificates,
+      rating: this.rating,
+      schedules: this.schedules,
+      nickname: this.nickname,
+      bio: this.bio,
+      gender: this.gender,
+      lastEducation: this.lastEducation,
+      company: this.company,
+      providerFee: this.providerFee,
+      mentorFee: this.mentorFee,
+      feeAcceptedAt: this.feeAcceptedAt,
       createdAt: this.createdAt.getTime(),
       updatedAt: this.updatedAt.getTime(),
       deletedAt: this.deletedAt?.getTime() || null,
@@ -144,17 +177,6 @@ export class Mentor extends Entity<IMentor> {
     name: string;
   } {
     return this._props.bankInfo;
-  }
-  get company(): {
-    name: string;
-  } {
-    return this._props.company;
-  }
-  get graduateFrom(): {
-    name: string;
-    region: string;
-  } {
-    return this._props.graduateFrom;
   }
   get introVideo(): {
     service: string;
@@ -219,12 +241,6 @@ export class Mentor extends Entity<IMentor> {
   set bankInfo(value: { accountName: string; accountNo: string; name: string }) {
     this._props.bankInfo = value;
   }
-  set company(value: { name: string }) {
-    this._props.company = value;
-  }
-  set graduateFrom(value: { name: string; region: string }) {
-    this._props.graduateFrom = value;
-  }
   set introVideo(value: { service: string; url: string }) {
     this._props.introVideo = value;
   }
@@ -254,5 +270,85 @@ export class Mentor extends Entity<IMentor> {
   }
   set joinedAt(value: number) {
     this._props.joinedAt = value;
+  }
+  get certificates(): {
+    title: string;
+    orgName: string;
+    fileUrl: string;
+  }[] {
+    return this._props.certificates;
+  }
+  set certificates(
+    v: {
+      title: string;
+      orgName: string;
+      fileUrl: string;
+    }[]
+  ) {
+    this._props.certificates = v;
+  }
+  set rating(v: number) {
+    this._props.rating = v;
+  }
+  get rating(): number {
+    return this._props.rating;
+  }
+  set schedules(v: string[]) {
+    this._props.schedules = v;
+  }
+  get schedules(): string[] {
+    return this._props.schedules;
+  }
+  set nickname(v: string) {
+    this._props.nickname = v;
+  }
+  get nickname(): string {
+    return this._props.nickname;
+  }
+  set bio(v: string) {
+    this._props.bio = v;
+  }
+  get bio(): string {
+    return this._props.bio;
+  }
+  set gender(v: string) {
+    this._props.gender = v;
+  }
+  get gender(): string {
+    return this._props.gender;
+  }
+  set lastEducation(v: string) {
+    this._props.lastEducation = v;
+  }
+  get lastEducation(): string {
+    return this._props.lastEducation;
+  }
+  get company(): {
+    name: string;
+    jobRole: string;
+    jobLevel: string;
+  } {
+    return this._props.company;
+  }
+  set company(v: { name: string; jobRole: string; jobLevel: string }) {
+    this._props.company = v;
+  }
+  set providerFee(v: number) {
+    this._props.providerFee = v;
+  }
+  get providerFee(): number {
+    return this._props.providerFee;
+  }
+  set mentorFee(v: number) {
+    this._props.mentorFee = v;
+  }
+  get mentorFee(): number {
+    return this._props.mentorFee;
+  }
+  set feeAcceptedAt(v: number | null) {
+    this._props.feeAcceptedAt = v;
+  }
+  get feeAcceptedAt(): number | null {
+    return this._props.feeAcceptedAt;
   }
 }
