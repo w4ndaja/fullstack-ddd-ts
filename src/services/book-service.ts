@@ -23,7 +23,8 @@ export class BookService {
     sessions: string[],
     className: string,
     paymentMethod: string,
-    paymentAccountNo: string
+    paymentAccountNo: string,
+				duration:number,
   ): Promise<IBook> {
     const auth = this.authService.auth;
     if (!auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
@@ -39,7 +40,7 @@ export class BookService {
         avatarUrl: mentorDto.avatarUrl,
       },
       className: className,
-      duration: 0,
+      duration: duration,
       payment: {
         method: paymentMethod,
         adminFee: 0,

@@ -43,4 +43,8 @@ export const config = {
       process.env.NODE_ENV === "production" ? "dist/presentation/web" : "src/presentation/web"
     ),
   },
+  zego:{
+    appId : process.env.ZEGO_APP_ID || "",
+    secret : process.env.ZEGO_SECRET || "",
+  }
 };

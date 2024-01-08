@@ -62,6 +62,7 @@ import {
   MentorService,
   BookService,
   BannerService,
+  ZegoService
 } from "@/services";
 
 const container = new Container({ skipBaseClassChecks: true });
@@ -104,5 +105,6 @@ container.bind<ProfileService>(ProfileService).toSelf();
 container.bind<MentorService>(MentorService).toSelf();
 container.bind<BookService>(BookService).toSelf();
 container.bind<BannerService>(BannerService).toSelf();
+container.bind<ZegoService>(ZegoService).toSelf();
 
 export { container };
