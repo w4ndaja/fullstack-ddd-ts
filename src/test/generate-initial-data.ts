@@ -181,7 +181,8 @@ Promise.all([
       dummyMentorProfiles[0].schedules,
       dummyMentorProfiles[0].className[0],
       "OVO",
-      "080898987878"
+      "080898987878",
+      120
     );
     await authService.login(dummyMentorUsers[0].email, "password");
     await bookService.accept(book.id);
@@ -196,7 +197,8 @@ Promise.all([
       dummyMentorProfiles[0].schedules,
       dummyMentorProfiles[0].className[0],
       "OVO",
-      "080898987878"
+      "080898987878",
+      120
     );
     await bookService.cancel(book.id);
   })();
@@ -208,7 +210,8 @@ Promise.all([
       dummyMentorProfiles[0].schedules,
       dummyMentorProfiles[0].className[0],
       "OVO",
-      "080898987878"
+      "080898987878",
+      120
     );
     await authService.login(dummyMentorUsers[0].email, "password");
     await bookService.reject(book.id);
@@ -222,7 +225,8 @@ Promise.all([
       dummyMentorProfiles[0].schedules,
       dummyMentorProfiles[0].className[0],
       "OVO",
-      "080898987878"
+      "080898987878",
+      120
     );
   })();
 
@@ -234,7 +238,8 @@ Promise.all([
       dummyMentorProfiles[0].schedules,
       dummyMentorProfiles[0].className[0],
       "OVO",
-      "080898987878"
+      "080898987878",
+      120
     );
     await authService.login(dummyMentorUsers[0].email, "password");
     await bookService.accept(book.id);
