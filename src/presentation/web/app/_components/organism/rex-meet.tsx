@@ -7,6 +7,7 @@ export default function RexMeet(props: any) {
   const [run, setRun] = useState(1);
   useEffect(() => {
     if (run == 1) {
+      const { ZIM } = require("zego-zim-web");
       const { ZegoUIKitPrebuilt } = require("@zegocloud/zego-uikit-prebuilt");
       const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
         appId,
@@ -56,6 +57,7 @@ export default function RexMeet(props: any) {
       });
 
       const zp = ZegoUIKitPrebuilt.create(kitToken);
+      zp.addPlugins({ ZIM });
       // start the call
       zp.joinRoom({
         container: streamContainerRef.current,
@@ -66,6 +68,9 @@ export default function RexMeet(props: any) {
           },
         },
         sharedLinks,
+        showMakeCohostButton: true, // Whether to show the button that is used to invite the audience to co-host on the host end.
+        showRemoveCohostButton: true, // Whether to show the button that is used to remove the audience on the host end.
+        showRequestToCohostButton: true, // Whether to show the button that is used to request to co-host on the audience end.
       });
     }
     return () => {
@@ -74,8 +79,11 @@ export default function RexMeet(props: any) {
   }, []);
   return (
     <>
-      <div className="flex items-center justify-center w-screen h-screen max-w-screen max-h-screen" id="stream-container" ref={streamContainerRef}>
-      </div>
+      <div
+        className="flex items-center justify-center w-screen h-screen max-w-screen max-h-screen"
+        id="stream-container"
+        ref={streamContainerRef}
+      ></div>
     </>
   );
 }
