@@ -17,6 +17,6 @@ export class AuthValidateParamMapper {
       },
       { email, password }
     );
-    return validated;
+    return <IAuthValidateParamDto>validated;
   }
 }
