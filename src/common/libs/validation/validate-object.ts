@@ -8,6 +8,7 @@ export const validateObject = <T extends ZodRawShape>(validation:T, source:unkno
     throw new AppError(
       ErrorCode.UNPROCESSABLE_ENTITY,
       "Validation Failed",
+      // @ts-ignore
       safeParse.error.flatten()
     );
   }
