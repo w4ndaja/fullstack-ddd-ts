@@ -66,18 +66,25 @@ const participantProfile2 = Participant.create({
 const dummyMentorProfiles: IMentor[] = [];
 const dummyMentorUsers: IUser[] = [];
 
+// Generate array of dummy avatar file names
+let avatarsImage: string[] = [];
+for (let i = 1; i <= 20; i++) {
+  avatarsImage.push(`Avatar${i}.png`);
+}
+
+// Generate 200 of dummy mentors
 for (let i = 0; i < 200; i++) {
+  const randImage = avatarsImage[Math.ceil(Math.random() * 20)];
   const mentor = User.create({
     email: `mentor${i + 1}@admin.com`,
     roles: [EROLES.MENTOR],
   });
   mentor.password = "password";
-
   const mentorProfile = Mentor.create({
     userId: mentor.id,
     username: `dummyUsername${i + 1}`,
     fullname: `Dummy User ${i + 1}`,
-    avatarUrl: "https://dummyimage.com/200x200",
+    avatarUrl: `https://camy-dev.pentarex.id/storage/${randImage}`,
     className: ["Class A", "Class B"],
     bankInfo: {
       accountName: "Dummy Account",
@@ -149,7 +156,7 @@ for (let i = 0; i < 200; i++) {
   dummyMentorUsers.push(mentor.unmarshall());
   dummyMentorProfiles.push(mentorProfile.unmarshall());
 }
-
+container.rebind<AuthService>(AuthService).toSelf().inSingletonScope();
 const authService = container.get<AuthService>(AuthService);
 const userService = container.get<UserService>(UserService);
 const participantRepository = container.get<IParticipantRepository>(TYPES.ParticipantRepository);

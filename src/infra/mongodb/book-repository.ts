@@ -9,10 +9,17 @@ export class BookRepository extends Repository<IBook> implements IBookRepository
     super("books");
   }
   async getByParticipantId(participantId: string, status: string): Promise<IBook[]> {
-    const collection = await this.collection.find({
-      participantId,
-      ...(status !== "" ? { status } : {}),
-    });
+    const collection = await this.collection.find(
+      {
+        participantId,
+        ...(status !== "" ? { status } : {}),
+      },
+      {
+        sort: {
+          createdAt: -1,
+        },
+      }
+    );
     if (!collection) {
       return [];
     }
@@ -20,10 +27,17 @@ export class BookRepository extends Repository<IBook> implements IBookRepository
     return arrayCollections.map(({ _id, ...item }) => <IBook>item);
   }
   async getByMentorId(userId: string, status: string): Promise<IBook[]> {
-    const collection = await this.collection.find({
-      "mentor.userId": userId,
-      ...(status !== "" ? { status } : {}),
-    });
+    const collection = await this.collection.find(
+      {
+        "mentor.userId": userId,
+        ...(status !== "" ? { status } : {}),
+      },
+      {
+        sort: {
+          createdAt: -1,
+        },
+      }
+    );
     if (!collection) {
       return [];
     }
