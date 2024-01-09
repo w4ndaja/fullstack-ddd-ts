@@ -24,7 +24,7 @@ export class BookService {
     className: string,
     paymentMethod: string,
     paymentAccountNo: string,
-				duration:number,
+    duration: number
   ): Promise<IBook> {
     const auth = this.authService.auth;
     if (!auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
@@ -57,7 +57,7 @@ export class BookService {
       participantName: auth?.user?.fullname || "",
       sessions: sessions,
     });
-    this.logger.info("Auth", auth)
+    this.logger.info("Auth", auth);
     bookEntity.setPrice(sessions.length, mentorDto.price);
     const bookDto = bookEntity.unmarshall();
     await this.bookRepository.save(bookDto);

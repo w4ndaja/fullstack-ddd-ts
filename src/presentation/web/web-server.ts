@@ -37,7 +37,7 @@ export class WebServer {
       dir: config.presentation.dir,
     });
     this.fePrepared = this.feServer.prepare();
-    const upload = multer({ dest: path.join(process.cwd(), "storage") });
+    const upload = multer({ dest: path.join(config.storageDir, "temp") });
     this.restServer.use(
       config.app.apiUrlPrefix,
       (req: Request, res: Response, next: NextFunction) => {
