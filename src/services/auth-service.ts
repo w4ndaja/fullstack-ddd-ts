@@ -63,10 +63,18 @@ export class AuthService {
       userId: userDto.id,
       username: userDto.email,
       fullname: userDto.fullname,
+      followerCount: 0,
+      followingCount: 0,
       bio: "",
-      gender: "",
-    })
-    const participantDto = participantEntity.unmarshall()
+      gender: null,
+      avatarUrl: "https://dummyimage.com/200x200",
+      introVideo: {
+        service: "youtube",
+        url: "https://www.youtube.com/watch?v=JGwWNGJdvx8",
+      },
+      hasUnreadNotif: false,
+    });
+    const participantDto = participantEntity.unmarshall();
     this.userRepository.save(userDto);
     this.participantRepository.save(participantDto);
     const auth = Auth.create({
