@@ -7,7 +7,8 @@ export default async function Page(props: any) {
     await getAppId(),
   ]);
   const _params = props.params || {};
-  props.params = {
+  const _props = {...props}
+  _props.params = {
     ..._params,
     token,
     appId,
@@ -15,5 +16,5 @@ export default async function Page(props: any) {
     userID: props.searchParams.userID || "annasR",
     userName: props.searchParams.userName || "annas-02",
   };
-  return <RexMeet {...props} />;
+  return <RexMeet {..._props} />;
 }

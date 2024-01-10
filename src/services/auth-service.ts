@@ -1,5 +1,5 @@
 import type { IAuth } from "@/domain/model/auth";
-import type { IUserRepository, IAuthRepository } from "@/domain/service";
+import type { IUserRepository, IAuthRepository, IParticipantRepository } from "@/domain/service";
 
 import { AppError } from "@/common/libs/error-handler";
 import { ErrorCode } from "@/common/utils/error-code";
@@ -8,7 +8,7 @@ import { TYPES } from "@/ioc/types";
 
 import { inject, injectable } from "inversify";
 import jwt from "jsonwebtoken";
-import { User } from "@/domain/model";
+import { Participant, User } from "@/domain/model";
 import { Logger } from "@/common/libs/logger";
 import { EROLES } from "@/common/utils/roles";
 
@@ -17,6 +17,7 @@ export class AuthService {
   private _auth: Auth | null = null;
   constructor(
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
+    @inject(TYPES.ParticipantRepository) private participantRepository: IParticipantRepository,
     @inject(TYPES.AuthRepository) private authRepository: IAuthRepository,
     @inject(TYPES.Logger) private logger: Logger
   ) {}
@@ -58,7 +59,16 @@ export class AuthService {
     const existUser = await this.userRepository.findByUsernameOrEmail(email);
     if (existUser) throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "User Already Exist");
     const userDto = userEntity.unmarshall();
+    const participantEntity = Participant.create({
+      userId: userDto.id,
+      username: userDto.email,
+      fullname: userDto.fullname,
+      bio: "",
+      gender: "",
+    })
+    const participantDto = participantEntity.unmarshall()
     this.userRepository.save(userDto);
+    this.participantRepository.save(participantDto);
     const auth = Auth.create({
       userId: userDto.id,
       expired: false,

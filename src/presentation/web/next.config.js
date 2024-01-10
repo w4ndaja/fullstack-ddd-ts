@@ -8,10 +8,6 @@ config.config({
 
 /** @type {import('next').NextConfig} */
 module.exports = {
-  experimental: {
-    serverActions: true,
-    // typedRoutes: true,
-  },
   distDir: "../../../dist/presentation/web/.next",
   basePath: process.env.APP_URL_PREFIX === "/" ? "" : process.env.APP_URL_PREFIX,
 };

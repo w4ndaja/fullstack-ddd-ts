@@ -6,9 +6,14 @@ export default function RexMeet(props: any) {
   const streamContainerRef = useRef<HTMLDivElement>(null);
   const [run, setRun] = useState(1);
   useEffect(() => {
-    if (run == 1) {
-      const { ZIM } = require("zego-zim-web");
-      const { ZegoUIKitPrebuilt } = require("@zegocloud/zego-uikit-prebuilt");
+    const doAsync_ = async () => {
+      const { ZegoUIKitPrebuilt } = await import("@zegocloud/zego-uikit-prebuilt");
+      const { ZIM } = await import("zego-zim-web");
+      console.log({ZegoUIKitPrebuilt, ZIM})
+    }
+    const doAsync = async () => {
+      const { ZegoUIKitPrebuilt } = await import("@zegocloud/zego-uikit-prebuilt");
+      const { ZIM } = await import("zego-zim-web");
       const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
         appId,
         token,
@@ -68,10 +73,14 @@ export default function RexMeet(props: any) {
           },
         },
         sharedLinks,
-        showMakeCohostButton: true, // Whether to show the button that is used to invite the audience to co-host on the host end.
+        showInviteToCohostButton: true, // Whether to show the button that is used to invite the audience to co-host on the host end.
         showRemoveCohostButton: true, // Whether to show the button that is used to remove the audience on the host end.
         showRequestToCohostButton: true, // Whether to show the button that is used to request to co-host on the audience end.
       });
+    };
+    if (run == 1) {
+      doAsync();
+      // doAsync_();
     }
     return () => {
       setRun((run) => run + 1);
