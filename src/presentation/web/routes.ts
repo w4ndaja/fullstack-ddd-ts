@@ -17,21 +17,14 @@ export class Routes extends Router {
     private userController: UserController,
     private mentorController: MentorController,
     private bookController: BookController,
-    private bannerController: BannerController,
-    private authMiddleware: AuthMiddleware
+    private bannerController: BannerController
   ) {
     super();
     this.getRouter().get("/health-check", async (req, res) => res.send("SERVER IS UP"));
     this.getRouter().use(this.authController.getRouter());
-    this.getRouter().use(
-      asyncWrapper(this.authMiddleware.authenticated.bind(this.authMiddleware)),
-      this.userController.getRouter()
-    );
+    this.getRouter().use(this.userController.getRouter());
     this.getRouter().use(this.mentorController.getRouter());
-    this.getRouter().use(
-      asyncWrapper(this.authMiddleware.authenticated.bind(this.authMiddleware)),
-      this.bookController.getRouter()
-    );
+    this.getRouter().use(this.bookController.getRouter());
     this.getRouter().use(this.bannerController.getRouter());
     this.getRouter().all("*", async (req, res, next) => {
       next(new AppError(ErrorCode.NOT_FOUND, "Not found"));

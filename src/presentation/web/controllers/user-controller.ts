@@ -4,11 +4,13 @@ import { IBaseGetParam } from "@/common/libs/pagination";
 import { UserService } from "@/services";
 import { NextFunction, Request, Response } from "express";
 import { RestMapper } from "@/dto/mappers/rest-mapper";
+import { AuthMiddleware } from "../middlewares/auth-middleware";
 
 @injectable()
 export class UserController extends Router {
-  constructor(private userService: UserService) {
+  constructor(private userService: UserService, private authMiddleware: AuthMiddleware) {
     super("/users");
+    this.routes.use(asyncWrapper(this.authMiddleware.authenticated.bind(this.authMiddleware)));
     this.routes.get("/", asyncWrapper(this.getUsers.bind(this)));
   }
   private async getUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
