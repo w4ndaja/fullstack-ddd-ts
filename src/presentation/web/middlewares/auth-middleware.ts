@@ -1,6 +1,8 @@
 import { AppError } from "@/common/libs/error-handler";
+import { Logger } from "@/common/libs/logger";
 import { ErrorCode } from "@/common/utils";
 import { EROLES } from "@/common/utils/roles";
+import { TYPES } from "@/ioc/types";
 import { AuthService } from "@/services";
 import { NextFunction, Request, Response } from "express";
 import { inject, injectable } from "inversify";
@@ -8,9 +10,14 @@ import { inject, injectable } from "inversify";
 @injectable()
 export class AuthMiddleware {
   @inject(AuthService) private declare _authService: AuthService;
+  @inject(TYPES.Logger) private declare logger: Logger;
   async authenticated(req: Request, res: Response, next: NextFunction) {
-    const [, token] = <string[]>req.get("Authorization")?.split("Bearer ");
-    await this._authService.checkToken(token);
+    try {
+      const [, token] = <string[]>req.get("Authorization")?.split("Bearer ");
+      await this._authService.checkToken(token);
+    } catch (e) {
+      throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized!");
+    }
     next();
   }
 

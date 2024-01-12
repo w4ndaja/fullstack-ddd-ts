@@ -12,7 +12,6 @@ import { NextServer } from "next/dist/server/next";
 import express, { NextFunction, Request, Response, Express, static as static_ } from "express";
 import cors from "cors";
 import { json } from "body-parser";
-import multer from "multer";
 import path from "path";
 // import { SocketServer } from "./socket/socket-server";
 
@@ -37,7 +36,6 @@ export class WebServer {
       dir: config.presentation.dir,
     });
     this.fePrepared = this.feServer.prepare();
-    const upload = multer({ dest: path.join(config.storageDir, "temp") });
     this.restServer.use(
       config.app.apiUrlPrefix,
       (req: Request, res: Response, next: NextFunction) => {
@@ -46,7 +44,6 @@ export class WebServer {
       }
     );
     this.restServer.use(config.app.apiUrlPrefix, cors());
-    this.restServer.use(config.app.apiUrlPrefix, upload.any());
     this.restServer.use(config.app.apiUrlPrefix, json());
     this.restServer.use(config.app.apiUrlPrefix, this.routes.getRouter());
     this.restServer.use(config.app.apiUrlPrefix, this.restErrorHandler.bind(this));
