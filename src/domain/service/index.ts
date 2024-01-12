@@ -4,4 +4,4 @@ export * from "./book-repository";
 export * from "./participant-repository";
 export * from "./mentor-repository";
 export * from "./banner-repository";
-export * from "./file-repository";
+export * from "./file-storage-repository";

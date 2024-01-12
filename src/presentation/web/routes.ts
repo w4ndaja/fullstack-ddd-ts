@@ -8,7 +8,7 @@ import { MentorController } from "./controllers/mentor-controller";
 import { BookController } from "./controllers/book-controller";
 import { BannerController } from "./controllers/banner-controller";
 import { AuthMiddleware } from "./middlewares/auth-middleware";
-import { FileController } from "./controllers/file-controller";
+import { FileStorageController } from "./controllers/file-storage-controller";
 
 @injectable()
 export class Routes extends Router {
@@ -18,7 +18,7 @@ export class Routes extends Router {
     private mentorController: MentorController,
     private bookController: BookController,
     private bannerController: BannerController,
-    private fileController: FileController
+    private fileController: FileStorageController
   ) {
     super();
     this.getRouter().get("/health-check", async (req, res) => res.send("SERVER IS UP"));

@@ -1,7 +1,7 @@
-import { IFileCreate } from "@/domain/model/file";
+import { IFileStorageCreate } from "@/domain/model/file-storage";
 
-export class FileUploadMapper{
-  static fromMulterToDto(file:Express.Multer.File):IFileCreate{
+export class FileStorageUploadMapper{
+  static fromMulterToDto(file:Express.Multer.File):IFileStorageCreate{
     return {
       originalname: file.originalname,
       encoding: file.encoding,

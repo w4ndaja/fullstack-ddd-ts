@@ -8,18 +8,18 @@ import { AuthMiddleware } from "../middlewares/auth-middleware";
 import multer from "multer";
 import path from "path";
 import { config } from "@/common/utils";
-import { FileService } from "@/services";
-import { File, IFile, IFileCreate } from "@/domain/model/file";
+import { FileStorageService } from "@/services";
+import { FileStorage, IFileStorage, IFileStorageCreate } from "@/domain/model/file-storage";
 import { arrayMapper } from "@/common/libs/array-mapper";
-import { FileUploadMapper } from "@/dto/mappers/file/file-upload-mapper";
+import { FileStorageUploadMapper } from "@/dto/mappers/file-storage/file-storage-upload-mapper";
 
 @injectable()
-export class FileController extends Router {
+export class FileStorageController extends Router {
   private multerUploader = multer({ dest: path.join(config.storageDir, "temp") });
   constructor(
     @inject(TYPES.Logger) private logger: Logger,
     @inject(AuthMiddleware) private authMiddleware: AuthMiddleware,
-    @inject(FileService) private fileService: FileService
+    @inject(FileStorageService) private fileService: FileStorageService
   ) {
     super("/storage");
     this.routes.use(asyncWrapper(this.authMiddleware.authenticated.bind(this.authMiddleware)));
@@ -33,7 +33,7 @@ export class FileController extends Router {
   private async upload(req: Request, res: Response, next: NextFunction) {
     const files = <Express.Multer.File[]>req.files;
     const result = await this.fileService.upload(
-      arrayMapper(files, FileUploadMapper.fromMulterToDto)
+      arrayMapper(files, FileStorageUploadMapper.fromMulterToDto)
     );
     res.json(
       RestMapper.dtoToRest(

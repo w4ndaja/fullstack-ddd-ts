@@ -1,5 +1,5 @@
 import { Entity, IEntity, IEntityCreate } from "./entity";
-export type IFile = IEntity<{
+export type IFileStorage = IEntity<{
   originalname: string;
   encoding: string;
   mimetype: string;
@@ -9,7 +9,7 @@ export type IFile = IEntity<{
   path: string;
 }>;
 
-export type IFileCreate = IEntityCreate<{
+export type IFileStorageCreate = IEntityCreate<{
   originalname: string;
   encoding: string;
   mimetype: string;
@@ -19,14 +19,14 @@ export type IFileCreate = IEntityCreate<{
   path: string;
 }>;
 
-export class File extends Entity<IFile> {
-  constructor(props: IFileCreate) {
+export class FileStorage extends Entity<IFileStorage> {
+  constructor(props: IFileStorageCreate) {
     super(props);
   }
-  public static create(props: IFileCreate) {
-    return new File(props);
+  public static create(props: IFileStorageCreate) {
+    return new FileStorage(props);
   }
-  public unmarshall(): IFile {
+  public unmarshall(): IFileStorage {
     return {
       id: this.id,
       originalname: this.originalname,
