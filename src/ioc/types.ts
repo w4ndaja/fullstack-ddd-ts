@@ -9,4 +9,5 @@ export const TYPES = {
   BookRepository: Symbol.for("BookRepository"),
   MentorRepository: Symbol.for("MentorRepository"),
   BannerRepository: Symbol.for("BannerRepository"),
+  FileRepository: Symbol.for("FileRepository"),
 };

@@ -1,4 +1,4 @@
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import { Router, asyncWrapper } from "../libs";
 import { NextFunction, Request, Response } from "express";
 import { BookService } from "@/services";
@@ -8,7 +8,10 @@ import { AuthMiddleware } from "../middlewares/auth-middleware";
 
 @injectable()
 export class BookController extends Router {
-  constructor(private bookService: BookService, private authMiddleware: AuthMiddleware) {
+  constructor(
+    private bookService: BookService,
+    @inject(AuthMiddleware) private authMiddleware: AuthMiddleware
+  ) {
     super("/books");
     this.routes.use(asyncWrapper(this.authMiddleware.authenticated.bind(this.authMiddleware)));
     this.routes.post("/", asyncWrapper(this.book.bind(this)));

@@ -1,4 +1,6 @@
-import { IFile } from "../model/file";
+import { IFile, IFileCreate } from "../model/file";
 import { IRepository } from "./repository";
 
-export interface IFileRepository extends IRepository<IFile>{}
+export interface IFileRepository extends IRepository<IFile> {
+  removeTemp(files: IFileCreate[]): void;
+}

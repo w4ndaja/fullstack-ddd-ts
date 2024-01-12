@@ -7,8 +7,8 @@ import { ErrorCode } from "@/common/utils";
 import { MentorController } from "./controllers/mentor-controller";
 import { BookController } from "./controllers/book-controller";
 import { BannerController } from "./controllers/banner-controller";
-import { asyncWrapper } from "./libs";
 import { AuthMiddleware } from "./middlewares/auth-middleware";
+import { FileController } from "./controllers/file-controller";
 
 @injectable()
 export class Routes extends Router {
@@ -17,7 +17,8 @@ export class Routes extends Router {
     private userController: UserController,
     private mentorController: MentorController,
     private bookController: BookController,
-    private bannerController: BannerController
+    private bannerController: BannerController,
+    private fileController: FileController
   ) {
     super();
     this.getRouter().get("/health-check", async (req, res) => res.send("SERVER IS UP"));
@@ -26,6 +27,7 @@ export class Routes extends Router {
     this.getRouter().use(this.mentorController.getRouter());
     this.getRouter().use(this.bookController.getRouter());
     this.getRouter().use(this.bannerController.getRouter());
+    this.getRouter().use(this.fileController.getRouter());
     this.getRouter().all("*", async (req, res, next) => {
       next(new AppError(ErrorCode.NOT_FOUND, "Not found"));
     });

@@ -1,30 +1,34 @@
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import { Repository } from "./repository";
-import { IFile } from "@/domain/model/file";
+import { IFile, IFileCreate } from "@/domain/model/file";
 import { IFileRepository } from "@/domain/service/file-repository";
-import fsExtra from 'fs-extra'
+import fsExtra from "fs-extra";
+import { Logger } from "@/common/libs/logger";
+import { TYPES } from "@/ioc/types";
+import path from "path";
+import { config } from "@/common/utils";
 
 @injectable()
 export class FileRepository extends Repository<IFile> implements IFileRepository {
-  constructor() {
+  constructor(@inject(TYPES.Logger) private logger: Logger) {
     super("files");
+    fsExtra.ensureDir(path.join(config.storageDir, "public"));
   }
   async save(_data: Partial<IFile>): Promise<IFile> {
-    const data = <IFile>{ ..._data };
-    const checkExist = await this.collection.findOne({ id: data.id });
-    if (checkExist?._id) {
-      await Promise.all([this.collection.updateOne(
-        { id: data.id },
-        {
-          $set: data,
-        }
-      ), (async () => {
-        const fileExists = await fsExtra.readFile(data.path)
-      })()])
-    } else {
-      await this.collection.insertOne(data);
-    }
-    const { _id, ...__data } = <any>data;
-    return <IFile>__data;
+    let data = <IFile>{ ..._data };
+    const newFileName = `${data.id}.${data.originalname.split(".").reverse()[0]}`;
+    const newPath = path.join(config.storageDir, `public/${newFileName}`);
+    await fsExtra.copyFile(data.path, newPath);
+    data.filename = newFileName;
+    data.path = newPath;
+    this.collection.insertOne(data);
+    return <IFile>data;
+  }
+  public removeTemp(files: IFileCreate[]): void {
+    files.forEach((file) => {
+      try {
+        fsExtra.remove(file.path);
+      } catch (e) {}
+    });
   }
 }

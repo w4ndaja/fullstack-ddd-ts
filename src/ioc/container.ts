@@ -22,6 +22,7 @@ import { UserController } from "@/presentation/web/controllers/user-controller";
 import { MentorController } from "@/presentation/web/controllers/mentor-controller";
 import { BookController } from "@/presentation/web/controllers/book-controller";
 import { BannerController } from "@/presentation/web/controllers/banner-controller";
+import { FileController } from "@/presentation/web/controllers/file-controller";
 
 // REST Middleware
 import { AuthMiddleware } from "@/presentation/web/middlewares/auth-middleware";
@@ -41,6 +42,7 @@ import {
   IMentorRepository,
   IParticipantRepository,
   IBannerRepository,
+  IFileRepository
 } from "@/domain/service";
 
 // Repository Implementation
@@ -51,6 +53,7 @@ import {
   MentorRepository,
   ParticipantRepository,
   BannerRepository,
+  FileRepository,
 } from "@/infra/mongodb";
 // import { UserRepository, AuthRepository } from "@/infra/sqlite/repositories";
 
@@ -62,7 +65,8 @@ import {
   MentorService,
   BookService,
   BannerService,
-  ZegoService
+  ZegoService,
+  FileService
 } from "@/services";
 
 const container = new Container({ skipBaseClassChecks: true });
@@ -80,6 +84,7 @@ container.bind<UserController>(UserController).toSelf();
 container.bind<MentorController>(MentorController).toSelf();
 container.bind<BookController>(BookController).toSelf();
 container.bind<BannerController>(BannerController).toSelf();
+container.bind<FileController>(FileController).toSelf();
 
 // REST Middleware Binding
 container.bind<AuthMiddleware>(AuthMiddleware).toSelf();
@@ -97,6 +102,7 @@ container.bind<IBookRepository>(TYPES.BookRepository).to(BookRepository);
 container.bind<IMentorRepository>(TYPES.MentorRepository).to(MentorRepository);
 container.bind<IParticipantRepository>(TYPES.ParticipantRepository).to(ParticipantRepository);
 container.bind<IBannerRepository>(TYPES.BannerRepository).to(BannerRepository);
+container.bind<IFileRepository>(TYPES.FileRepository).to(FileRepository);
 
 // Service Bind
 container.bind<AuthService>(AuthService).toSelf().inRequestScope();
@@ -106,5 +112,6 @@ container.bind<MentorService>(MentorService).toSelf();
 container.bind<BookService>(BookService).toSelf();
 container.bind<BannerService>(BannerService).toSelf();
 container.bind<ZegoService>(ZegoService).toSelf();
+container.bind<FileService>(FileService).toSelf();
 
 export { container };
