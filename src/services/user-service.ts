@@ -6,6 +6,8 @@ import type { IGenericPaginatedData } from "@/common/libs/pagination";
 import { inject, injectable } from "inversify";
 import { TYPES } from "@/ioc/types";
 import { User } from "@/domain/model";
+import { AppError } from "@/common/libs/error-handler";
+import { ErrorCode } from "@/common/utils";
 
 /**
  * UserService
@@ -49,8 +51,12 @@ export class UserService {
     return _user;
   }
   public async getByEmail(email: string) {
-    const user = User.create(await this._userRepository.findByUsernameOrEmail(email));
-    const userDto = user.unmarshall();
+    let userDto = await this._userRepository.findByUsernameOrEmail(email);
+    if (!userDto) {
+      throw new AppError(ErrorCode.NOT_FOUND, "User tidak ditemukan");
+    }
+    const user = User.create(userDto);
+    userDto = user.unmarshall();
     return userDto;
   }
   public setAuth(auth: IAuth) {
