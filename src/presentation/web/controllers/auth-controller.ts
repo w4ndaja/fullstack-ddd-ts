@@ -8,6 +8,7 @@ import { AppError } from "@/common/libs/error-handler";
 import { ErrorCode } from "@/common/utils/error-code";
 import { AuthValidateParamMapper } from "@/dto/mappers/auth/auth-validate-param-mapper";
 import { AuthMiddleware } from "../middlewares/auth-middleware";
+import { IAuth } from "@/domain/model";
 
 @injectable()
 export class AuthController extends Router {
@@ -18,7 +19,11 @@ export class AuthController extends Router {
   ) {
     super("/auth");
     this.routes.post(`/login`, asyncWrapper(this.login.bind(this)));
-    this.routes.get(`/check-token`, asyncWrapper(this.checkToken.bind(this)));
+    this.routes.get(
+      `/check-token`,
+      asyncWrapper(this.authMiddleware.authenticated.bind(this.authMiddleware)),
+      asyncWrapper(this.checkToken.bind(this))
+    );
     this.routes.post("/register", asyncWrapper(this.register.bind(this)));
     this.routes.get(
       "/profile",
@@ -37,9 +42,9 @@ export class AuthController extends Router {
     res.json(RestMapper.dtoToRest(auth));
   }
   private async checkToken(req: Request, res: Response, next: NextFunction) {
-    const auth = await this.authService.auth;
+    const auth = <IAuth>res.locals.auth;
     if (!auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Invalid token");
-    res.json(RestMapper.dtoToRest(auth?.unmarshall()));
+    res.json(RestMapper.dtoToRest(auth));
   }
   private async register(req: Request, res: Response, next: NextFunction) {
     const { email, password } = AuthValidateParamMapper.fromRest(req.body);
@@ -47,10 +52,12 @@ export class AuthController extends Router {
     res.json(RestMapper.dtoToRest(auth));
   }
   private async profile(req: Request, res: Response, next: NextFunction) {
+    this.profileService.setAuth(res.locals.auth);
     const profile = await this.profileService.getProfile();
     return res.json(RestMapper.dtoToRest(<object>profile));
   }
   private async updateProfile(req: Request, res: Response, next: NextFunction) {
+    this.profileService.setAuth(res.locals.auth);
     const profile = await this.profileService.updateProfile(req.body);
     return res.json(RestMapper.dtoToRest(<object>profile));
   }

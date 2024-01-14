@@ -9,7 +9,6 @@ import multer from "multer";
 import path from "path";
 import { config } from "@/common/utils";
 import { FileStorageService } from "@/services";
-import { FileStorage, IFileStorage, IFileStorageCreate } from "@/domain/model/file-storage";
 import { arrayMapper } from "@/common/libs/array-mapper";
 import { FileStorageUploadMapper } from "@/dto/mappers/file-storage/file-storage-upload-mapper";
 

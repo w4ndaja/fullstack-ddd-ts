@@ -6,3 +6,4 @@ export * from "./mentor-service";
 export * from "./banner-service";
 export * from "./zego-service";
 export * from "./file-storage-service";
+export * from "./live-training-service";

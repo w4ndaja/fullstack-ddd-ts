@@ -2,6 +2,7 @@ import { AppError } from "@/common/libs/error-handler";
 import { Logger } from "@/common/libs/logger";
 import { ErrorCode } from "@/common/utils";
 import { EROLES } from "@/common/utils/roles";
+import { Auth, IAuth } from "@/domain/model";
 import { TYPES } from "@/ioc/types";
 import { AuthService } from "@/services";
 import { NextFunction, Request, Response } from "express";
@@ -14,17 +15,18 @@ export class AuthMiddleware {
   async authenticated(req: Request, res: Response, next: NextFunction) {
     try {
       const [, token] = <string[]>req.get("Authorization")?.split("Bearer ");
-      await this._authService.checkToken(token);
+      const auth = await this._authService.checkToken(token);
+      res.locals["auth"] = auth;
     } catch (e) {
       throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized!");
     }
     next();
   }
 
-  async hasRole(role: EROLES) {
-    const _this = this;
+  hasRole(role: EROLES) {
     return async function (req: Request, res: Response, next: NextFunction) {
-      const auth = await _this._authService.auth;
+      const authDto = <IAuth>res.locals.auth;
+      const auth = Auth.create(authDto);
       if (!auth?.user.hasRole(role)) {
         throw new AppError(ErrorCode.FORBIDDEN, "Forbidden");
       }

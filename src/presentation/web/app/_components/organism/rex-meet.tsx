@@ -1,16 +1,13 @@
 "use client";
+import { ILiveTraining } from "@/domain/model/live-training";
 import React, { useEffect, useRef, useState } from "react";
 export default function RexMeet(props: any) {
   const appId: number = Number(props.params.appId);
   const { token, roomID, userID, userName }: any = props.params;
+  const activeLiveStreaming = props.params.activeLiveStreaming as ILiveTraining;
   const streamContainerRef = useRef<HTMLDivElement>(null);
   const [run, setRun] = useState(1);
   useEffect(() => {
-    const doAsync_ = async () => {
-      const { ZegoUIKitPrebuilt } = await import("@zegocloud/zego-uikit-prebuilt");
-      const { ZIM } = await import("zego-zim-web");
-      console.log({ZegoUIKitPrebuilt, ZIM})
-    }
     const doAsync = async () => {
       const { ZegoUIKitPrebuilt } = await import("@zegocloud/zego-uikit-prebuilt");
       const { ZIM } = await import("zego-zim-web");
@@ -21,8 +18,6 @@ export default function RexMeet(props: any) {
         userID,
         userName
       );
-      // const kitToken =  ZegoUIKitPrebuilt.generateKitTokenForTest(appId, "94d3c7a74038ee8ed17f0e472340d500", roomId,  userId,  userName);
-
       const getUrlParams: any = (url = window.location.href) => {
         let urlStr = url.split("?")[1];
         return new URLSearchParams(urlStr);
@@ -80,7 +75,6 @@ export default function RexMeet(props: any) {
     };
     if (run == 1) {
       doAsync();
-      // doAsync_();
     }
     return () => {
       setRun((run) => run + 1);

@@ -24,16 +24,24 @@ export class BookController extends Router {
     this.routes.put("/:bookId/finish", asyncWrapper(this.finish.bind(this)));
   }
   private async book(req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { mentorId, duration, sessions, className, paymentMethod, paymentAccountNo } = <any>(
-      req.body
-    );
+    const {
+      mentorId,
+      duration,
+      sessions,
+      className,
+      paymentMethod,
+      paymentAccountNo,
+      sessionDate,
+    } = <any>req.body;
+
     const book = await this.bookService.book(
       mentorId,
       sessions,
       className,
       paymentMethod,
       paymentAccountNo,
-      duration
+      duration,
+      sessionDate
     );
     res.json(RestMapper.dtoToRest(book));
   }
@@ -76,7 +84,8 @@ export class BookController extends Router {
 
   private async finish(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { bookId } = req.params;
-    const book = await this.bookService.finish(bookId);
+    const { rating = 5, review = "" } = req.body;
+    const book = await this.bookService.finish(bookId, Number(rating), String(review));
     res.json(RestMapper.dtoToRest(book));
   }
 }

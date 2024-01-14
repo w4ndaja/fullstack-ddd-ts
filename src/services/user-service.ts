@@ -1,5 +1,5 @@
 import type { IUserRepository } from "@/domain/service/user-repository";
-import type { IUserCreate, IUser } from "@/domain/model";
+import { IUserCreate, IUser, Auth, IAuth } from "@/domain/model";
 import { GenericPaginatedData, IBaseGetParam } from "@/common/libs/pagination";
 import type { Logger } from "@/common/libs/logger/logger";
 import type { IGenericPaginatedData } from "@/common/libs/pagination";
@@ -13,6 +13,7 @@ import { User } from "@/domain/model";
  */
 @injectable()
 export class UserService {
+  private auth: Auth;
   @inject(TYPES.UserRepository) private declare _userRepository: IUserRepository;
   @inject(TYPES.Logger) private declare logger: Logger;
 
@@ -46,5 +47,13 @@ export class UserService {
     const _user = user.unmarshall();
     await this._userRepository.save(_user);
     return _user;
+  }
+  public async getByEmail(email: string) {
+    const user = User.create(await this._userRepository.findByUsernameOrEmail(email));
+    const userDto = user.unmarshall();
+    return userDto;
+  }
+  public setAuth(auth: IAuth) {
+    this.auth = Auth.create(auth);
   }
 }

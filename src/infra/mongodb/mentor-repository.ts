@@ -45,16 +45,71 @@ export class MentorRepository extends Repository<IMentor> implements IMentorRepo
   async getAllMentors(
     search: string,
     category: string,
+    sortBy: IMentorSortType,
     limit: number,
     offset: number
   ): Promise<IMentor[]> {
-    const collection = await this.collection.find(
+    const collection = await this.collection.aggregate([
       {
-        ...(search && { fullname: { $regex: search, $options: "i" } }),
-        ...(category && { className: category }),
+        $set: {
+          certificatesCount: {
+            $size: "$certificates",
+          },
+        },
       },
-      { limit, skip: offset }
-    );
+      ...(sortBy == "HIGHER_CERTIFICATE"
+        ? [
+            {
+              $sort: {
+                _id: 1,
+                certificatesCount: -1,
+              },
+            },
+          ]
+        : []),
+      ...(sortBy == "LOWER_PRICE"
+        ? [
+            {
+              $sort: {
+                _id: 1,
+                price: 1,
+              },
+            },
+          ]
+        : []),
+      ...(sortBy == "HIGHER_PRICE"
+        ? [
+            {
+              $sort: {
+                _id: 1,
+                price: -1,
+              },
+            },
+          ]
+        : []),
+      ...(sortBy == "HIGHER_RATING"
+        ? [
+            {
+              $sort: {
+                _id: 1,
+                rating: -1,
+              },
+            },
+          ]
+        : []),
+      {
+        $match: {
+          ...(search && { fullname: { $regex: search, $options: "i" } }),
+          ...(category && { className: category }),
+        },
+      },
+      {
+        $limit: limit + offset
+      },
+      {
+        $skip: offset,
+      },
+    ]);
     if (!collection) {
       return [];
     }

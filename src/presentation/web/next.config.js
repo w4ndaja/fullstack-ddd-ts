@@ -10,4 +10,9 @@ config.config({
 module.exports = {
   distDir: "../../../dist/presentation/web/.next",
   basePath: process.env.APP_URL_PREFIX === "/" ? "" : process.env.APP_URL_PREFIX,
+  transpilePackages: [
+    "@zegocloud/zego-uikit-prebuilt",
+    "zego-express-engine-webrtc",
+    "zego-zim-web",
+  ],
 };

@@ -43,8 +43,16 @@ export const config = {
       process.env.NODE_ENV === "production" ? "dist/presentation/web" : "src/presentation/web"
     ),
   },
-  zego:{
-    appId : process.env.ZEGO_APP_ID || "",
-    secret : process.env.ZEGO_SECRET || "",
-  }
+  zego: {
+    appId: process.env.ZEGO_APP_ID || "",
+    secret: process.env.ZEGO_SECRET || "",
+  },
+  camy: {
+    email: {
+      username: process.env.CAMY_EMAIL_USERNAME || "developer@rexhoster.id",
+      password: process.env.CAMY_EMAIL_PASSWORD || "123123123",
+      host: process.env.CAMY_EMAIL_HOST || "mail.rexhoster.id",
+    },
+    liveRoomUrl: process.env.LIVE_ROOM_URL || "https://camy-dev.pentarex.id",
+  },
 };

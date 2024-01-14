@@ -24,17 +24,22 @@ export type IBook = IEntity<{
   finishedBy: string | null;
   review: string;
   rating: number;
+  sessionDate: number;
+  start: number | null;
+  end: number | null;
+  mentorFee: number;
+  providerFee: number;
 }>;
 
 export type IBookCreate = IEntityCreate<{
-  bookId: string;
-  status: string;
+  bookId?: string;
+  status?: string;
   participantId: string;
   mentor: Mentor | null;
   className: string;
   duration?: number;
   payment: Payment;
-  expiredDate: number;
+  expiredDate?: number;
   acceptedAt?: number | null;
   rejectedAt?: number | null;
   canceledAt?: number | null;
@@ -46,6 +51,11 @@ export type IBookCreate = IEntityCreate<{
   finishedBy?: string | null;
   review?: string;
   rating?: number;
+  sessionDate?: number;
+  start?: number | null;
+  end?: number | null;
+  mentorFee?: number;
+  providerFee?: number;
 }>;
 
 interface Payment {
@@ -76,8 +86,48 @@ interface Mentor {
 }
 
 export class Book extends Entity<IBook> {
-  constructor(props: IBookCreate) {
-    super(props);
+  constructor({
+    duration,
+    acceptedAt,
+    rejectedAt,
+    canceledAt,
+    canceledByUserId,
+    participant,
+    finishedAt,
+    finishedBy,
+    review,
+    rating,
+    start,
+    end,
+    mentorFee,
+    providerFee,
+    bookId,
+    status,
+    expiredDate,
+    sessionDate,
+    ...props
+  }: IBookCreate) {
+    super({
+      bookId: bookId || Date.now().toString() + Math.floor(Math.random() * 9999).toString(),
+      status: status || EBookStatus.PENDING.toString(),
+      duration: duration || 60,
+      acceptedAt: acceptedAt || null,
+      rejectedAt: rejectedAt || null,
+      canceledAt: canceledAt || null,
+      canceledByUserId: canceledByUserId || null,
+      participant: participant || null,
+      finishedAt: finishedAt || null,
+      finishedBy: finishedBy || null,
+      review: review || "",
+      rating: rating || 5,
+      start: start || null,
+      end: end || null,
+      mentorFee: mentorFee || 50,
+      providerFee: providerFee || 50,
+      expiredDate: expiredDate || Date.now() + 86400000 * 2,
+      sessionDate: sessionDate || Date.now(),
+      ...props,
+    });
   }
   public static create(props: IBookCreate): Book {
     return new Book(props);
@@ -92,23 +142,88 @@ export class Book extends Entity<IBook> {
       className: this.className,
       duration: this.duration,
       payment: this.payment,
-      expiredDate: this.expiredDate,
-      acceptedAt: this.acceptedAt,
+      expiredDate: this.expiredDate?.getTime() || null,
+      acceptedAt: this.acceptedAt?.getTime() || null,
       canceledAt: this.canceledAt,
       canceledByUserId: this.canceledByUserId,
-      rejectedAt: this.rejectedAt,
+      rejectedAt: this.rejectedAt?.getTime() || null,
       createdAt: this.createdAt.getTime(),
       updatedAt: this.updatedAt.getTime(),
       deletedAt: this.deletedAt?.getTime() || null,
       participant: this.participant?.unmarshall(),
       participantName: this.participantName,
       sessions: this.sessions,
-      finishedAt: this.finishedAt,
+      finishedAt: this.finishedAt?.getTime() || null,
       finishedBy: this.finishedBy,
       review: this.review,
       rating: this.rating,
+      sessionDate: this.sessionDate?.getTime() || null,
+      start: this.start?.getTime() || null,
+      end: this.end?.getTime() || null,
+      mentorFee: this.mentorFee,
+      providerFee: this.providerFee,
     };
   }
+
+  public setPrice(sessionCount: number, price: number) {
+    this.duration = sessionCount * 60;
+    this.payment.subTotal = sessionCount * price;
+    this.payment.total = this.payment.subTotal + this.payment.adminFee + this.payment.tax;
+  }
+
+  public accept() {
+    if (this.status !== EBookStatus.PENDING.toString())
+      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not pending");
+    this.acceptedAt = new Date();
+    this.status = EBookStatus.WAITINGPAYMENT.toString();
+    return this;
+  }
+
+  public reject(canceledBy: string) {
+    if (this.status === EBookStatus.PENDING.toString()) {
+      this.rejectedAt = Date.now();
+      this.status = EBookStatus.REJECTED.toString();
+      this.canceledByUserId = canceledBy;
+    } else {
+      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not pending");
+    }
+    return this;
+  }
+
+  public setPaid() {
+    if (this.status !== EBookStatus.WAITINGPAYMENT.toString())
+      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not waiting payment");
+    this.payment.paidAt = Date.now();
+    this.status = EBookStatus.OCCURRING.toString();
+    return this;
+  }
+
+  public cancel(canceledBy: string) {
+    if (this.status === EBookStatus.PENDING.toString()) {
+      this.canceledAt = new Date();
+      this.status = EBookStatus.CANCELED.toString();
+      this.canceledByUserId = canceledBy;
+    } else {
+      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not pending");
+    }
+    return this;
+  }
+
+  public finish(userId: string, rating: number, review: string) {
+    if (
+      this.status !== EBookStatus.OCCURRING.toString() &&
+      this.status !== EBookStatus.FINISHED.toString()
+    ) {
+      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not occuring");
+    }
+    this.finishedAt = new Date();
+    this.status = EBookStatus.FINISHED;
+    this.finishedBy = userId;
+    this.rating = rating;
+    this.review = review;
+    return this;
+  }
+
   get bookId(): string {
     return this._props.bookId;
   }
@@ -130,11 +245,11 @@ export class Book extends Entity<IBook> {
   get payment(): Payment {
     return this._props.payment;
   }
-  get expiredDate(): number {
-    return this._props.expiredDate;
+  get expiredDate(): Date {
+    return this._props.expiredDate ? new Date(this._props.expiredDate) : new Date();
   }
-  get acceptedAt(): number | null {
-    return this._props.acceptedAt;
+  get acceptedAt(): Date | null {
+    return this._props.acceptedAt ? new Date(this._props.acceptedAt) : null;
   }
   get canceledAt(): number | null {
     return this._props.canceledAt;
@@ -142,8 +257,8 @@ export class Book extends Entity<IBook> {
   get canceledByUserId(): string | null {
     return this._props.canceledByUserId;
   }
-  get rejectedAt(): number | null {
-    return this._props.rejectedAt;
+  get rejectedAt(): Date | null {
+    return this._props.rejectedAt ? new Date(this._props.rejectedAt) : null;
   }
   get participant(): Participant | undefined {
     return this._props.participant ? Participant.create(this._props.participant) : undefined;
@@ -176,16 +291,16 @@ export class Book extends Entity<IBook> {
     this._props.payment = value;
   }
 
-  set expiredDate(value: number) {
-    this._props.expiredDate = value;
+  set expiredDate(value: Date) {
+    this._props.expiredDate = value.getTime();
   }
 
-  set acceptedAt(value: number | null) {
-    this._props.acceptedAt = value;
+  set acceptedAt(value: Date | null) {
+    this._props.acceptedAt = value.getTime();
   }
 
-  set canceledAt(value: number | null) {
-    this._props.canceledAt = value;
+  set canceledAt(value: Date | null) {
+    this._props.canceledAt = value.getTime();
   }
 
   set canceledByUserId(value: string | null) {
@@ -203,11 +318,11 @@ export class Book extends Entity<IBook> {
   get sessions(): string[] {
     return this._props.sessions;
   }
-  set finishedAt(v: number | null) {
-    this._props.finishedAt = v;
+  set finishedAt(v: Date | null) {
+    this._props.finishedAt = v.getTime();
   }
-  get finishedAt(): number | null {
-    return this._props.finishedAt;
+  get finishedAt(): Date | null {
+    return this._props.finishedAt ? new Date(this._props.finishedAt) : null;
   }
   set participantName(v: string) {
     this._props.participantName = v;
@@ -234,57 +349,34 @@ export class Book extends Entity<IBook> {
     return this._props.rating;
   }
 
-  public setPrice(sessionCount: number, price: number) {
-    this.duration = sessionCount * 60;
-    this.payment.subTotal = sessionCount * price;
-    this.payment.total = this.payment.subTotal + this.payment.adminFee + this.payment.tax;
+  set start(v: Date) {
+    this._props.start = v.getTime();
   }
-
-  public accept() {
-    if (this.status !== EBookStatus.PENDING.toString())
-      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not pending");
-    this.acceptedAt = Date.now();
-    this.status = EBookStatus.WAITINGPAYMENT.toString();
-    return this;
+  get start(): Date | null {
+    return this._props.start ? new Date(this._props.start) : null;
   }
-
-  public reject(canceledBy: string) {
-    if (this.status === EBookStatus.PENDING.toString()) {
-      this.rejectedAt = Date.now();
-      this.status = EBookStatus.REJECTED.toString();
-      this.canceledByUserId = canceledBy;
-    } else {
-      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not pending");
-    }
-    return this;
+  set end(v: Date) {
+    this._props.end = v.getTime();
   }
-
-  public setPaid() {
-    if (this.status !== EBookStatus.WAITINGPAYMENT.toString())
-      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not waiting payment");
-    this.payment.paidAt = Date.now();
-    this.status = EBookStatus.OCCURRING.toString();
-    return this;
+  get end(): Date | null {
+    return this._props.end ? new Date(this._props.end) : null;
   }
-
-  public cancel(canceledBy: string) {
-    if (this.status === EBookStatus.PENDING.toString()) {
-      this.canceledAt = Date.now();
-      this.status = EBookStatus.CANCELED.toString();
-      this.canceledByUserId = canceledBy;
-    } else {
-      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not pending");
-    }
-    return this;
+  set sessionDate(v: number) {
+    this._props.sessionDate = v;
   }
-
-  public finish(userId: string) {
-    if (this.status !== EBookStatus.OCCURRING.toString()) {
-      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not occuring");
-    }
-    this._props.finishedAt = Date.now();
-    this._props.status = EBookStatus.FINISHED;
-    this._props.finishedBy = userId;
-    return this;
+  get sessionDate(): Date | null {
+    return this._props.sessionDate ? new Date(this._props.sessionDate) : null;
+  }
+  get mentorFee(): number {
+    return this._props.mentorFee;
+  }
+  set mentorFee(v: number) {
+    this._props.mentorFee = v;
+  }
+  get providerFee(): number {
+    return this._props.providerFee;
+  }
+  set providerFee(v: number) {
+    this._props.providerFee = v;
   }
 }

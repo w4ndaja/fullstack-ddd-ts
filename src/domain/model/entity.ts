@@ -53,8 +53,13 @@ export class Entity<I> {
   }
 
   public unmarshall(): IEntity<I> {
+    const keyProps = Object.keys(this._props);
+    let props: IEntity<I> = Object();
+    keyProps.forEach((key) => {
+      Object.assign(props, { [key]: this[key] || this._props[key] });
+    });
     return {
-      ...this._props,
+      ...props,
       id: this.id,
       createdAt: this.createdAt.getTime(),
       updatedAt: this.updatedAt.getTime(),

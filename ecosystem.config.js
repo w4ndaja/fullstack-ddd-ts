@@ -3,7 +3,7 @@ module.exports = {
         {
           name: "camy-dev",
           script: "./dist/index.js",
-          watch: true,
+          watch: false,
           env: {
             "NODE_ENV": "production",
           }

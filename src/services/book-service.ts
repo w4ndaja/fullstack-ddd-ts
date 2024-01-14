@@ -4,16 +4,17 @@ import { Book, IBook } from "@/domain/model/book";
 import { IBookRepository, IMentorRepository } from "@/domain/service";
 import { TYPES } from "@/ioc/types";
 import { inject, injectable } from "inversify";
-import { AuthService } from "./auth-service";
 import { AppError } from "@/common/libs/error-handler";
 import { ErrorCode } from "@/common/utils";
 import { PaymentStatus } from "@/common/utils/payment-status";
 import { EROLES } from "@/common/utils/roles";
+import { Auth, IAuth } from "@/domain/model";
+import { Mentor } from "@/domain/model/mentor";
 
 @injectable()
 export class BookService {
+  private auth: Auth;
   constructor(
-    @inject(AuthService) private authService: AuthService,
     @inject(TYPES.MentorRepository) private mentorRepository: IMentorRepository,
     @inject(TYPES.BookRepository) private bookRepository: IBookRepository,
     @inject(TYPES.Logger) private logger: Logger
@@ -24,15 +25,14 @@ export class BookService {
     className: string,
     paymentMethod: string,
     paymentAccountNo: string,
-    duration: number
+    duration: number,
+    sessionDate: number
   ): Promise<IBook> {
-    const auth = this.authService.auth;
-    if (!auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
-    const mentorDto = await this.mentorRepository.findById(mentorId);
+    if (!this.auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
+    let mentorDto = await this.mentorRepository.findById(mentorId);
+    const mentor = Mentor.create(mentorDto);
     const bookEntity = Book.create({
-      bookId: Date.now().toString() + Math.floor(Math.random() * 9999).toString(),
-      status: EBookStatus.PENDING.toString(),
-      participantId: auth.userId,
+      participantId: this.auth.userId,
       mentor: {
         userId: mentorDto.userId,
         mentorId: mentorDto.id,
@@ -53,11 +53,12 @@ export class BookService {
         paidAt: null,
         status: PaymentStatus.PENDING.toString(),
       },
-      expiredDate: Date.now() + 86400000 * 2,
-      participantName: auth?.user?.fullname || "",
+      participantName: this.auth?.user?.fullname || "",
       sessions: sessions,
+      sessionDate: sessionDate,
+      mentorFee: mentor.mentorFee,
+      providerFee: mentor.providerFee,
     });
-    this.logger.info("Auth", auth);
     bookEntity.setPrice(sessions.length, mentorDto.price);
     const bookDto = bookEntity.unmarshall();
     await this.bookRepository.save(bookDto);
@@ -65,9 +66,8 @@ export class BookService {
   }
 
   async accept(bookId: string): Promise<IBook> {
-    const auth = this.authService.auth;
-    if (!auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
-    if (!auth.user.hasRole(EROLES.MENTOR)) {
+    if (!this.auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
+    if (!this.auth.user.hasRole(EROLES.MENTOR)) {
       throw new AppError(ErrorCode.FORBIDDEN, "Forbidden");
     }
     const bookDto = await this.bookRepository.findById(bookId);
@@ -80,24 +80,22 @@ export class BookService {
   }
 
   async reject(bookId: string): Promise<IBook> {
-    const auth = this.authService.auth;
-    if (!auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
-    if (!auth.user.hasRole(EROLES.MENTOR)) {
+    if (!this.auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
+    if (!this.auth.user.hasRole(EROLES.MENTOR)) {
       throw new AppError(ErrorCode.FORBIDDEN, "Forbidden");
     }
     const bookDto = await this.bookRepository.findById(bookId);
     if (!bookDto) throw new AppError(ErrorCode.NOT_FOUND, "Not found");
     const bookEntity = Book.create(bookDto);
-    bookEntity.reject(auth.user.id);
+    bookEntity.reject(this.auth.user.id);
     const bookUpdateDto = bookEntity.unmarshall();
     await this.bookRepository.save(bookUpdateDto);
     return bookUpdateDto;
   }
 
   async setPaid(bookId: string): Promise<IBook> {
-    const auth = this.authService.auth;
-    if (!auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
-    if (!auth.user.hasRole(EROLES.MENTOR)) {
+    if (!this.auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
+    if (!this.auth.user.hasRole(EROLES.MENTOR)) {
       throw new AppError(ErrorCode.FORBIDDEN, "Forbidden");
     }
     const bookDto = await this.bookRepository.findById(bookId);
@@ -110,48 +108,47 @@ export class BookService {
   }
 
   async cancel(bookId: string): Promise<IBook> {
-    const auth = this.authService.auth;
-    if (!auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
+    if (!this.auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
     const bookDto = await this.bookRepository.findById(bookId);
     if (!bookDto) throw new AppError(ErrorCode.NOT_FOUND, "Not found");
     const bookEntity = Book.create(bookDto);
-    bookEntity.cancel(auth.user.id);
+    bookEntity.cancel(this.auth.user.id);
     const bookUpdateDto = bookEntity.unmarshall();
     await this.bookRepository.save(bookUpdateDto);
     return bookUpdateDto;
   }
 
   async history(status: EBookStatus): Promise<IBook[]> {
-    const auth = this.authService.auth;
-    if (!auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
-    if (auth.user.hasRole(EROLES.MENTOR)) {
-      const books = await this.bookRepository.getByMentorId(auth.userId, status);
+    if (!this.auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
+    if (this.auth.user.hasRole(EROLES.MENTOR)) {
+      const books = await this.bookRepository.getByMentorId(this.auth.userId, status);
       return books;
-    } else if (auth.user.hasRole(EROLES.PARTICIPANT)) {
-      const books = await this.bookRepository.getByParticipantId(auth.userId, status);
+    } else if (this.auth.user.hasRole(EROLES.PARTICIPANT)) {
+      const books = await this.bookRepository.getByParticipantId(this.auth.userId, status);
       return books;
     }
     return [];
   }
 
   async detail(bookId: string): Promise<IBook> {
-    const auth = this.authService.auth;
-    if (!auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
+    if (!this.auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
     const bookDto = await this.bookRepository.findById(bookId);
     if (!bookDto) throw new AppError(ErrorCode.NOT_FOUND, "Not found");
     const bookEntity = Book.create(bookDto);
     return bookEntity.unmarshall();
   }
 
-  async finish(bookId: string): Promise<IBook> {
-    const auth = this.authService.auth;
-    if (!auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
+  async finish(bookId: string, rating: number, review: string): Promise<IBook> {
+    if (!this.auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
     const bookDto = await this.bookRepository.findById(bookId);
     if (!bookDto) throw new AppError(ErrorCode.NOT_FOUND, "Not found");
     const bookEntity = Book.create(bookDto);
-    bookEntity.finish(auth.userId);
+    bookEntity.finish(this.auth.userId, rating, review);
     const bookUpdateDto = bookEntity.unmarshall();
     await this.bookRepository.save(bookUpdateDto);
     return bookUpdateDto;
+  }
+  public setAuth(auth: IAuth) {
+    this.auth = Auth.create(auth);
   }
 }

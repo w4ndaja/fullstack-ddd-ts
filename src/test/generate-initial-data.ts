@@ -182,73 +182,86 @@ Promise.all([
 ]).then(async () => {
   await (async () => {
     // Finished Order
-    await authService.login(participant1.email, "password");
+    let auth = await authService.login(participant1.email, "password");
+    bookService.setAuth(auth);
     const book = await bookService.book(
       dummyMentorProfiles[0].id,
       dummyMentorProfiles[0].schedules,
       dummyMentorProfiles[0].className[0],
       "OVO",
       "080898987878",
-      120
+      120,
+      Date.now()
     );
-    await authService.login(dummyMentorUsers[0].email, "password");
+    auth = await authService.login(dummyMentorUsers[0].email, "password");
+    bookService.setAuth(auth);
     await bookService.accept(book.id);
     await bookService.setPaid(book.id);
-    await bookService.finish(book.id);
+    await bookService.finish(book.id, 5, "OK");
   })();
   await (async () => {
     // Canceled Order
-    await authService.login(participant1.email, "password");
+    const auth = await authService.login(participant1.email, "password");
+    bookService.setAuth(auth);
     const book = await bookService.book(
       dummyMentorProfiles[0].id,
       dummyMentorProfiles[0].schedules,
       dummyMentorProfiles[0].className[0],
       "OVO",
       "080898987878",
-      120
+      120,
+      Date.now()
     );
     await bookService.cancel(book.id);
   })();
   await (async () => {
     // Rejected Order
-    await authService.login(participant1.email, "password");
+    let auth = await authService.login(participant1.email, "password");
+    bookService.setAuth(auth);
     const book = await bookService.book(
       dummyMentorProfiles[0].id,
       dummyMentorProfiles[0].schedules,
       dummyMentorProfiles[0].className[0],
       "OVO",
       "080898987878",
-      120
+      120,
+      Date.now()
     );
-    await authService.login(dummyMentorUsers[0].email, "password");
+    auth = await authService.login(dummyMentorUsers[0].email, "password");
+    bookService.setAuth(auth);
     await bookService.reject(book.id);
   })();
 
   await (async () => {
     // Pending Order
-    await authService.login(participant1.email, "password");
+    let auth = await authService.login(participant1.email, "password");
+    bookService.setAuth(auth);
     const book = await bookService.book(
       dummyMentorProfiles[0].id,
       dummyMentorProfiles[0].schedules,
       dummyMentorProfiles[0].className[0],
       "OVO",
       "080898987878",
-      120
+      120,
+      Date.now()
     );
   })();
 
   await (async () => {
     // Waiting Payment Order
-    await authService.login(participant1.email, "password");
+    let auth = await authService.login(participant1.email, "password");
+    bookService.setAuth(auth);
     const book = await bookService.book(
       dummyMentorProfiles[0].id,
       dummyMentorProfiles[0].schedules,
       dummyMentorProfiles[0].className[0],
       "OVO",
       "080898987878",
-      120
+      120,
+      Date.now()
     );
-    await authService.login(dummyMentorUsers[0].email, "password");
+    auth = await authService.login(dummyMentorUsers[0].email, "password");
+    bookService.setAuth(auth);
     await bookService.accept(book.id);
   })();
 });

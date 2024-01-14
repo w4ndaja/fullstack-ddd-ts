@@ -1,4 +1,4 @@
-import { Logger, WinstonLogger } from "@/common/libs/logger";
+import { Logger } from "@/common/libs/logger";
 import { config } from "@/common/utils";
 import { generateToken04 } from "@/infra/zego-server-assistant/zego-server-assistant";
 import { TYPES } from "@/ioc/types";

@@ -13,8 +13,8 @@ export class MentorService {
     const mentor = await this.mentorRepository.getMentorsSorted(sortType);
     return mentor;
   }
-  async getAllMentors(search: string, category: string, limit: number, offset: number) {
-    const mentor = await this.mentorRepository.getAllMentors(search, category, limit, offset);
+  async getAllMentors(search: string, category: string, sortBy:IMentorSortType, limit: number, offset: number) {
+    const mentor = await this.mentorRepository.getAllMentors(search, category, sortBy, limit, offset);
     return mentor;
   }
   async getDetailMentor(id: string) {

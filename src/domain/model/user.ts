@@ -3,7 +3,7 @@ import { Entity, IEntityCreate, IEntity } from "./entity";
 import bcrypt from "bcrypt";
 import { EPERMISSIONS } from "@/common/utils/permissions";
 import { IParticipant, Participant } from "@/domain/model/participant";
-import { IMentor, Mentor } from "@/domain/model/mentor"; // Import Mentor
+import { IMentor, Mentor } from "@/domain/model/mentor";
 export type IUser = IEntity<{
   fullname: string | null;
   username: string | null;
@@ -12,7 +12,7 @@ export type IUser = IEntity<{
   roles: string[];
   permissions: string[];
   participant?: IParticipant;
-  mentor?: IMentor; // Add mentor property
+  mentor?: IMentor;
 }>;
 
 export type IUserCreate = IEntityCreate<{
@@ -64,13 +64,22 @@ export class User extends Entity<IUser> {
   get fullname(): string | null {
     return this._props.fullname || null;
   }
+  set fullname(v: string | null) {
+    this._props.fullname = v;
+  }
 
   get email(): string {
     return this._props.email;
   }
+  set email(v: string) {
+    this._props.email = v;
+  }
 
   get username(): string | null {
     return this._props.username || null;
+  }
+  set username(v: string | null) {
+    this._props.username = v;
   }
 
   get password(): string {
@@ -105,16 +114,18 @@ export class User extends Entity<IUser> {
     this._props.participant = participant?.unmarshall();
   }
 
-  get mentor(): Mentor | undefined { // Add mentor getter
+  get mentor(): Mentor | undefined {
+    // Add mentor getter
     return this._props.mentor ? Mentor.create(this._props.mentor) : undefined;
   }
 
-  set mentor(mentor: Mentor | undefined) { // Add mentor setter
+  set mentor(mentor: Mentor | undefined) {
+    // Add mentor setter
     this._props.mentor = mentor?.unmarshall();
   }
 
   public hasRole(role: EROLES): boolean {
-    if(role === EROLES.SUPER_ADMIN) return true;
+    if (role === EROLES.SUPER_ADMIN) return true;
     return this.roles.includes(role);
   }
 
@@ -125,7 +136,7 @@ export class User extends Entity<IUser> {
   }
 
   public hasPermission(permission: EPERMISSIONS): boolean {
-    if(this.hasRole(EROLES.SUPER_ADMIN)) return true;
+    if (this.hasRole(EROLES.SUPER_ADMIN)) return true;
     return this.permissions.includes(permission);
   }
 
