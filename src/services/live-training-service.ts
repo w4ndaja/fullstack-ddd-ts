@@ -211,6 +211,46 @@ export class LiveTrainingService {
     return liveTrainingDto;
   }
 
+  public async findHistories(
+    param: IBaseGetParam,
+    startDate: number,
+    endDate: number,
+    status: string
+  ) {
+    const mentor = Mentor.create(await this.mentorRepository.findByUserId(this.auth.userId));
+    const liveTraining = GenericPaginatedData.create(
+      await this.liveTrainingRepository.findHistoryByMonthStatusAndMentorId(
+        startDate,
+        endDate,
+        mentor.id,
+        param.page,
+        param.limit,
+        status
+      )
+    );
+    return liveTraining.unmarshall();
+  }
+
+  public async findUserHistories(
+    param: IBaseGetParam,
+    startDate: number,
+    endDate: number,
+    status: string
+  ) {
+    const liveTraining = GenericPaginatedData.create(
+      await this.liveTrainingBookRepository.findHistoryByMonthStatusAndUserId(
+        startDate,
+        endDate,
+        this.auth.userId,
+        param.page,
+        param.limit,
+        status
+      )
+    );
+    const liveTrainingDto = liveTraining.unmarshall();
+    return liveTrainingDto;
+  }
+
   public setAuth(auth: Auth): void {
     this.auth = auth;
   }

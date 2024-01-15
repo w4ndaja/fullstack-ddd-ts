@@ -16,6 +16,8 @@ export class LiveTrainingController extends Router {
     super("/live-training");
     this.routes.get("/", asyncWrapper(this.getAllByStatus.bind(this)));
     this.routes.use(asyncWrapper(this.authMiddleware.authenticated.bind(this.authMiddleware)));
+    this.routes.get("/histories", asyncWrapper(this.findHistories.bind(this)));
+    this.routes.get("/user-histories", asyncWrapper(this.findUserHistories.bind(this)));
     this.routes.post(
       "/create",
       asyncWrapper(this.authMiddleware.hasRole(EROLES.MENTOR).bind(this.authMiddleware)),
@@ -98,6 +100,42 @@ export class LiveTrainingController extends Router {
   private async finish(req: Request, res: Response, next: NextFunction) {
     const { liveTrainingId } = req.params;
     const result = await this.liveTrainingService.finish(liveTrainingId);
+    res.json(RestMapper.dtoToRest(result));
+  }
+
+  private async findHistories(req: Request, res: Response, next: NextFunction) {
+    const {
+      page: _page,
+      limit: _limit,
+      startDate: _startDate,
+      endDate: _endDate,
+      status: _status,
+    } = req.query;
+    this.liveTrainingService.setAuth(res.locals.auth);
+    const result = await this.liveTrainingService.findHistories(
+      { page: Number(_page), limit: Number(_limit), search: "" },
+      Number(_startDate),
+      Number(_endDate),
+      String(_status)
+    );
+    res.json(RestMapper.dtoToRest(result));
+  }
+  
+  private async findUserHistories(req: Request, res: Response, next: NextFunction) {
+    const {
+      page: _page,
+      limit: _limit,
+      startDate: _startDate,
+      endDate: _endDate,
+      status: _status,
+    } = req.query;
+    this.liveTrainingService.setAuth(res.locals.auth);
+    const result = await this.liveTrainingService.findUserHistories(
+      { page: Number(_page), limit: Number(_limit), search: "" },
+      Number(_startDate),
+      Number(_endDate),
+      String(_status)
+    );
     res.json(RestMapper.dtoToRest(result));
   }
 }

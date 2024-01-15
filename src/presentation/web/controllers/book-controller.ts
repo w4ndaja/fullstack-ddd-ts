@@ -33,7 +33,7 @@ export class BookController extends Router {
       paymentAccountNo,
       sessionDate,
     } = <any>req.body;
-
+    this.bookService.setAuth(res.locals.auth);
     const book = await this.bookService.book(
       mentorId,
       sessions,
@@ -48,36 +48,42 @@ export class BookController extends Router {
 
   private async accept(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { bookId } = req.params;
+    this.bookService.setAuth(res.locals.auth);
     const book = await this.bookService.accept(bookId);
     res.json(RestMapper.dtoToRest(book));
   }
 
   private async reject(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { bookId } = req.params;
+    this.bookService.setAuth(res.locals.auth);
     const book = await this.bookService.reject(bookId);
     res.json(RestMapper.dtoToRest(book));
   }
 
   private async cancel(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { bookId } = req.params;
+    this.bookService.setAuth(res.locals.auth);
     const book = await this.bookService.cancel(bookId);
     res.json(RestMapper.dtoToRest(book));
   }
 
   private async history(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { status } = req.query;
+    this.bookService.setAuth(res.locals.auth);
     const books = await this.bookService.history(<EBookStatus>status);
     res.json(RestMapper.dtoToRest(books));
   }
 
   private async setPaid(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { bookId } = req.params;
+    this.bookService.setAuth(res.locals.auth);
     const book = await this.bookService.setPaid(bookId);
     res.json(RestMapper.dtoToRest(book));
   }
 
   private async detail(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { bookId } = req.params;
+    this.bookService.setAuth(res.locals.auth);
     const book = await this.bookService.detail(bookId);
     res.json(RestMapper.dtoToRest(book));
   }
@@ -85,6 +91,7 @@ export class BookController extends Router {
   private async finish(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { bookId } = req.params;
     const { rating = 5, review = "" } = req.body;
+    this.bookService.setAuth(res.locals.auth);
     const book = await this.bookService.finish(bookId, Number(rating), String(review));
     res.json(RestMapper.dtoToRest(book));
   }

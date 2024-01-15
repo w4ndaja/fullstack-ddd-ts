@@ -1,14 +1,19 @@
 import { ILiveTrainingRepository } from "@/domain/service";
 import { inject, injectable } from "inversify";
 import { Repository } from "./repository";
-import { ILiveTraining, ILiveTrainingStatus } from "@/domain/model/live-training";
+import { ILiveTraining, ILiveTrainingStatus, LiveTraining } from "@/domain/model/live-training";
 import {
+  GenericPaginatedData,
   IBaseGetParam,
   ICreateGenericPaginatedData,
+  IGenericPaginatedData,
   PaginationLib,
 } from "@/common/libs/pagination";
 import { TYPES } from "@/ioc/types";
 import { Logger } from "@/common/libs/logger";
+import { arrayMapper } from "@/common/libs/array-mapper";
+import { AppError } from "@/common/libs/error-handler";
+import { ErrorCode } from "@/common/utils";
 
 @injectable()
 export class LiveTrainingRepository
@@ -17,6 +22,47 @@ export class LiveTrainingRepository
 {
   constructor(@inject(TYPES.Logger) private logger: Logger) {
     super("liveTrainings");
+  }
+  async findHistoryByMonthStatusAndMentorId(
+    startDate: number,
+    endDate: number,
+    mentorId: string,
+    page: number,
+    limit: number,
+    status: string
+  ): Promise<IGenericPaginatedData<ILiveTraining>> {
+    const skip = PaginationLib.calcSkip(page, limit);
+    const liveTraining = await this.collection.find(
+      {
+        startAt: {
+          $gte: startDate,
+          $lte: endDate,
+        },
+        status: status,
+        mentorId: mentorId,
+      },
+      {
+        limit,
+        skip,
+      }
+    );
+    const liveTrainingCount = await this.collection.countDocuments({
+      startAt: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+      status: status,
+      mentorId: mentorId,
+    });
+    const liveTrainingsDto = (await liveTraining.toArray()).map(({ _id, ...item }) =>
+      LiveTraining.create(<ILiveTraining>item).unmarshall()
+    );
+    return GenericPaginatedData.create({
+      page: page,
+      limit: limit,
+      data: liveTrainingsDto,
+      totalRow: liveTrainingCount,
+    }).unmarshall();
   }
   async findActiveByRoomAndMentorId(
     roomId: string,

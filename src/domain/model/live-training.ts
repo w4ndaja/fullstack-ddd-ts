@@ -1,5 +1,6 @@
 import { config } from "@/common/utils";
 import { Entity, IEntity, IEntityCreate } from "./entity";
+import { ILiveTrainingBook, LiveTrainingBook } from "./live-training-book";
 
 export type ILiveTrainingStatus = "ONGOING" | "COMINGSOON" | "ONDEMAND";
 
@@ -26,6 +27,7 @@ export type ILiveTraining = IEntity<{
   mentorFee: number;
   providerFee: number;
   authorized: boolean;
+  liveTrainingBooks?: ILiveTrainingBook[];
 }>;
 export type ILiveTrainingCreate = IEntityCreate<{
   roomId?: string;
@@ -50,6 +52,7 @@ export type ILiveTrainingCreate = IEntityCreate<{
   mentorFee?: number;
   providerFee?: number;
   authorized?: boolean;
+  liveTrainingBooks?: ILiveTrainingBook[];
 }>;
 
 export class LiveTraining extends Entity<ILiveTraining> {
@@ -106,6 +109,7 @@ export class LiveTraining extends Entity<ILiveTraining> {
   public unmarshall(): ILiveTraining {
     return {
       ...super.unmarshall(),
+      liveTrainingBooks : this.liveTrainingBooks ? this.liveTrainingBooks.map(item => item.unmarshall()) : undefined,
       startAt: this.startAt.getTime(),
       endAt: this.endAt?.getTime() || null,
     };
@@ -263,5 +267,13 @@ export class LiveTraining extends Entity<ILiveTraining> {
   }
   set authorized(v: boolean) {
     this._props.authorized = v;
+  }
+  get liveTrainingBooks(): LiveTrainingBook[] | undefined {
+    return this._props.liveTrainingBooks
+      ? this._props.liveTrainingBooks.map((item) => LiveTrainingBook.create(item))
+      : undefined;
+  }
+  set liveTrainingBooks(v: ILiveTrainingBook[] | undefined) {
+    this._props.liveTrainingBooks = v;
   }
 }

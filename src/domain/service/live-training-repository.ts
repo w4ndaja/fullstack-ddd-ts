@@ -5,7 +5,6 @@ import {
 } from "@/common/libs/pagination";
 import { ILiveTraining, ILiveTrainingStatus } from "../model/live-training";
 import { IRepository } from "./repository";
-import { EBookStatus } from "@/common/utils/book-status";
 
 export interface ILiveTrainingRepository extends IRepository<ILiveTraining> {
   findActiveByMentorId(mentorId: string): Promise<ILiveTraining | null>;
@@ -14,4 +13,12 @@ export interface ILiveTrainingRepository extends IRepository<ILiveTraining> {
     status: ILiveTrainingStatus
   ): Promise<ICreateGenericPaginatedData<ILiveTraining>>;
   findActiveByRoomAndMentorId(roomId: string, mentorId: string): Promise<ILiveTraining>;
+  findHistoryByMonthStatusAndMentorId(
+    startDate: number,
+    endDate: number,
+    mentorId: string,
+    page: number,
+    limit: number,
+    status:string
+  ): Promise<IGenericPaginatedData<ILiveTraining>>;
 }

@@ -1,6 +1,7 @@
 import { PaymentStatus } from "@/common/utils/payment-status";
 import { Entity, IEntity, IEntityCreate } from "./entity";
 import { EBookStatus } from "@/common/utils/book-status";
+import { ILiveTraining, LiveTraining } from "./live-training";
 
 export interface ILiveTrainingParticipants {
   userId: string;
@@ -35,6 +36,7 @@ export type ILiveTrainingBook = IEntity<{
   totalParticipant: number;
   payment: LiveTraniningBookPayment;
   status: string;
+  liveTraining?: ILiveTraining;
 }>;
 
 export type ILiveTrainingBookCreate = IEntityCreate<{
@@ -48,6 +50,7 @@ export type ILiveTrainingBookCreate = IEntityCreate<{
   totalParticipant?: number;
   payment: Partial<LiveTraniningBookPayment>;
   status?: string;
+  liveTraining?: ILiveTraining;
 }>;
 
 export class LiveTrainingBook extends Entity<ILiveTrainingBook> {
@@ -69,6 +72,9 @@ export class LiveTrainingBook extends Entity<ILiveTrainingBook> {
       status: status || EBookStatus.WAITINGPAYMENT.toString(),
       ...props,
     });
+    if (this.payment.total === 0) {
+      this.setPaid();
+    }
   }
   public static create(props: ILiveTrainingBookCreate): LiveTrainingBook {
     return new LiveTrainingBook(props);
@@ -76,6 +82,7 @@ export class LiveTrainingBook extends Entity<ILiveTrainingBook> {
   public unmarshall(): ILiveTrainingBook {
     return {
       ...super.unmarshall(),
+      liveTraining: this.liveTraining ? this.liveTraining.unmarshall() : undefined,
     };
   }
   public setPaid() {
@@ -144,5 +151,11 @@ export class LiveTrainingBook extends Entity<ILiveTrainingBook> {
   }
   set status(v: string) {
     this._props.status = v;
+  }
+  get liveTraining(): LiveTraining | undefined {
+    return this._props.liveTraining ? LiveTraining.create(this._props.liveTraining) : undefined;
+  }
+  set liveTraining(v: LiveTraining | undefined) {
+    this._props.liveTraining = v.unmarshall();
   }
 }
