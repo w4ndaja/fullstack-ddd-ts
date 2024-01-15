@@ -136,8 +136,8 @@ export class LiveTrainingController extends Router {
     this.liveTrainingService.setAuth(res.locals.auth);
     const result = await this.liveTrainingService.findUserHistories(
       { page: Number(_page), limit: Number(_limit), search: "" },
-      Number(_startDate),
-      Number(_endDate),
+      _startDate && Number(_startDate),
+      _endDate && Number(_endDate),
       String(_status)
     );
     res.json(RestMapper.dtoToRest(result));

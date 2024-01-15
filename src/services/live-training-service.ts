@@ -233,8 +233,8 @@ export class LiveTrainingService {
 
   public async findUserHistories(
     param: IBaseGetParam,
-    startDate: number,
-    endDate: number,
+    startDate: number | undefined,
+    endDate: number | undefined,
     status: string
   ) {
     const liveTraining = GenericPaginatedData.create(

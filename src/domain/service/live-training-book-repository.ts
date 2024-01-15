@@ -5,11 +5,11 @@ import { IRepository } from "./repository";
 export interface ILiveTrainingBookRepository extends IRepository<ILiveTrainingBook> {
   findByIdAndParticipantId(id: string, participantId: string): Promise<ILiveTrainingBook>;
   findHistoryByMonthStatusAndUserId(
-    startDate: number,
-    endDate: number,
+    startDate: number | undefined,
+    endDate: number | undefined,
     userId: string,
     page: number,
     limit: number,
-    status:string
+    status: string
   ): Promise<IGenericPaginatedData<ILiveTrainingBook>>;
 }

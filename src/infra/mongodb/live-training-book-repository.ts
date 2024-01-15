@@ -19,8 +19,8 @@ export class LiveTrainingBookRepository
     super("liveTrainingBooks");
   }
   async findHistoryByMonthStatusAndUserId(
-    startDate: number,
-    endDate: number,
+    startDate: number | undefined,
+    endDate: number | undefined,
     userId: string,
     page: number,
     limit: number,
@@ -40,10 +40,14 @@ export class LiveTrainingBookRepository
           },
           {
             $match: {
-              "liveTraining.startAt": {
-                $gte: startDate,
-                $lte: endDate,
-              },
+              ...(startDate && endDate
+                ? {
+                    "liveTraining.startAt": {
+                      $gte: startDate,
+                      $lte: endDate,
+                    },
+                  }
+                : {}),
               "liveTraining.status": status,
               "participants.userId": userId,
             },
