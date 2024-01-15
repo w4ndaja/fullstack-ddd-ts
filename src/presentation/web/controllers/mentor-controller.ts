@@ -24,7 +24,13 @@ export class MentorController extends Router {
     res.json(RestMapper.dtoToRest(mentors));
   }
   private async getAllMentors(req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { search, category, limit, offset, sortBy } = req.query;
+    const { search, category, limit, offset, sortBy } = { 
+      search : req.query.search || "", 
+      category : req.query.category || "", 
+      limit : req.query.limit || "10", 
+      offset : req.query.offset || "0", 
+      sortBy : req.query.sortBy || "HIGHER_RATING" 
+    };
     const mentors = await this.mentorService.getAllMentors(
       <string>search,
       <string>category,
