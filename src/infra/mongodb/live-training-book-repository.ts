@@ -85,7 +85,7 @@ export class LiveTrainingBookRepository
         $count: "count",
       },
     ]);
-    const [{ count }] = await _liveTrainingCount.toArray();
+    const [{ count = 0 }] = await _liveTrainingCount.toArray();
     const liveTrainingPaginated = GenericPaginatedData.create({
       page: page,
       limit: limit,
