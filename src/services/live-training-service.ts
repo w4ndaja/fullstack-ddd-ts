@@ -182,6 +182,7 @@ export class LiveTrainingService {
         ErrorCode.FORBIDDEN,
         "Anda belum terdaftar di layanan ini, silahkan daftar untuk melanjutkan!"
       );
+      
     }else{
       if(liveTrainingBookDto.payment.paidAt == null){
         throw new AppError(
