@@ -182,9 +182,8 @@ export class LiveTrainingService {
         ErrorCode.FORBIDDEN,
         "Anda belum terdaftar di layanan ini, silahkan daftar untuk melanjutkan!"
       );
-      
-    }else{
-      if(liveTrainingBookDto.payment.paidAt == null){
+    } else {
+      if (liveTrainingBookDto.payment.paidAt == null) {
         throw new AppError(
           ErrorCode.PAYMENT_REQUIRED,
           "Layanan ini belum dibayar, silahkan selesaikan pembayaran untuk melanjutkan!"
@@ -257,6 +256,16 @@ export class LiveTrainingService {
     );
     const liveTrainingDto = liveTraining.unmarshall();
     return liveTrainingDto;
+  }
+
+  public async getBookDetail(bookId: string) {
+    let bookDto = await this.liveTrainingBookRepository.findById(bookId);
+    if(!bookDto){
+      throw new AppError(ErrorCode.NOT_FOUND, "Book Not Found!");
+    }
+    const book = LiveTrainingBook.create(bookDto);
+    bookDto = book.unmarshall();
+    return bookDto;
   }
 
   public setAuth(auth: Auth): void {

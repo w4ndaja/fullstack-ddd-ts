@@ -9,6 +9,7 @@ import {
   IGenericPaginatedData,
   PaginationLib,
 } from "@/common/libs/pagination";
+import { LiveTraining } from "@/domain/model/live-training";
 
 @injectable()
 export class LiveTrainingBookRepository
@@ -108,5 +109,38 @@ export class LiveTrainingBookRepository
     }
     const { _id, ...data } = liveTrainingBook;
     return <ILiveTrainingBook>data;
+  }
+
+  async findById(id: string): Promise<ILiveTrainingBook> {
+    const liveTrainingDto = (
+      await this.collection
+        .aggregate([
+          {
+            $lookup: {
+              from: "liveTrainings",
+              localField: "liveTrainingId",
+              foreignField: "id",
+              as: "liveTraining",
+            },
+          },
+          {
+            $match: {
+              id: id,
+            },
+          },
+        ])
+        .toArray()
+    ).map(({ _id, ...item }) => {
+      let liveTrainingDto = item.liveTraining?.[0] || undefined;
+      const liveTraining = liveTrainingDto
+        ? LiveTraining.create(liveTrainingDto).unmarshall()
+        : undefined;
+      const liveTrainingBookDto = LiveTrainingBook.create(<ILiveTrainingBook>{
+        ...item,
+        liveTraining,
+      }).unmarshall();
+      return liveTrainingBookDto;
+    });
+    return liveTrainingDto[0];
   }
 }

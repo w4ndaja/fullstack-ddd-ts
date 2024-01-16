@@ -22,6 +22,7 @@ export class LiveTrainingController extends Router {
       asyncWrapper(this.findHistories.bind(this))
     );
     this.routes.get("/user-histories", asyncWrapper(this.findUserHistories.bind(this)));
+    this.routes.get("/user-histories/:id/detail", asyncWrapper(this.findHistoryDetail.bind(this)));
     this.routes.post(
       "/create",
       asyncWrapper(this.authMiddleware.hasRole(EROLES.MENTOR).bind(this.authMiddleware)),
@@ -140,6 +141,12 @@ export class LiveTrainingController extends Router {
       _endDate && Number(_endDate),
       String(_status)
     );
+    res.json(RestMapper.dtoToRest(result));
+  }
+
+  private async findHistoryDetail(req: Request, res: Response, next: NextFunction) {
+    const { id } = req.params;
+    const result = await this.liveTrainingService.getBookDetail(id);
     res.json(RestMapper.dtoToRest(result));
   }
 }
