@@ -180,8 +180,15 @@ export class LiveTrainingService {
     if (!liveTrainingBookDto) {
       throw new AppError(
         ErrorCode.FORBIDDEN,
-        "Layanan ini belum dibayar, silahkan selesaikan pembayaran untuk melanjutkan!"
+        "Anda belum terdaftar di layanan ini, silahkan daftar untuk melanjutkan!"
       );
+    }else{
+      if(liveTrainingBookDto.payment.paidAt == null){
+        throw new AppError(
+          ErrorCode.PAYMENT_REQUIRED,
+          "Layanan ini belum dibayar, silahkan selesaikan pembayaran untuk melanjutkan!"
+        );
+      }
     }
     const liveTraining = LiveTraining.create(
       await this.liveTrainingRepository.findById(liveTrainingId)
