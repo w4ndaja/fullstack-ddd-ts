@@ -215,7 +215,7 @@ export class LiveTrainingService {
     param: IBaseGetParam,
     startDate: number,
     endDate: number,
-    status: string
+    status: string | undefined
   ) {
     const mentor = Mentor.create(await this.mentorRepository.findByUserId(this.auth.userId));
     const liveTraining = GenericPaginatedData.create(

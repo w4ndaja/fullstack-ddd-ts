@@ -19,6 +19,6 @@ export interface ILiveTrainingRepository extends IRepository<ILiveTraining> {
     mentorId: string,
     page: number,
     limit: number,
-    status:string
+    status: string | undefined
   ): Promise<IGenericPaginatedData<ILiveTraining>>;
 }

@@ -29,7 +29,7 @@ export class LiveTrainingRepository
     mentorId: string,
     page: number,
     limit: number,
-    status: string
+    status: string | undefined
   ): Promise<IGenericPaginatedData<ILiveTraining>> {
     const skip = PaginationLib.calcSkip(page, limit);
     const liveTraining = await this.collection.find(
@@ -38,7 +38,7 @@ export class LiveTrainingRepository
           $gte: startDate,
           $lte: endDate,
         },
-        status: status,
+        ...(status && { status: status }),
         mentorId: mentorId,
       },
       {
