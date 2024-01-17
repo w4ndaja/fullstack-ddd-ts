@@ -37,13 +37,13 @@ export class Repository<IData> implements IRepository<IData> {
     return <IGenericPaginatedData<IData>>genericPaginatedData;
   }
 
-  async findById(id: string): Promise<IData> {
+  async findById(id: string): Promise<IData | null> {
     const collection = await this.collection.findOne({ id });
     if (collection) {
       const { _id, ...data } = collection;
       return <IData>data;
     } else {
-      throw new Error("Not Found");
+      return null;
     }
   }
 
