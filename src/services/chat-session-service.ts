@@ -63,6 +63,8 @@ export class ChatSesssionService {
     if (!chatSession.startAt) {
       chatSession.start(chatSession.book ? chatSession.book.duration : 1);
     }
+    chatSession.mentor.avatarUrl = mentorDto.avatarUrl;
+    chatSession.participant.avatarUrl = participant.avatarUrl;
     chatSessionDto = chatSession.unmarshall();
     chatSessionDto = await this.chatSessionRepository.save(chatSessionDto);
     return chatSessionDto;

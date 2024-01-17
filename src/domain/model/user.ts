@@ -13,6 +13,7 @@ export type IUser = IEntity<{
   permissions: string[];
   participant?: IParticipant;
   mentor?: IMentor;
+  avatarUrl?: string;
 }>;
 
 export type IUserCreate = IEntityCreate<{
@@ -24,6 +25,7 @@ export type IUserCreate = IEntityCreate<{
   permissions?: string[];
   participant?: IParticipant;
   mentor?: IMentor; // Add mentor property
+  avatarUrl?: string;
 }>;
 
 export class User extends Entity<IUser> {
@@ -122,6 +124,13 @@ export class User extends Entity<IUser> {
   set mentor(mentor: Mentor | undefined) {
     // Add mentor setter
     this._props.mentor = mentor?.unmarshall();
+  }
+
+  get avatarUrl(): string | undefined {
+    return this._props.avatarUrl;
+  }
+  set avatarUrl(v: string | undefined) {
+    this._props.avatarUrl = v;
   }
 
   public hasRole(role: EROLES): boolean {
