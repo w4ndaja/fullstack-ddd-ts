@@ -209,11 +209,13 @@ export class LiveTrainingService {
   }
 
   public async finish(liveTrainingId: string) {
+    let liveTrainingDto = await this.liveTrainingRepository.findById(liveTrainingId)
+    if(!liveTrainingDto) throw new AppError(ErrorCode.NOT_FOUND, "Live Training Not Found");
     const liveTraining = LiveTraining.create(
-      await this.liveTrainingRepository.findById(liveTrainingId)
+      liveTrainingDto
     );
     liveTraining.finish();
-    const liveTrainingDto = liveTraining.unmarshall();
+    liveTrainingDto = liveTraining.unmarshall();
     await this.liveTrainingRepository.save(liveTrainingDto);
     return liveTrainingDto;
   }
