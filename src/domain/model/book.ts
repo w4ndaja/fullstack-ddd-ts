@@ -141,8 +141,11 @@ export class Book extends Entity<IBook> {
       bookId: this.bookId,
       status: this.status,
       participantId: this.participantId,
-      participantAvatar: this.participantAvatar,
-      mentor: this.mentor,
+      participantAvatar: this.participantAvatar || "",
+      mentor: {
+        ...this.mentor,
+        email: this.mentor.email || "",
+      },
       className: this.className,
       duration: this.duration,
       payment: this.payment,
