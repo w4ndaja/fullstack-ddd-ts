@@ -8,6 +8,7 @@ export type IBook = IEntity<{
   bookId: string;
   status: string;
   participantId: string;
+  participantAvatar: string;
   mentor: Mentor | null;
   className: string;
   duration: number;
@@ -35,6 +36,7 @@ export type IBookCreate = IEntityCreate<{
   bookId?: string;
   status?: string;
   participantId: string;
+  participantAvatar: string;
   mentor: Mentor | null;
   className: string;
   duration?: number;
@@ -83,6 +85,7 @@ interface Mentor {
   mentorId: string;
   name: string;
   avatarUrl: string;
+  email: string;
 }
 
 export class Book extends Entity<IBook> {
@@ -138,6 +141,7 @@ export class Book extends Entity<IBook> {
       bookId: this.bookId,
       status: this.status,
       participantId: this.participantId,
+      participantAvatar: this.participantAvatar,
       mentor: this.mentor,
       className: this.className,
       duration: this.duration,
@@ -222,6 +226,15 @@ export class Book extends Entity<IBook> {
     this.rating = rating;
     this.review = review;
     return this;
+  }
+
+  public isExpired(): Boolean {
+    return this.expiredDate.getTime() < Date.now();
+  }
+
+  startChat() {
+    this.start = new Date();
+    this.end = new Date(this.start.getTime() + this.duration * 60000);
   }
 
   get bookId(): string {
@@ -378,5 +391,11 @@ export class Book extends Entity<IBook> {
   }
   set providerFee(v: number) {
     this._props.providerFee = v;
+  }
+  get participantAvatar(): string {
+    return this._props.participantAvatar;
+  }
+  set participantAvatar(v: string) {
+    this._props.participantAvatar = v;
   }
 }

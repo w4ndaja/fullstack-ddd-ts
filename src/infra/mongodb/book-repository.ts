@@ -8,7 +8,23 @@ export class BookRepository extends Repository<IBook> implements IBookRepository
   constructor() {
     super("books");
   }
-  async getByParticipantId(participantId: string, status: string): Promise<IBook[]> {
+  async findByParticipantAndMentorId(
+    participantId: string,
+    mentorId: string
+  ): Promise<IBook | null> {
+    console.log(participantId, mentorId);
+    const bookMongo = await this.collection.findOne({
+      participantId: participantId,
+      "mentor.mentorId": mentorId,
+      expiredDate: {
+        $gte: Date.now(),
+      },
+    });
+    if (!bookMongo) return null;
+    const { _id, ..._bookMongo } = bookMongo;
+    return <IBook>_bookMongo;
+  }
+  async findAllByParticipantId(participantId: string, status: string): Promise<IBook[]> {
     const collection = await this.collection.find(
       {
         participantId,
@@ -26,7 +42,7 @@ export class BookRepository extends Repository<IBook> implements IBookRepository
     const arrayCollections = (await collection.toArray()).map((item) => item);
     return arrayCollections.map(({ _id, ...item }) => <IBook>item);
   }
-  async getByMentorId(userId: string, status: string): Promise<IBook[]> {
+  async findAllByMentorId(userId: string, status: string): Promise<IBook[]> {
     const collection = await this.collection.find(
       {
         "mentor.userId": userId,

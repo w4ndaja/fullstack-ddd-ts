@@ -11,5 +11,6 @@ export const TYPES = {
   BannerRepository: Symbol.for("BannerRepository"),
   FileStorageRepository: Symbol.for("FileStorageRepository"),
   LiveTrainingRepository: Symbol.for("LiveTrainingRepository"),
-  LiveTrainingBookRepository: Symbol.for("LiveTrainingParticipantRepository"),
+  LiveTrainingBookRepository: Symbol.for("LiveTrainingBookRepository"),
+  ChatSessionRespository: Symbol.for("ChatSessionRespository"),
 };

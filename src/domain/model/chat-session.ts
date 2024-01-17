@@ -1,19 +1,23 @@
+import { Book, IBook } from "./book";
 import { Entity, IEntity, IEntityCreate } from "./entity";
+import { IUser, User } from "./user";
 
 export type IChatSession = IEntity<{
-  audiens: string[];
-  startBy: string;
-  startAt: number;
-  endAt: number;
-  endBy: string;
+  mentor: IUser;
+  participant: IUser;
+  remainingMinutes: number;
+  book: IBook | null;
+  startAt: number | null;
+  endAt: number | null;
 }>;
 
 export type IChatSessionCreate = IEntityCreate<{
-  audiens: string[];
-  startBy: string;
-  startAt: number;
-  endAt: number;
-  endBy: string;
+  mentor: IUser;
+  participant: IUser;
+  book?: IBook | null;
+  remainingMinutes?: number;
+  startAt?: number | null;
+  endAt?: number | null;
 }>;
 
 export class ChatSession extends Entity<IChatSession> {
@@ -25,50 +29,61 @@ export class ChatSession extends Entity<IChatSession> {
   }
   public unmarshall(): IChatSession {
     return {
-      id: this.id,
-      audiens: this.audiens,
-      startBy: this.startBy,
-      startAt: this.startAt,
-      endAt: this.endAt,
-      endBy: this.endBy,
-      createdAt: this.createdAt.getTime(),
-      updatedAt: this.updatedAt.getTime(),
-      deletedAt: this.deletedAt?.getTime() || null,
+      ...super.unmarshall(),
+      remainingMinutes: this.remainingMinutes,
+      mentor: this.mentor.unmarshall(),
+      participant: this.participant.unmarshall(),
+      book: this.book?.unmarshall() || undefined,
+      startAt: this.startAt?.getTime() || null,
+      endAt: this.endAt?.getTime() || null,
     };
   }
-  get audiens(): string[] {
-    return this._props.audiens;
+  start(duration: number) {
+    this.startAt = new Date();
+    this.endAt = new Date(this.startAt.getTime() + duration * 60 * 1000);
+    return this;
   }
-  get startBy(): string {
-    return this._props.startBy;
+  get mentor(): User {
+    return User.create(this._props.mentor);
   }
-  get startAt(): number {
-    return this._props.startAt;
+  set mentor(v: User) {
+    this._props.mentor = v.unmarshall();
   }
-  get endAt(): number {
-    return this._props.endAt;
+  get participant(): User {
+    return User.create(this._props.participant);
   }
-  get endBy(): string {
-    return this._props.endBy;
+  set participant(v: User) {
+    this._props.participant = v.unmarshall();
   }
-
-  set audiens(value: string[]) {
-    this._props.audiens = value;
+  get remainingMinutes(): number {
+    if(!this.endAt){
+      if (this.book) {
+        this.endAt = new Date(Date.now() + this.book.duration * 60 * 1000);
+      }else{
+        this.endAt = new Date(Date.now() + 60000);
+      }
+    }
+    return Math.ceil((this.endAt.getTime() - Date.now()) / 1000 / 60);
   }
-
-  set startBy(value: string) {
-    this._props.startBy = value;
+  set remainingMinutes(v: number) {
+    this._props.remainingMinutes = v;
   }
-
-  set startAt(value: number) {
-    this._props.startAt = value;
+  get book(): Book | null {
+    return this._props.book ? Book.create(this._props.book) : null;
   }
-
-  set endAt(value: number) {
-    this._props.endAt = value;
+  set book(v: Book | null) {
+    this._props.book = v?.unmarshall() || null;
   }
-
-  set endBy(value: string) {
-    this._props.endBy = value;
+  get startAt(): Date | null {
+    return this._props.startAt ? new Date(this._props.startAt) : null;
+  }
+  set startAt(v: Date) {
+    this._props.startAt = v.getTime();
+  }
+  get endAt(): Date | null {
+    return this._props.endAt ? new Date(this._props.endAt) : null;
+  }
+  set endAt(v: Date) {
+    this._props.endAt = v.getTime();
   }
 }

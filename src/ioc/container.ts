@@ -24,6 +24,7 @@ import { BookController } from "@/presentation/web/controllers/book-controller";
 import { BannerController } from "@/presentation/web/controllers/banner-controller";
 import { FileStorageController } from "@/presentation/web/controllers/file-storage-controller";
 import { LiveTrainingController } from "@/presentation/web/controllers/live-training-controller";
+import { ChatSessionController } from "@/presentation/web/controllers/chat-session-controller";
 
 // REST Middleware
 import { AuthMiddleware } from "@/presentation/web/middlewares/auth-middleware";
@@ -48,6 +49,7 @@ import {
   IFileStorageRepository,
   ILiveTrainingRepository,
   ILiveTrainingBookRepository,
+  IChatSessionRepository,
 } from "@/domain/service";
 
 // Repository Implementation
@@ -60,7 +62,8 @@ import {
   BannerRepository,
   FileStorageRepository,
   LiveTrainingRepository,
-  LiveTrainingBookRepository
+  LiveTrainingBookRepository,
+  ChatSessionRepository,
 } from "@/infra/mongodb";
 // import { UserRepository, AuthRepository } from "@/infra/sqlite/repositories";
 
@@ -75,6 +78,7 @@ import {
   ZegoService,
   FileStorageService,
   LiveTrainingService,
+  ChatSesssionService
 } from "@/services";
 
 const container = new Container({ skipBaseClassChecks: true });
@@ -94,6 +98,7 @@ container.bind<BookController>(BookController).toSelf();
 container.bind<BannerController>(BannerController).toSelf();
 container.bind<FileStorageController>(FileStorageController).toSelf();
 container.bind<LiveTrainingController>(LiveTrainingController).toSelf();
+container.bind<ChatSessionController>(ChatSessionController).toSelf();
 
 // REST Middleware Binding
 container.bind<AuthMiddleware>(AuthMiddleware).toSelf();
@@ -115,7 +120,12 @@ container.bind<IParticipantRepository>(TYPES.ParticipantRepository).to(Participa
 container.bind<IBannerRepository>(TYPES.BannerRepository).to(BannerRepository);
 container.bind<IFileStorageRepository>(TYPES.FileStorageRepository).to(FileStorageRepository);
 container.bind<ILiveTrainingRepository>(TYPES.LiveTrainingRepository).to(LiveTrainingRepository);
-container.bind<ILiveTrainingBookRepository>(TYPES.LiveTrainingBookRepository).to(LiveTrainingBookRepository);
+container
+  .bind<ILiveTrainingBookRepository>(TYPES.LiveTrainingBookRepository)
+  .to(LiveTrainingBookRepository);
+container
+  .bind<IChatSessionRepository>(TYPES.ChatSessionRespository)
+  .to(ChatSessionRepository);
 
 // Service Bind
 container.bind<AuthService>(AuthService).toSelf();
@@ -127,5 +137,6 @@ container.bind<BannerService>(BannerService).toSelf();
 container.bind<ZegoService>(ZegoService).toSelf();
 container.bind<FileStorageService>(FileStorageService).toSelf();
 container.bind<LiveTrainingService>(LiveTrainingService).toSelf();
+container.bind<ChatSesssionService>(ChatSesssionService).toSelf();
 
 export { container };
