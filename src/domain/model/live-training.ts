@@ -215,11 +215,11 @@ export class LiveTraining extends Entity<ILiveTraining> {
     this._props.endAt = v;
   }
   get status(): ILiveTrainingStatus {
-    if (this._props.startAt <= Date.now()) {
-      return "ONGOING";
-    } else if (this._props.endAt && this._props.endAt <= Date.now()) {
+    if (this._props.endAt && this._props.endAt <= Date.now()) {
       return "ONDEMAND";
-    } else {
+    } else if (this._props.startAt <= Date.now()) {
+      return "ONGOING";
+    } else  {
       return this._props.status;
     }
   }
