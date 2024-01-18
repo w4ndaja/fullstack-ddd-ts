@@ -13,8 +13,8 @@ import { AppError } from "@/common/libs/error-handler";
 import { ErrorCode } from "@/common/utils";
 import { PaymentStatus } from "@/common/utils/payment-status";
 import { EROLES } from "@/common/utils/roles";
-import { Auth, IAuth } from "@/domain/model";
-import { Mentor } from "@/domain/model/mentor";
+import { Auth, IAuth, IParticipant } from "@/domain/model";
+import { IMentor, Mentor } from "@/domain/model/mentor";
 
 @injectable()
 export class BookService {
@@ -36,10 +36,13 @@ export class BookService {
     sessionDate: number
   ): Promise<IBook> {
     if (!this.auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
-    let [mentorDto, participantDto] = await Promise.all([
+    let [mentorDto, participantDto]:[IMentor, IParticipant|IMentor] = await Promise.all([
       this.mentorRepository.findById(mentorId),
       this.participantRepository.findByUserId(this.auth.userId),
     ]);
+    if(!participantDto){
+      participantDto = await this.mentorRepository.findById(this.auth.userId);
+    }
     const mentorUserDto = await this.userRepository.findById(mentorDto.userId);
     const mentor = Mentor.create(mentorDto);
     const bookEntity = Book.create({
@@ -133,17 +136,22 @@ export class BookService {
 
   async history(status: EBookStatus): Promise<IBook[]> {
     if (!this.auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
-    let books:IBook[] = [];
-    if (this.auth.user.hasRole(EROLES.MENTOR)) {
-      books = await this.bookRepository.findAllByMentorId(this.auth.userId, status);
-    } else if (this.auth.user.hasRole(EROLES.PARTICIPANT)) {
+    let books: IBook[] = [];
+    if (this.auth.user.hasRole(EROLES.PARTICIPANT)) {
       books = await this.bookRepository.findAllByParticipantId(this.auth.userId, status);
+    } else if (this.auth.user.hasRole(EROLES.MENTOR)) {
+      books = await this.bookRepository.findAllByMentorId(this.auth.userId, status);
     }
-    await Promise.all(books.map(async book => {
-      const [userMentorDto, userParticipantDto] = await Promise.all([this.userRepository.findById(book.mentor.userId), this.userRepository.findById(book.participantId)]);
-      book.mentor.email = userMentorDto.email;
-      book.participantEmail = userParticipantDto.email;
-    }));
+    await Promise.all(
+      books.map(async (book) => {
+        const [userMentorDto, userParticipantDto] = await Promise.all([
+          this.userRepository.findById(book.mentor.userId),
+          this.userRepository.findById(book.participantId),
+        ]);
+        book.mentor.email = userMentorDto.email;
+        book.participantEmail = userParticipantDto.email;
+      })
+    );
     return books;
   }
 
