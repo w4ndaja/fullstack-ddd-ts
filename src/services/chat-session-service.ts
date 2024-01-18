@@ -86,8 +86,13 @@ export class ChatSesssionService {
           avatarUrl: targetProfileDto.avatarUrl,
         },
       });
+    }else{
+      const chatSessionDto = await this.chatSessionRepository.findByBookId(book.id);
+      if (chatSessionDto) {
+        chatSession = ChatSession.create(chatSessionDto);
+      }
     }
-    if(!chatSession){
+    if (!chatSession) {
       chatSession = ChatSession.create({
         mentor: {
           ...currentUser.unmarshall(),
