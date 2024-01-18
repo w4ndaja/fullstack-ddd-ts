@@ -60,6 +60,7 @@ export class User extends Entity<IUser> {
       createdAt: this.createdAt.getTime(),
       updatedAt: this.updatedAt.getTime(),
       deletedAt: this.deletedAt?.getTime() || null,
+      avatarUrl: this.avatarUrl,
     };
   }
 

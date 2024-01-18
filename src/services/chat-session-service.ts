@@ -1,7 +1,7 @@
 import { AppError } from "@/common/libs/error-handler";
 import { Logger } from "@/common/libs/logger";
 import { ErrorCode } from "@/common/utils";
-import { Auth, IAuth, User } from "@/domain/model";
+import { Auth, IAuth, Participant, User } from "@/domain/model";
 import { Book } from "@/domain/model/book";
 import { ChatSession, IChatSession } from "@/domain/model/chat-session";
 import { Mentor } from "@/domain/model/mentor";
@@ -9,6 +9,7 @@ import {
   IBookRepository,
   IChatSessionRepository,
   IMentorRepository,
+  IParticipantRepository,
   IUserRepository,
 } from "@/domain/service";
 import { TYPES } from "@/ioc/types";
@@ -22,24 +23,27 @@ export class ChatSesssionService {
     @inject(TYPES.ChatSessionRespository) private chatSessionRepository: IChatSessionRepository,
     @inject(TYPES.BookRepository) private bookRepository: IBookRepository,
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
-    @inject(TYPES.MentorRepository) private mentorRepository: IMentorRepository
+    @inject(TYPES.MentorRepository) private mentorRepository: IMentorRepository,
+    @inject(TYPES.ParticipantRepository) private participantRepository: IParticipantRepository
   ) {}
   public async startChat(mentorId: string): Promise<IChatSession> {
     let chatSessionDto: IChatSession | null = null;
     const mentorDto = await this.mentorRepository.findById(mentorId);
-    let [bookDto, mentorUserDto] = await Promise.all([
+    let [bookDto, mentorUserDto, participantDto] = await Promise.all([
       this.bookRepository.findByParticipantAndMentorId(this.auth.userId, mentorId),
       this.userRepository.findById(mentorDto.userId),
+      this.participantRepository.findByUserId(this.auth.userId),
     ]);
     const mentorUser = User.create(mentorUserDto);
-    const participant = this.auth.user;
+    const participant = Participant.create(participantDto);
+    const participantUser = this.auth.user;
     let book: Book | undefined = bookDto ? Book.create(bookDto) : undefined;
     if (book) {
       if (book?.isExpired()) {
-        this.logger.info("book expired =>", book.expiredDate.toLocaleString())
+        this.logger.info("book expired =>", book.expiredDate.toLocaleString());
         book = undefined;
         bookDto = null;
-      }else{
+      } else {
         chatSessionDto = await this.chatSessionRepository.findByBookId(book.id);
         if (!book.start) {
           book.startChat();
@@ -55,16 +59,24 @@ export class ChatSesssionService {
     if (!chatSessionDto) {
       chatSessionDto = ChatSession.create({
         mentor: mentorUser.unmarshall(),
-        participant: participant.unmarshall(),
+        participant: participantUser.unmarshall(),
         book: book?.unmarshall() || undefined,
       }).unmarshall();
     }
-    const chatSession = ChatSession.create(chatSessionDto);
+    const chatSession = ChatSession.create({
+      ...chatSessionDto,
+      participant: {
+        ...chatSessionDto.participant,
+        avatarUrl: participant.avatarUrl,
+      },
+      mentor: {
+        ...chatSessionDto.mentor,
+        avatarUrl: mentorDto.avatarUrl,
+      },
+    });
     if (!chatSession.startAt) {
       chatSession.start(chatSession.book ? chatSession.book.duration : 1);
     }
-    chatSession.mentor.avatarUrl = mentorDto.avatarUrl;
-    chatSession.participant.avatarUrl = participant.avatarUrl;
     chatSessionDto = chatSession.unmarshall();
     chatSessionDto = await this.chatSessionRepository.save(chatSessionDto);
     return chatSessionDto;

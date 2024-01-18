@@ -15,9 +15,6 @@ export class ChatSessionRepository
     participantId: string,
     mentorId: string
   ): Promise<IChatSession | null> {
-    console.log(
-      `finding chat session with participantId:${participantId} and mrntorId:${mentorId}`
-    );
     const chatSessionMongo = await this.collection.findOne({
       "participant.id": participantId,
       "mentor.id": mentorId,
