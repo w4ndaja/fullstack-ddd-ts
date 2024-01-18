@@ -41,7 +41,7 @@ export class BookService {
       this.participantRepository.findByUserId(this.auth.userId),
     ]);
     if (!participantDto) {
-      participantDto = await this.mentorRepository.findById(this.auth.userId);
+      participantDto = await this.mentorRepository.findByUserId(this.auth.userId);
     }
     const mentorUserDto = await this.userRepository.findById(mentorDto.userId);
     const mentor = Mentor.create(mentorDto);
