@@ -4,7 +4,10 @@ import { TYPES } from "@/ioc/types";
 import { inject, injectable } from "inversify";
 import { EROLES } from "@/common/utils/roles";
 import { IMentor, IMentorCreate, Mentor } from "@/domain/model/mentor";
-import { Auth, IAuth, IParticipantCreate, Participant, User } from "@/domain/model";
+import { Auth, IAuth, IParticipant, IParticipantCreate, Participant, User } from "@/domain/model";
+import fs from "fs";
+import axios from "axios";
+import { request } from "https";
 
 @injectable()
 export class ProfileService {
@@ -29,7 +32,9 @@ export class ProfileService {
     if (!this.auth) return null;
     if (this.auth.user.roles.includes(EROLES.MENTOR) || reqMentor) {
       let mentorDto = await this.mentorRepository.findByUserId(this.auth.user.id);
-      const user = User.create(await this.userRepository.findById(mentorDto?.userId || this.auth.userId));
+      const user = User.create(
+        await this.userRepository.findById(mentorDto?.userId || this.auth.userId)
+      );
       if (!user.hasRole(EROLES.MENTOR)) {
         user.roles.push(EROLES.MENTOR);
       }
@@ -153,6 +158,17 @@ export class ProfileService {
         return participantUpdate;
       }
     }
+  }
+  public async getAvatarFile(email: string) {
+    const userDto = await this.userRepository.findByUsernameOrEmail(email);
+    let profileDto: IMentor | IParticipant = await this.participantRepository.findByUserId(
+      userDto.id
+    );
+    if (!profileDto) {
+      profileDto = await this.mentorRepository.findByUserId(userDto.id);
+    }
+    const response = await axios.get(profileDto.avatarUrl, { responseType: "arraybuffer" });
+    return response;
   }
   public setAuth(auth: IAuth) {
     this.auth = Auth.create(auth);

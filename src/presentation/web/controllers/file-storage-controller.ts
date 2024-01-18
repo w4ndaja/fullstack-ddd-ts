@@ -21,9 +21,9 @@ export class FileStorageController extends Router {
     @inject(FileStorageService) private fileService: FileStorageService
   ) {
     super("/storage");
-    this.routes.use(asyncWrapper(this.authMiddleware.authenticated.bind(this.authMiddleware)));
     this.routes.post(
       "/upload",
+      asyncWrapper(this.authMiddleware.authenticated.bind(this.authMiddleware)),
       this.multerUploader.any(),
       asyncWrapper(this.upload.bind(this)),
       asyncWrapper(this.removeTemp.bind(this))
