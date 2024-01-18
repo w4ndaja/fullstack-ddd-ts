@@ -58,7 +58,7 @@ export class AuthController extends Router {
   }
   private async updateProfile(req: Request, res: Response, next: NextFunction) {
     this.profileService.setAuth(res.locals.auth);
-    const profile = await this.profileService.updateProfile(req.body);
+    const profile = await this.profileService.updateProfile(req.body, <Boolean>req.body.reqMentor);
     return res.json(RestMapper.dtoToRest(<object>profile));
   }
 }

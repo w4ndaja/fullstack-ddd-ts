@@ -56,6 +56,7 @@ export type IMentor = IEntity<{
   mentorFee: number;
   feeAcceptedAt: number | null;
   email: string;
+  approvedAt: number | null;
 }>;
 
 export type IMentorCreate = IEntityCreate<{
@@ -114,6 +115,7 @@ export type IMentorCreate = IEntityCreate<{
   mentorFee: number;
   feeAcceptedAt: number | null;
   email?: string;
+  approvedAt?: number | null;
 }>;
 
 export class Mentor extends Entity<IMentor> {
@@ -157,6 +159,7 @@ export class Mentor extends Entity<IMentor> {
       updatedAt: this.updatedAt.getTime(),
       deletedAt: this.deletedAt?.getTime() || null,
       email: this.email,
+      approvedAt: this.approvedAt,
     };
   }
   get userId(): string {
@@ -359,5 +362,11 @@ export class Mentor extends Entity<IMentor> {
   }
   set email(v: string) {
     this._props.email = v;
+  }
+  get approvedAt(): number | null {
+    return this._props.approvedAt || null;
+  }
+  set approvedAt(v: number | null) {
+    this._props.approvedAt = v;
   }
 }

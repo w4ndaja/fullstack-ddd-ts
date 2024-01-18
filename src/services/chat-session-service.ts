@@ -1,10 +1,11 @@
 import { AppError } from "@/common/libs/error-handler";
 import { Logger } from "@/common/libs/logger";
 import { ErrorCode } from "@/common/utils";
+import { EROLES } from "@/common/utils/roles";
 import { Auth, IAuth, IParticipant, Participant, User } from "@/domain/model";
-import { Book } from "@/domain/model/book";
+import { Book, IBook } from "@/domain/model/book";
 import { ChatSession, IChatSession } from "@/domain/model/chat-session";
-import { Mentor } from "@/domain/model/mentor";
+import { IMentor, Mentor } from "@/domain/model/mentor";
 import {
   IBookRepository,
   IChatSessionRepository,
@@ -32,55 +33,51 @@ export class ChatSesssionService {
     if (!targetUserDto) {
       throw new AppError(ErrorCode.NOT_FOUND, "Email not found!");
     }
-    const mentorDto = await this.mentorRepository.findByUserId(targetUserDto.id);
-    const mentorId = mentorDto.id;
-    let [bookDto, participantDto] = await Promise.all([
-      this.bookRepository.findByParticipantAndMentorId(this.auth.userId, mentorId),
-      this.participantRepository.findByUserId(this.auth.userId),
-    ]);
-    const mentorUser = User.create(targetUserDto);
-    let participant: Participant | null = null;
-    if (!participantDto) {
-      participant = Participant.create(participantDto);
-    }
-    const participantUser = this.auth.user;
-    let book: Book | undefined = bookDto ? Book.create(bookDto) : undefined;
-    if (book) {
-      if (book?.isExpired()) {
-        this.logger.info("book expired =>", book.expiredDate.toLocaleString());
-        book = undefined;
-        bookDto = null;
-      } else {
-        chatSessionDto = await this.chatSessionRepository.findByBookId(book.id);
-        if (!book.start) {
-          book.startChat();
-        }
-        this.bookRepository.save(book.unmarshall());
+    const currentUser = this.auth.user;
+    const targetUser = User.create(targetUserDto);
+    const userIsMentor = currentUser.hasRole(EROLES.MENTOR);
+    const targetIsMentor = currentUser.hasRole(EROLES.MENTOR);
+    let userProfileDto: IMentor | IParticipant | undefined;
+    let targetProfileDto: IMentor | IParticipant | undefined;
+    let bookDto: IBook | undefined;
+    if (userIsMentor && targetIsMentor) {
+      bookDto = await this.bookRepository.findByParticipantAndMentorId(
+        currentUser.id,
+        targetUser.id
+      );
+      if (!bookDto) {
+        bookDto = await this.bookRepository.findByParticipantAndMentorId(
+          targetUser.id,
+          currentUser.id
+        );
       }
-    } else {
-      chatSessionDto = await this.chatSessionRepository.findByUserAndMentorId(
-        this.auth.userId,
-        mentorUser.id
+      userProfileDto = await this.mentorRepository.findByUserId(currentUser.id);
+      targetProfileDto = await this.participantRepository.findByUserId(targetUserDto.id);
+    } else if (userIsMentor && !targetIsMentor) {
+      bookDto = await this.bookRepository.findByParticipantAndMentorId(
+        targetUser.id,
+        currentUser.id
+      );
+    } else if (!userIsMentor && targetIsMentor) {
+      bookDto = await this.bookRepository.findByParticipantAndMentorId(
+        currentUser.id,
+        targetUser.id
       );
     }
-    if (!chatSessionDto) {
-      chatSessionDto = ChatSession.create({
-        mentor: mentorUser.unmarshall(),
-        participant: participantUser.unmarshall(),
-        book: book?.unmarshall() || undefined,
-      }).unmarshall();
+    let book: Book | undefined = bookDto ? Book.create(bookDto) : undefined;
+    let chatSession: ChatSession;
+    if (book?.isExpired() || !book) {
+      chatSession = ChatSession.create({
+        mentor: {
+          ...currentUser.unmarshall(),
+          avatarUrl: userProfileDto.avatarUrl,
+        },
+        participant: {
+          ...targetUser.unmarshall(),
+          avatarUrl: targetProfileDto.avatarUrl,
+        },
+      });
     }
-    const chatSession = ChatSession.create({
-      ...chatSessionDto,
-      participant: {
-        ...chatSessionDto.participant,
-        avatarUrl: participant.avatarUrl,
-      },
-      mentor: {
-        ...chatSessionDto.mentor,
-        avatarUrl: mentorDto.avatarUrl,
-      },
-    });
     if (!chatSession.startAt) {
       chatSession.start(chatSession.book ? chatSession.book.duration : 1);
     }

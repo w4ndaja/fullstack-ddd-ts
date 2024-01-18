@@ -25,14 +25,63 @@ export class ProfileService {
       return participant;
     }
   }
-  async updateProfile(data: IMentorCreate | IParticipantCreate) {
+  async updateProfile(data: IMentorCreate | IParticipantCreate, reqMentor: Boolean) {
     if (!this.auth) return null;
-    if (this.auth.user.roles.includes(EROLES.MENTOR)) {
-      const mentor = await this.mentorRepository.findByUserId(this.auth.user.id);
-      const user = User.create(await this.userRepository.findById(mentor.userId));
-      if (mentor) {
+    if (this.auth.user.roles.includes(EROLES.MENTOR) || reqMentor) {
+      let mentorDto = await this.mentorRepository.findByUserId(this.auth.user.id);
+      const user = User.create(await this.userRepository.findById(mentorDto.userId));
+      if (!user.hasRole(EROLES.MENTOR)) {
+        user.roles.push(EROLES.MENTOR);
+      }
+      if (!mentorDto) {
+        mentorDto = Mentor.create({
+          userId: user.id,
+          username: user.email,
+          fullname: user.fullname,
+          avatarUrl: "",
+          className: [],
+          bankInfo: {
+            accountName: user.fullname,
+            accountNo: "",
+            name: "",
+          },
+          introVideo: {
+            service: "",
+            url: "",
+          },
+          availableClasses: [],
+          upcomingClasses: [],
+          highlightedUpcomingClass: {
+            type: "",
+            className: "",
+            thumbnailUrl: "",
+          },
+          liveClasses: [],
+          isOnline: false,
+          reviewPoint: 0,
+          price: 0,
+          isCertified: false,
+          joinedAt: 0,
+          certificates: [],
+          rating: 0,
+          schedules: [],
+          nickname: "",
+          bio: "",
+          gender: "",
+          lastEducation: "",
+          company: {
+            name: "",
+            jobRole: "",
+            jobLevel: "",
+          },
+          providerFee: 0,
+          mentorFee: 0,
+          feeAcceptedAt: 0,
+        }).unmarshall();
+      }
+      if (mentorDto) {
         const mentorEntity = Mentor.create({
-          ...(<IMentorCreate>mentor),
+          ...mentorDto,
           ...{
             username: (<IMentor>data).username,
             fullname: (<IMentor>data).fullname,
@@ -66,8 +115,8 @@ export class ProfileService {
             feeAcceptedAt: (<IMentor>data).feeAcceptedAt,
           },
         });
-        user.fullname = mentor.fullname;
-        const mentorDto = mentorEntity.unmarshall();
+        user.fullname = mentorDto.fullname;
+        mentorDto = mentorEntity.unmarshall();
         const userDto = user.unmarshall();
         const [mentorUpdate, userUpdateDto] = await Promise.all([
           this.mentorRepository.save(mentorDto),
