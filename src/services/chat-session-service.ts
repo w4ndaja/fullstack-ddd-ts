@@ -36,11 +36,12 @@ export class ChatSesssionService {
     const currentUser = this.auth.user;
     const targetUser = User.create(targetUserDto);
     const userIsMentor = currentUser.hasRole(EROLES.MENTOR);
-    const targetIsMentor = currentUser.hasRole(EROLES.MENTOR);
+    const targetIsMentor = targetUser.hasRole(EROLES.MENTOR);
     let userProfileDto: IMentor | IParticipant | undefined;
     let targetProfileDto: IMentor | IParticipant | undefined;
     let bookDto: IBook | undefined;
     if (userIsMentor && targetIsMentor) {
+      this.logger.info("userIsMentor && targetIsMentor");
       bookDto = await this.bookRepository.findByParticipantAndMentorId(
         currentUser.id,
         targetUser.id
@@ -52,17 +53,25 @@ export class ChatSesssionService {
         );
       }
       userProfileDto = await this.mentorRepository.findByUserId(currentUser.id);
-      targetProfileDto = await this.participantRepository.findByUserId(targetUserDto.id);
+      targetProfileDto = await this.mentorRepository.findByUserId(targetUserDto.id);
     } else if (userIsMentor && !targetIsMentor) {
+      this.logger.info("userIsMentor && !targetIsMentor");
       bookDto = await this.bookRepository.findByParticipantAndMentorId(
         targetUser.id,
         currentUser.id
       );
+      userProfileDto = await this.mentorRepository.findByUserId(currentUser.id);
+      targetProfileDto = await this.participantRepository.findByUserId(targetUserDto.id);
     } else if (!userIsMentor && targetIsMentor) {
+      this.logger.info("!userIsMentor && targetIsMentor");
       bookDto = await this.bookRepository.findByParticipantAndMentorId(
         currentUser.id,
         targetUser.id
       );
+      userProfileDto = await this.participantRepository.findByUserId(currentUser.id);
+      targetProfileDto = await this.mentorRepository.findByUserId(targetUserDto.id);
+    } else {
+      this.logger.info(`userIsMentor=${userIsMentor} && targetIsMentor=${targetIsMentor}`);
     }
     let book: Book | undefined = bookDto ? Book.create(bookDto) : undefined;
     let chatSession: ChatSession;
