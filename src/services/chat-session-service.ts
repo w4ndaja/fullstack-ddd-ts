@@ -26,19 +26,19 @@ export class ChatSesssionService {
     @inject(TYPES.MentorRepository) private mentorRepository: IMentorRepository,
     @inject(TYPES.ParticipantRepository) private participantRepository: IParticipantRepository
   ) {}
-  public async startChat(mentorEmail: string): Promise<IChatSession> {
+  public async startChat(targetEmail: string): Promise<IChatSession> {
     let chatSessionDto: IChatSession | null = null;
-    const mentorUserDto = await this.userRepository.findByUsernameOrEmail(mentorEmail);
-    if (!mentorUserDto) {
+    const targetUserDto = await this.userRepository.findByUsernameOrEmail(targetEmail);
+    if (!targetUserDto) {
       throw new AppError(ErrorCode.NOT_FOUND, "Email not found!");
     }
-    const mentorDto = await this.mentorRepository.findByUserId(mentorUserDto.id);
+    const mentorDto = await this.mentorRepository.findByUserId(targetUserDto.id);
     const mentorId = mentorDto.id;
     let [bookDto, participantDto] = await Promise.all([
       this.bookRepository.findByParticipantAndMentorId(this.auth.userId, mentorId),
       this.participantRepository.findByUserId(this.auth.userId),
     ]);
-    const mentorUser = User.create(mentorUserDto);
+    const mentorUser = User.create(targetUserDto);
     let participant: Participant | null = null;
     if (!participantDto) {
       participant = Participant.create(participantDto);

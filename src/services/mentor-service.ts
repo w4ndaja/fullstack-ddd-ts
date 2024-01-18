@@ -1,10 +1,10 @@
-import { IMentorRepository, IMentorSortType } from "@/domain/service";
+import { IMentorRepository, IMentorSortType, IUserRepository } from "@/domain/service";
 import { TYPES } from "@/ioc/types";
 import { inject, injectable } from "inversify";
 
 @injectable()
 export class MentorService {
-  constructor(@inject(TYPES.MentorRepository) private mentorRepository: IMentorRepository) {}
+  constructor(@inject(TYPES.MentorRepository) private mentorRepository: IMentorRepository, @inject(TYPES.UserRepository) private userRepository: IUserRepository) {}
   async getMentors() {
     const mentor = await this.mentorRepository.getMentors();
     return mentor;
@@ -19,6 +19,8 @@ export class MentorService {
   }
   async getDetailMentor(id: string) {
     const mentor = await this.mentorRepository.findById(id);
+    const userMentorDto = await this.userRepository.findById(mentor.userId);
+    mentor.email = userMentorDto.email;
     return mentor;
   }
 }
