@@ -137,14 +137,14 @@ export class BookService {
   async history(status: EBookStatus): Promise<IBook[]> {
     if (!this.auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
     let books: IBook[] = [];
+    if (this.auth.user.hasRole(EROLES.PARTICIPANT)) {
+      books = await this.bookRepository.findAllByParticipantId(this.auth.userId, status);
+    }
     if (this.auth.user.hasRole(EROLES.MENTOR)) {
       books = [
         ...books,
         ...(await this.bookRepository.findAllByMentorId(this.auth.userId, status)),
       ];
-    }
-    if (this.auth.user.hasRole(EROLES.PARTICIPANT)) {
-      books = await this.bookRepository.findAllByParticipantId(this.auth.userId, status);
     }
     books = books.sort((a, b) => a.createdAt - b.createdAt);
     await Promise.all(
