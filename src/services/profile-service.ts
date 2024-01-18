@@ -29,7 +29,7 @@ export class ProfileService {
     if (!this.auth) return null;
     if (this.auth.user.roles.includes(EROLES.MENTOR) || reqMentor) {
       let mentorDto = await this.mentorRepository.findByUserId(this.auth.user.id);
-      const user = User.create(await this.userRepository.findById(mentorDto.userId));
+      const user = User.create(await this.userRepository.findById(mentorDto?.userId || this.auth.userId));
       if (!user.hasRole(EROLES.MENTOR)) {
         user.roles.push(EROLES.MENTOR);
       }
