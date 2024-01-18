@@ -138,9 +138,15 @@ export class BookService {
     if (!this.auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
     let books: IBook[] = [];
     if (this.auth.user.hasRole(EROLES.PARTICIPANT)) {
-      books = await this.bookRepository.findAllByParticipantId(this.auth.userId, status);
+      books = [
+        ...books,
+        ...(await this.bookRepository.findAllByParticipantId(this.auth.userId, status)),
+      ];
     } else if (this.auth.user.hasRole(EROLES.MENTOR)) {
-      books = await this.bookRepository.findAllByMentorId(this.auth.userId, status);
+      books = [
+        ...books,
+        ...(await this.bookRepository.findAllByMentorId(this.auth.userId, status)),
+      ];
     }
     await Promise.all(
       books.map(async (book) => {
