@@ -81,10 +81,10 @@ export class ChatSesssionService {
     } else {
       this.logger.info(`userIsMentor=${userIsMentor} && targetIsMentor=${targetIsMentor}`);
     }
-    this.logger.info("book =>", bookDto)
     let book: Book | undefined = bookDto ? Book.create(bookDto) : undefined;
     let chatSession: ChatSession;
     if (book?.isExpired() || !book) {
+      this.logger.info("book?.isExpired() || !book", book?.expiredDate?.toDateString());
       chatSession = ChatSession.create({
         mentor: {
           ...currentUser.unmarshall(),
@@ -97,6 +97,7 @@ export class ChatSesssionService {
       });
     } else {
       const chatSessionDto = await this.chatSessionRepository.findByBookId(book.id);
+      this.logger.info(`findByBookId(${book.id})`, chatSessionDto.startAt);
       if (chatSessionDto) {
         chatSession = ChatSession.create(chatSessionDto);
       }
@@ -111,6 +112,7 @@ export class ChatSesssionService {
           ...targetUser.unmarshall(),
           avatarUrl: targetProfileDto.avatarUrl,
         },
+        book : bookDto
       });
     }
     if (!chatSession.startAt) {
