@@ -81,6 +81,7 @@ export class ChatSesssionService {
     } else {
       this.logger.info(`userIsMentor=${userIsMentor} && targetIsMentor=${targetIsMentor}`);
     }
+    this.logger.info("book =>", bookDto)
     let book: Book | undefined = bookDto ? Book.create(bookDto) : undefined;
     let chatSession: ChatSession;
     if (book?.isExpired() || !book) {
