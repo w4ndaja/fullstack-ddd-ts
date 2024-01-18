@@ -12,7 +12,6 @@ export class BookRepository extends Repository<IBook> implements IBookRepository
     participantId: string,
     mentorUserId: string
   ): Promise<IBook | null> {
-    console.log(participantId, mentorUserId);
     const bookMongo = await this.collection.findOne({
       participantId: participantId,
       "mentor.userId": mentorUserId,
