@@ -97,9 +97,21 @@ export class ChatSesssionService {
       });
     } else {
       const chatSessionDto = await this.chatSessionRepository.findByBookId(book.id);
-      this.logger.info(`findByBookId(${book.id})`, chatSessionDto.startAt);
+      this.logger.info(`findByBookId(${book.id})`, chatSessionDto);
       if (chatSessionDto) {
         chatSession = ChatSession.create(chatSessionDto);
+      } else {
+        chatSession = chatSession = ChatSession.create({
+          mentor: {
+            ...currentUser.unmarshall(),
+            avatarUrl: userProfileDto.avatarUrl,
+          },
+          participant: {
+            ...targetUser.unmarshall(),
+            avatarUrl: targetProfileDto.avatarUrl,
+          },
+          book: bookDto,
+        });
       }
     }
     if (!chatSession) {
@@ -112,7 +124,7 @@ export class ChatSesssionService {
           ...targetUser.unmarshall(),
           avatarUrl: targetProfileDto.avatarUrl,
         },
-        book : bookDto
+        book: bookDto,
       });
     }
     if (!chatSession.startAt) {
