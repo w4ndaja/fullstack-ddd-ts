@@ -1,7 +1,7 @@
 import { AppError } from "@/common/libs/error-handler";
 import { Logger } from "@/common/libs/logger";
 import { ErrorCode } from "@/common/utils";
-import { Auth, IAuth, Participant, User } from "@/domain/model";
+import { Auth, IAuth, IParticipant, Participant, User } from "@/domain/model";
 import { Book } from "@/domain/model/book";
 import { ChatSession, IChatSession } from "@/domain/model/chat-session";
 import { Mentor } from "@/domain/model/mentor";
@@ -26,16 +26,25 @@ export class ChatSesssionService {
     @inject(TYPES.MentorRepository) private mentorRepository: IMentorRepository,
     @inject(TYPES.ParticipantRepository) private participantRepository: IParticipantRepository
   ) {}
-  public async startChat(mentorId: string): Promise<IChatSession> {
+  public async startChat(mentorEmail: string): Promise<IChatSession> {
     let chatSessionDto: IChatSession | null = null;
-    const mentorDto = await this.mentorRepository.findById(mentorId);
-    let [bookDto, mentorUserDto, participantDto] = await Promise.all([
+    const mentorUserDto = await this.userRepository.findByUsernameOrEmail(mentorEmail);
+    if (!mentorUserDto) {
+      throw new AppError(ErrorCode.NOT_FOUND, "Email not found!");
+    }
+    const mentorDto = await this.mentorRepository.findByUserId(mentorUserDto.id);
+    const mentorId = mentorDto.id;
+    let [bookDto, participantDto] = await Promise.all([
       this.bookRepository.findByParticipantAndMentorId(this.auth.userId, mentorId),
-      this.userRepository.findById(mentorDto.userId),
       this.participantRepository.findByUserId(this.auth.userId),
     ]);
     const mentorUser = User.create(mentorUserDto);
-    const participant = Participant.create(participantDto);
+    let participant: Participant | Mentor = null;
+    if (!participantDto) {
+      participant = Mentor.create(await this.mentorRepository.findByUserId(this.auth.userId));
+    }else{
+      participant = Participant.create(participantDto);
+    }
     const participantUser = this.auth.user;
     let book: Book | undefined = bookDto ? Book.create(bookDto) : undefined;
     if (book) {
