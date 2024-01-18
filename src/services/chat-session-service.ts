@@ -56,10 +56,12 @@ export class ChatSesssionService {
       targetProfileDto = await this.mentorRepository.findByUserId(targetUserDto.id);
     } else if (userIsMentor && !targetIsMentor) {
       this.logger.info("userIsMentor && !targetIsMentor");
-      bookDto = await this.bookRepository.findByParticipantAndMentorId(
-        targetUser.id,
-        currentUser.id
-      );
+      if (!bookDto) {
+        bookDto = await this.bookRepository.findByParticipantAndMentorId(
+          currentUser.id,
+          targetUser.id
+        );
+      }
       userProfileDto = await this.mentorRepository.findByUserId(currentUser.id);
       targetProfileDto = await this.participantRepository.findByUserId(targetUserDto.id);
     } else if (!userIsMentor && targetIsMentor) {
@@ -68,6 +70,12 @@ export class ChatSesssionService {
         currentUser.id,
         targetUser.id
       );
+      if (!bookDto) {
+        bookDto = await this.bookRepository.findByParticipantAndMentorId(
+          targetUser.id,
+          currentUser.id
+        );
+      }
       userProfileDto = await this.participantRepository.findByUserId(currentUser.id);
       targetProfileDto = await this.mentorRepository.findByUserId(targetUserDto.id);
     } else {
@@ -86,7 +94,7 @@ export class ChatSesssionService {
           avatarUrl: targetProfileDto.avatarUrl,
         },
       });
-    }else{
+    } else {
       const chatSessionDto = await this.chatSessionRepository.findByBookId(book.id);
       if (chatSessionDto) {
         chatSession = ChatSession.create(chatSessionDto);
