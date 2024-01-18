@@ -36,11 +36,11 @@ export class BookService {
     sessionDate: number
   ): Promise<IBook> {
     if (!this.auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
-    let [mentorDto, participantDto]:[IMentor, IParticipant|IMentor] = await Promise.all([
+    let [mentorDto, participantDto]: [IMentor, IParticipant | IMentor] = await Promise.all([
       this.mentorRepository.findById(mentorId),
       this.participantRepository.findByUserId(this.auth.userId),
     ]);
-    if(!participantDto){
+    if (!participantDto) {
       participantDto = await this.mentorRepository.findById(this.auth.userId);
     }
     const mentorUserDto = await this.userRepository.findById(mentorDto.userId);
