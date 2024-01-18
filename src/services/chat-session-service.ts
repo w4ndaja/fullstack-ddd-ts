@@ -87,6 +87,18 @@ export class ChatSesssionService {
         },
       });
     }
+    if(!chatSession){
+      chatSession = ChatSession.create({
+        mentor: {
+          ...currentUser.unmarshall(),
+          avatarUrl: userProfileDto.avatarUrl,
+        },
+        participant: {
+          ...targetUser.unmarshall(),
+          avatarUrl: targetProfileDto.avatarUrl,
+        },
+      });
+    }
     if (!chatSession.startAt) {
       chatSession.start(chatSession.book ? chatSession.book.duration : 1);
     }
