@@ -13,7 +13,7 @@ import { AppError } from "@/common/libs/error-handler";
 import { ErrorCode } from "@/common/utils";
 import { PaymentStatus } from "@/common/utils/payment-status";
 import { EROLES } from "@/common/utils/roles";
-import { Auth, IAuth, IParticipant } from "@/domain/model";
+import { Auth, IAuth, IParticipant, IUser } from "@/domain/model";
 import { IMentor, Mentor } from "@/domain/model/mentor";
 
 @injectable()
@@ -165,11 +165,14 @@ export class BookService {
     if (!this.auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
     const bookDto = await this.bookRepository.findById(bookId);
     if (!bookDto) throw new AppError(ErrorCode.NOT_FOUND, "Not found");
-    const [mentorUserDto, participantDto, userParticipantDto] = await Promise.all([
+    let [mentorUserDto, participantDto, userParticipantDto]:[IUser, IParticipant|IMentor, IUser] = await Promise.all([
       this.userRepository.findById(bookDto.mentor.userId),
       this.participantRepository.findByUserId(bookDto.participantId),
       this.userRepository.findById(bookDto.participantId),
     ]);
+    if(!participantDto){
+      participantDto = await this.mentorRepository.findByUserId(bookDto.participantId);
+    }
     const bookEntity = Book.create(bookDto);
     bookEntity.participantAvatar = participantDto.avatarUrl;
     bookEntity.participantEmail = userParticipantDto.email;
