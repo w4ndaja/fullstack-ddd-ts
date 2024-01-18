@@ -4,7 +4,7 @@ import { ErrorCode } from "@/common/utils";
 import { Auth, IAuth, IParticipant, Participant, User } from "@/domain/model";
 import { Book } from "@/domain/model/book";
 import { ChatSession, IChatSession } from "@/domain/model/chat-session";
-import { Mentor } from "@/domain/model/mentor";
+import { IMentor, Mentor } from "@/domain/model/mentor";
 import {
   IBookRepository,
   IChatSessionRepository,
@@ -28,22 +28,23 @@ export class ChatSesssionService {
   ) {}
   public async startChat(mentorEmail: string): Promise<IChatSession> {
     let chatSessionDto: IChatSession | null = null;
-    const mentorUserDto = await this.userRepository.findByUsernameOrEmail(mentorEmail);
-    if (!mentorUserDto) {
+    const targetUserDto = await this.userRepository.findByUsernameOrEmail(mentorEmail);
+    if (!targetUserDto) {
       throw new AppError(ErrorCode.NOT_FOUND, "Email not found!");
     }
-    const mentorDto = await this.mentorRepository.findByUserId(mentorUserDto.id);
-    const mentorId = mentorDto.id;
+    let targetProfileDto: IMentor | IParticipant = await this.mentorRepository.findByUserId(
+      targetUserDto.id
+    );
+    let targetProfile: Participant | Mentor = null;
     let [bookDto, participantDto] = await Promise.all([
       this.bookRepository.findByParticipantAndMentorId(this.auth.userId, mentorId),
       this.participantRepository.findByUserId(this.auth.userId),
     ]);
-    const mentorUser = User.create(mentorUserDto);
-    let participant: Participant | Mentor = null;
+    const mentorUser = User.create(targetUserDto);
     if (!participantDto) {
-      participant = Mentor.create(await this.mentorRepository.findByUserId(this.auth.userId));
-    }else{
-      participant = Participant.create(participantDto);
+      targetProfile = Mentor.create(await this.mentorRepository.findByUserId(this.auth.userId));
+    } else {
+      targetProfile = Participant.create(participantDto);
     }
     const participantUser = this.auth.user;
     let book: Book | undefined = bookDto ? Book.create(bookDto) : undefined;
@@ -76,11 +77,11 @@ export class ChatSesssionService {
       ...chatSessionDto,
       participant: {
         ...chatSessionDto.participant,
-        avatarUrl: participant.avatarUrl,
+        avatarUrl: targetProfile.avatarUrl,
       },
       mentor: {
         ...chatSessionDto.mentor,
-        avatarUrl: mentorDto.avatarUrl,
+        avatarUrl: targetProfileDto.avatarUrl,
       },
     });
     if (!chatSession.startAt) {

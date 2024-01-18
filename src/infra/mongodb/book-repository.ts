@@ -10,12 +10,12 @@ export class BookRepository extends Repository<IBook> implements IBookRepository
   }
   async findByParticipantAndMentorId(
     participantId: string,
-    mentorId: string
+    mentorUserId: string
   ): Promise<IBook | null> {
-    console.log(participantId, mentorId);
+    console.log(participantId, mentorUserId);
     const bookMongo = await this.collection.findOne({
       participantId: participantId,
-      "mentor.mentorId": mentorId,
+      "mentor.userId": mentorUserId,
       expiredDate: {
         $gte: Date.now(),
       },

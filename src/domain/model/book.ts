@@ -30,6 +30,7 @@ export type IBook = IEntity<{
   end: number | null;
   mentorFee: number;
   providerFee: number;
+  participantEmail: string;
 }>;
 
 export type IBookCreate = IEntityCreate<{
@@ -58,6 +59,7 @@ export type IBookCreate = IEntityCreate<{
   end?: number | null;
   mentorFee?: number;
   providerFee?: number;
+  participantEmail?: string;
 }>;
 
 interface Payment {
@@ -108,6 +110,7 @@ export class Book extends Entity<IBook> {
     status,
     expiredDate,
     sessionDate,
+    participantEmail,
     ...props
   }: IBookCreate) {
     super({
@@ -129,6 +132,7 @@ export class Book extends Entity<IBook> {
       providerFee: providerFee || 50,
       expiredDate: expiredDate || Date.now() + 86400000 * 2,
       sessionDate: sessionDate || Date.now(),
+      participantEmail: participantEmail || "",
       ...props,
     });
   }
@@ -169,6 +173,7 @@ export class Book extends Entity<IBook> {
       end: this.end?.getTime() || null,
       mentorFee: this.mentorFee,
       providerFee: this.providerFee,
+      participantEmail: this.participantEmail,
     };
   }
 
@@ -400,5 +405,11 @@ export class Book extends Entity<IBook> {
   }
   set participantAvatar(v: string) {
     this._props.participantAvatar = v;
+  }
+  get participantEmail(): string {
+    return this._props.participantEmail || "";
+  }
+  set participantEmail(v: string) {
+    this._props.participantEmail = v;
   }
 }
