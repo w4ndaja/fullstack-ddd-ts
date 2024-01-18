@@ -4,7 +4,7 @@ import { ErrorCode } from "@/common/utils";
 import { Auth, IAuth, IParticipant, Participant, User } from "@/domain/model";
 import { Book } from "@/domain/model/book";
 import { ChatSession, IChatSession } from "@/domain/model/chat-session";
-import { IMentor, Mentor } from "@/domain/model/mentor";
+import { Mentor } from "@/domain/model/mentor";
 import {
   IBookRepository,
   IChatSessionRepository,
@@ -28,23 +28,20 @@ export class ChatSesssionService {
   ) {}
   public async startChat(mentorEmail: string): Promise<IChatSession> {
     let chatSessionDto: IChatSession | null = null;
-    const targetUserDto = await this.userRepository.findByUsernameOrEmail(mentorEmail);
-    if (!targetUserDto) {
+    const mentorUserDto = await this.userRepository.findByUsernameOrEmail(mentorEmail);
+    if (!mentorUserDto) {
       throw new AppError(ErrorCode.NOT_FOUND, "Email not found!");
     }
-    let targetProfileDto: IMentor | IParticipant = await this.mentorRepository.findByUserId(
-      targetUserDto.id
-    );
-    let targetProfile: Participant | Mentor = null;
+    const mentorDto = await this.mentorRepository.findByUserId(mentorUserDto.id);
+    const mentorId = mentorDto.id;
     let [bookDto, participantDto] = await Promise.all([
       this.bookRepository.findByParticipantAndMentorId(this.auth.userId, mentorId),
       this.participantRepository.findByUserId(this.auth.userId),
     ]);
-    const mentorUser = User.create(targetUserDto);
+    const mentorUser = User.create(mentorUserDto);
+    let participant: Participant | null = null;
     if (!participantDto) {
-      targetProfile = Mentor.create(await this.mentorRepository.findByUserId(this.auth.userId));
-    } else {
-      targetProfile = Participant.create(participantDto);
+      participant = Participant.create(participantDto);
     }
     const participantUser = this.auth.user;
     let book: Book | undefined = bookDto ? Book.create(bookDto) : undefined;
@@ -77,11 +74,11 @@ export class ChatSesssionService {
       ...chatSessionDto,
       participant: {
         ...chatSessionDto.participant,
-        avatarUrl: targetProfile.avatarUrl,
+        avatarUrl: participant.avatarUrl,
       },
       mentor: {
         ...chatSessionDto.mentor,
-        avatarUrl: targetProfileDto.avatarUrl,
+        avatarUrl: mentorDto.avatarUrl,
       },
     });
     if (!chatSession.startAt) {
