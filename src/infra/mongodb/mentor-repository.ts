@@ -101,10 +101,13 @@ export class MentorRepository extends Repository<IMentor> implements IMentorRepo
         $match: {
           ...(search && { fullname: { $regex: search, $options: "i" } }),
           ...(category && { className: category }),
+          // verifiedAt: {
+          //   $ne: null,
+          // },
         },
       },
       {
-        $limit: limit + offset
+        $limit: limit + offset,
       },
       {
         $skip: offset,

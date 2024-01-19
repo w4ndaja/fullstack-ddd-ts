@@ -12,13 +12,20 @@ export class BookRepository extends Repository<IBook> implements IBookRepository
     participantId: string,
     mentorUserId: string
   ): Promise<IBook | null> {
-    const bookMongo = await this.collection.findOne({
-      participantId: participantId,
-      "mentor.userId": mentorUserId,
-      expiredDate: {
-        $gte: Date.now(),
+    const bookMongo = await this.collection.findOne(
+      {
+        participantId: participantId,
+        "mentor.userId": mentorUserId,
+        expiredDate: {
+          $gte: Date.now(),
+        },
       },
-    });
+      {
+        sort: {
+          createdAt: -1,
+        },
+      }
+    );
     if (!bookMongo) return null;
     const { _id, ..._bookMongo } = bookMongo;
     return <IBook>_bookMongo;

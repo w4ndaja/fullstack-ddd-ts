@@ -38,8 +38,8 @@ export class ChatSession extends Entity<IChatSession> {
       endAt: this.endAt?.getTime() || null,
     };
   }
-  start(duration: number) {
-    this.startAt = new Date();
+  start(start:number, duration: number) {
+    this.startAt = new Date(start);
     this.endAt = new Date(this.startAt.getTime() + duration * 60 * 1000);
     return this;
   }

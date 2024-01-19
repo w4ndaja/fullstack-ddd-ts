@@ -35,9 +35,6 @@ export class ProfileService {
       const user = User.create(
         await this.userRepository.findById(mentorDto?.userId || this.auth.userId)
       );
-      if (!user.hasRole(EROLES.MENTOR)) {
-        user.roles.push(EROLES.MENTOR);
-      }
       if (!mentorDto) {
         mentorDto = Mentor.create({
           userId: user.id,

@@ -127,8 +127,24 @@ export class ChatSesssionService {
         book: bookDto,
       });
     }
+    let startTime = new Date();
+    if (book) {
+      startTime = new Date(
+        book.sessions
+          .map((session) => {
+            const [hour, minute] = session
+              .split("-")[0]
+              .split(":")
+              .map((item) => Number(item));
+            const date = new Date();
+            date.setHours(hour, minute, 0, 0);
+            return date.getTime();
+          })
+          .sort((a, b) => a - b)[0]
+      );
+    }
     if (!chatSession.startAt) {
-      chatSession.start(chatSession.book ? chatSession.book.duration : 1);
+      chatSession.start(startTime.getTime(), chatSession.book ? chatSession.book.duration : 1);
     }
     chatSessionDto = chatSession.unmarshall();
     chatSessionDto = await this.chatSessionRepository.save(chatSessionDto);
