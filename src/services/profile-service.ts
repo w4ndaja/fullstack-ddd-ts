@@ -88,36 +88,36 @@ export class ProfileService {
         const mentorEntity = Mentor.create({
           ...mentorDto,
           ...{
-            username: (<IMentor>data).username,
-            fullname: (<IMentor>data).fullname,
-            avatarUrl: (<IMentor>data).avatarUrl,
-            className: (<IMentor>data).className,
+            username: (<IMentor>data).username || "",
+            fullname: (<IMentor>data).fullname || "",
+            avatarUrl: (<IMentor>data).avatarUrl || "",
+            className: (<IMentor>data).className || [],
             bankInfo: {
-              accountName: (<IMentor>data).bankInfo.accountName,
-              accountNo: (<IMentor>data).bankInfo.accountNo,
-              name: (<IMentor>data).bankInfo.name,
+              accountName: (<IMentor>data)?.bankInfo?.accountName || "",
+              accountNo: (<IMentor>data)?.bankInfo?.accountNo || "",
+              name: (<IMentor>data)?.bankInfo?.name || "",
             },
             introVideo: {
-              service: (<IMentor>data).introVideo.service,
-              url: (<IMentor>data).introVideo.url,
+              service: (<IMentor>data)?.introVideo?.service || "",
+              url: (<IMentor>data)?.introVideo?.url || "",
             },
-            availableClasses: (<IMentor>data).availableClasses,
-            isOnline: (<IMentor>data).isOnline,
-            price: (<IMentor>data).price,
-            certificates: (<IMentor>data).certificates,
-            schedules: (<IMentor>data).schedules,
-            nickname: (<IMentor>data).nickname,
-            bio: (<IMentor>data).bio,
-            gender: (<IMentor>data).gender,
-            lastEducation: (<IMentor>data).lastEducation,
+            availableClasses: (<IMentor>data).availableClasses || [],
+            isOnline: (<IMentor>data).isOnline || true,
+            price: (<IMentor>data).price || 100000,
+            certificates: (<IMentor>data).certificates || [],
+            schedules: (<IMentor>data).schedules || [],
+            nickname: (<IMentor>data).nickname || "",
+            bio: (<IMentor>data).bio || "",
+            gender: (<IMentor>data).gender || "",
+            lastEducation: (<IMentor>data).lastEducation || "",
             company: {
-              name: (<IMentor>data).company.name,
-              jobRole: (<IMentor>data).company.jobRole,
-              jobLevel: (<IMentor>data).company.jobLevel,
+              name: (<IMentor>data)?.company?.name || "",
+              jobRole: (<IMentor>data)?.company?.jobRole || "",
+              jobLevel: (<IMentor>data)?.company?.jobLevel || "",
             },
-            providerFee: (<IMentor>data).providerFee,
-            mentorFee: (<IMentor>data).mentorFee,
-            feeAcceptedAt: (<IMentor>data).feeAcceptedAt,
+            providerFee: (<IMentor>data)?.providerFee || 50,
+            mentorFee: (<IMentor>data)?.mentorFee || 50,
+            feeAcceptedAt: (<IMentor>data)?.feeAcceptedAt || null,
           },
         });
         user.fullname = mentorDto.fullname;
@@ -167,7 +167,11 @@ export class ProfileService {
     if (!profileDto) {
       profileDto = await this.mentorRepository.findByUserId(userDto.id);
     }
-    const response = await axios.get(profileDto?.avatarUrl || `https://dummyimage.com/100x100&text=${profileDto.fullname.substring(0,1)}`, { responseType: "arraybuffer" });
+    const response = await axios.get(
+      profileDto?.avatarUrl ||
+        `https://dummyimage.com/100x100&text=${profileDto.fullname.substring(0, 1)}`,
+      { responseType: "arraybuffer" }
+    );
     return response;
   }
   public setAuth(auth: IAuth) {
