@@ -240,7 +240,7 @@ export class Book extends Entity<IBook> {
     return this.expiredDate.getTime() < Date.now();
   }
 
-  startChat() {
+  startService() {
     this.start = new Date();
     this.end = new Date(this.start.getTime() + this.duration * 60000);
   }

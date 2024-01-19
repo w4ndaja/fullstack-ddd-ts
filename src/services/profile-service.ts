@@ -167,7 +167,7 @@ export class ProfileService {
     if (!profileDto) {
       profileDto = await this.mentorRepository.findByUserId(userDto.id);
     }
-    const response = await axios.get(profileDto.avatarUrl, { responseType: "arraybuffer" });
+    const response = await axios.get(profileDto?.avatarUrl || `https://dummyimage.com/100x100&text=${profileDto.fullname.substring(0,1)}`, { responseType: "arraybuffer" });
     return response;
   }
   public setAuth(auth: IAuth) {
