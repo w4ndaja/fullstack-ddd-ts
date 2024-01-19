@@ -146,7 +146,7 @@ export class BookService {
         ...(await this.bookRepository.findAllByMentorId(this.auth.userId, status)),
       ];
     }
-    books = books.sort((a, b) => a.createdAt - b.createdAt);
+    books = books.sort((b, a) => a.createdAt - b.createdAt);
     await Promise.all(
       books.map(async (book) => {
         const [userMentorDto, userParticipantDto] = await Promise.all([
