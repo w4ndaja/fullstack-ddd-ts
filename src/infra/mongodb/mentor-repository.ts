@@ -50,6 +50,17 @@ export class MentorRepository extends Repository<IMentor> implements IMentorRepo
     offset: number,
     verified: boolean
   ): Promise<IMentor[]> {
+    console.log("finding mentor =>", {
+      $match: {
+        ...(search && { fullname: { $regex: search, $options: "i" } }),
+        ...(category && { className: category }),
+        verifiedAt: verified
+          ? {
+              $ne: null,
+            }
+          : null,
+      },
+    });
     const collection = await this.collection.aggregate([
       {
         $set: {
@@ -102,9 +113,11 @@ export class MentorRepository extends Repository<IMentor> implements IMentorRepo
         $match: {
           ...(search && { fullname: { $regex: search, $options: "i" } }),
           ...(category && { className: category }),
-          verifiedAt: verified ? {
-            $ne: null,
-          } : null,
+          verifiedAt: verified
+            ? {
+                $ne: null,
+              }
+            : null,
         },
       },
       {
