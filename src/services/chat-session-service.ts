@@ -142,6 +142,9 @@ export class ChatSesssionService {
           })
           .sort((a, b) => a - b)[0]
       );
+      if(startTime.getTime() > Date.now()){
+        throw new AppError(ErrorCode.FORBIDDEN, "Konsultasi belum dimulai, mohon untuk bergabung sesuai jadwal")
+      }
     }
     if (!chatSession.startAt) {
       chatSession.start(startTime.getTime(), chatSession.book ? chatSession.book.duration : 1);

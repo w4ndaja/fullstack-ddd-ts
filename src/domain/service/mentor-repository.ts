@@ -19,6 +19,7 @@ export interface IMentorRepository extends IRepository<IMentor> {
     category: IClassCategory["id"],
     sortBy: IMentorSortType,
     limit: number,
-    offset: number
+    offset: number,
+    verified:boolean
   ): Promise<IMentor[]>;
 }

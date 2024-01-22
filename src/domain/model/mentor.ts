@@ -162,6 +162,11 @@ export class Mentor extends Entity<IMentor> {
       approvedAt: this.approvedAt,
     };
   }
+  public approve() {
+    this.approvedAt = Date.now();
+    return this;
+  }
+
   get userId(): string {
     return this._props.userId;
   }

@@ -47,7 +47,8 @@ export class MentorRepository extends Repository<IMentor> implements IMentorRepo
     category: string,
     sortBy: IMentorSortType,
     limit: number,
-    offset: number
+    offset: number,
+    verified: boolean
   ): Promise<IMentor[]> {
     const collection = await this.collection.aggregate([
       {
@@ -101,9 +102,9 @@ export class MentorRepository extends Repository<IMentor> implements IMentorRepo
         $match: {
           ...(search && { fullname: { $regex: search, $options: "i" } }),
           ...(category && { className: category }),
-          // verifiedAt: {
-          //   $ne: null,
-          // },
+          verifiedAt: verified ? {
+            $ne: null,
+          } : null,
         },
       },
       {

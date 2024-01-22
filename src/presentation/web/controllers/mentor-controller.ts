@@ -13,6 +13,7 @@ export class MentorController extends Router {
     this.routes.get("/sorted", asyncWrapper(this.getMentorsSorted.bind(this)));
     this.routes.get("/all", asyncWrapper(this.getAllMentors.bind(this)));
     this.routes.get("/:id/detail", asyncWrapper(this.getDetailMentor.bind(this)));
+    this.routes.put("/:id/approve", asyncWrapper(this.approve.bind(this)));
   }
   private async getMentors(req: Request, res: Response, next: NextFunction): Promise<void> {
     const mentors = await this.mentorService.getMentors();
@@ -24,19 +25,21 @@ export class MentorController extends Router {
     res.json(RestMapper.dtoToRest(mentors));
   }
   private async getAllMentors(req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { search, category, limit, offset, sortBy } = { 
-      search : req.query.search || "", 
-      category : req.query.category || "", 
-      limit : req.query.limit || "10", 
-      offset : req.query.offset || "0", 
-      sortBy : req.query.sortBy || "HIGHER_RATING" 
+    const { search, category, limit, offset, sortBy, verified } = {
+      search: req.query.search || "",
+      category: req.query.category || "",
+      limit: req.query.limit || "10",
+      offset: req.query.offset || "0",
+      sortBy: req.query.sortBy || "HIGHER_RATING",
+      verified: req.query?.verified ? req.query?.verified === "true" : true,
     };
     const mentors = await this.mentorService.getAllMentors(
       <string>search,
       <string>category,
       <IMentorSortType>sortBy,
       Number(limit),
-      Number(offset)
+      Number(offset),
+      verified
     );
     res.json(RestMapper.dtoToRest(mentors));
   }
@@ -44,5 +47,10 @@ export class MentorController extends Router {
     const { id } = req.params;
     const mentor = await this.mentorService.getDetailMentor(id);
     res.json(RestMapper.dtoToRest(mentor));
+  }
+  private async approve(req: Request, res: Response, next: NextFunction) {
+    const { id } = req.params;
+    const result = await this.mentorService.approveMentor(id);
+    res.json(RestMapper.dtoToRest(result));
   }
 }
