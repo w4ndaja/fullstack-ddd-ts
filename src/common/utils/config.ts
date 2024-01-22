@@ -55,4 +55,19 @@ export const config = {
     },
     liveRoomUrl: process.env.LIVE_ROOM_URL || "https://camy-dev.pentarex.id",
   },
+  midtrans: {
+    env: process.env.MIDTRANS_ENV || "SANDBOX",
+    chargeUrlSandbox:
+      process.env.MIDTRANS_CHARGE_URL_SANDBOX ||
+      "https://app.sandbox.midtrans.com/snap/v1/transactions",
+    clientKeySandbox: process.env.MIDTRANS_CLIENT_KEY_SANDBOX || "SB-Mid-client-AmHndSJPH05XStfJ",
+    serverKeySandbox:
+      process.env.MIDTRANS_SERVER_KEY_SANDBOX || "SB-Mid-server-1eY5p54sKVB6kWQSl87xCtAf",
+    chargeUrlProduction:
+      process.env.MIDTRANS_CHARGE_URL_PRODUCTION || "https://app.midtrans.com/snap/v1/transactions",
+    clientKeyProduction:
+      process.env.MIDTRANS_CLIENT_KEY_PRODUCTION || "Mid-client-JzJIiu1Ymz7X4EAz",
+    serverKeyProduction:
+      process.env.MIDTRANS_SERVER_KEY_PRODUCTION || "Mid-server-uAk-NeS8dZkJfA_ecaS45NGq",
+  },
 };
