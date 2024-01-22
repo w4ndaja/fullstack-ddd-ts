@@ -54,7 +54,7 @@ export class MentorRepository extends Repository<IMentor> implements IMentorRepo
       $match: {
         ...(search && { fullname: { $regex: search, $options: "i" } }),
         ...(category && { className: category }),
-        verifiedAt: verified
+        approvedAt: verified
           ? {
               $ne: null,
             }
