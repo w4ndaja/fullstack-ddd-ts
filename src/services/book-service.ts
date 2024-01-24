@@ -5,6 +5,7 @@ import {
   IBookRepository,
   IMentorRepository,
   IParticipantRepository,
+  ITransactionRepository,
   IUserRepository,
 } from "@/domain/service";
 import { TYPES } from "@/ioc/types";
@@ -15,6 +16,7 @@ import { PaymentStatus } from "@/common/utils/payment-status";
 import { EROLES } from "@/common/utils/roles";
 import { Auth, IAuth, IParticipant, IUser } from "@/domain/model";
 import { IMentor, Mentor } from "@/domain/model/mentor";
+import { Transaction } from "@/domain/model/transaction";
 
 @injectable()
 export class BookService {
@@ -24,6 +26,7 @@ export class BookService {
     @inject(TYPES.ParticipantRepository) private participantRepository: IParticipantRepository,
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
     @inject(TYPES.BookRepository) private bookRepository: IBookRepository,
+    @inject(TYPES.TransactionRepository) private transactionRepository: ITransactionRepository,
     @inject(TYPES.Logger) private logger: Logger
   ) {}
   async book(
@@ -76,6 +79,26 @@ export class BookService {
       participantAvatar: participantDto.avatarUrl,
     });
     bookEntity.setPrice(sessions.length, mentorDto.price);
+    const [firstName, ...lastName] = bookEntity.participantName.split(" ");
+    let transactionEntity = Transaction.create({
+      transaction_details: { order_id: bookEntity.bookId, gross_amount: bookEntity.payment.total },
+      credit_card: {
+        secure: true,
+      },
+      customer_details: {
+        first_name: firstName,
+        last_name: lastName.join(" "),
+        email: this.auth.user.email,
+        phone: "",
+      },
+    });
+    let transactionDto = transactionEntity.unmarshall();
+    transactionDto = await this.transactionRepository.createTransaction(transactionDto);
+    transactionEntity = Transaction.create(transactionDto);
+    bookEntity.payment = {
+      ...bookEntity.payment,
+      url: transactionEntity.redirect_url,
+    };
     const bookDto = bookEntity.unmarshall();
     await this.bookRepository.save(bookDto);
     return bookDto;

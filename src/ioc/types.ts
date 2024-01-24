@@ -13,4 +13,5 @@ export const TYPES = {
   LiveTrainingRepository: Symbol.for("LiveTrainingRepository"),
   LiveTrainingBookRepository: Symbol.for("LiveTrainingBookRepository"),
   ChatSessionRespository: Symbol.for("ChatSessionRespository"),
+  TransactionRepository: Symbol.for("TransactionRepository"),
 };

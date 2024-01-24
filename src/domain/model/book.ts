@@ -73,6 +73,7 @@ interface Payment {
   expiredAt: number;
   paidAt?: any;
   status: string;
+  url?: string | null;
 }
 
 interface Schedule {

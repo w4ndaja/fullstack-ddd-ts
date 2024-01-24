@@ -60,7 +60,11 @@ export class WinstonLogger implements Logger {
       if (item instanceof AppError || typeof item === "string") {
         return item;
       } else {
-        return JSON.stringify(item, null, 4);
+        try {
+          return JSON.stringify(item, null, 4);
+        } catch (error) {
+          return item
+        }
       }
     }).join("\n");
   }

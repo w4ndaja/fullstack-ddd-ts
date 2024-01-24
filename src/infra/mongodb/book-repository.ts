@@ -8,6 +8,11 @@ export class BookRepository extends Repository<IBook> implements IBookRepository
   constructor() {
     super("books");
   }
+  async findByOrderId(orderId: string): Promise<IBook> {
+    const mongo = await this.collection.findOne({ bookId: orderId });
+    const { _id, ...bookDto } = mongo;
+    return <IBook>bookDto;
+  }
   async findByParticipantAndMentorId(
     participantId: string,
     mentorUserId: string

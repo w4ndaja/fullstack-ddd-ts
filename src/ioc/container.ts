@@ -38,6 +38,7 @@ import { AuthMiddleware } from "@/presentation/web/middlewares/auth-middleware";
 import { MongoDBConnection } from "@/infra/mongodb/connection";
 import { FirebaseAdmin } from "@/infra/firebase-admin";
 import { CamyMail } from "@/infra/camy-mail";
+import { Midtrans } from "@/infra/midtrans";
 
 // Repository Interfaces
 import {
@@ -51,6 +52,7 @@ import {
   ILiveTrainingRepository,
   ILiveTrainingBookRepository,
   IChatSessionRepository,
+  ITransactionRepository,
 } from "@/domain/service";
 
 // Repository Implementation
@@ -65,6 +67,7 @@ import {
   LiveTrainingRepository,
   LiveTrainingBookRepository,
   ChatSessionRepository,
+  TransactionRepository,
 } from "@/infra/mongodb";
 // import { UserRepository, AuthRepository } from "@/infra/sqlite/repositories";
 
@@ -79,7 +82,8 @@ import {
   ZegoService,
   FileStorageService,
   LiveTrainingService,
-  ChatSesssionService
+  ChatSesssionService,
+  TransactionService,
 } from "@/services";
 
 const container = new Container({ skipBaseClassChecks: true });
@@ -112,6 +116,7 @@ container.bind<AuthMiddleware>(AuthMiddleware).toSelf();
 container.bind<MongoDBConnection>(MongoDBConnection).toSelf().inSingletonScope();
 container.bind<FirebaseAdmin>(FirebaseAdmin).toSelf().inSingletonScope();
 container.bind<CamyMail>(CamyMail).toSelf().inSingletonScope();
+container.bind<Midtrans>(Midtrans).toSelf().inSingletonScope();
 
 // Repository Binding Sqlite
 container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
@@ -125,9 +130,8 @@ container.bind<ILiveTrainingRepository>(TYPES.LiveTrainingRepository).to(LiveTra
 container
   .bind<ILiveTrainingBookRepository>(TYPES.LiveTrainingBookRepository)
   .to(LiveTrainingBookRepository);
-container
-  .bind<IChatSessionRepository>(TYPES.ChatSessionRespository)
-  .to(ChatSessionRepository);
+container.bind<IChatSessionRepository>(TYPES.ChatSessionRespository).to(ChatSessionRepository);
+container.bind<ITransactionRepository>(TYPES.TransactionRepository).to(TransactionRepository);
 
 // Service Bind
 container.bind<AuthService>(AuthService).toSelf();
@@ -140,5 +144,6 @@ container.bind<ZegoService>(ZegoService).toSelf();
 container.bind<FileStorageService>(FileStorageService).toSelf();
 container.bind<LiveTrainingService>(LiveTrainingService).toSelf();
 container.bind<ChatSesssionService>(ChatSesssionService).toSelf();
+container.bind<TransactionService>(TransactionService).toSelf();
 
 export { container };
