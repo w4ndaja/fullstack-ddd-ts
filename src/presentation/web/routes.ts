@@ -11,6 +11,7 @@ import { FileStorageController } from "./controllers/file-storage-controller";
 import { LiveTrainingController } from "./controllers/live-training-controller";
 import { ChatSessionController } from "./controllers/chat-session-controller";
 import { StorageController } from "./controllers/storage-controller";
+import { TransactionController } from "./controllers/transaction-controller";
 
 @injectable()
 export class Routes extends Router {
@@ -23,7 +24,8 @@ export class Routes extends Router {
     private fileController: FileStorageController,
     private liveTrainingController: LiveTrainingController,
     private chatSesssionController: ChatSessionController,
-    private storageController: StorageController
+    private storageController: StorageController,
+    private transactionController: TransactionController
   ) {
     super();
     this.getRouter().get("/health-check", async (req, res) => res.send("SERVER IS UP"));
@@ -36,6 +38,7 @@ export class Routes extends Router {
     this.getRouter().use(this.liveTrainingController.getRouter());
     this.getRouter().use(this.chatSesssionController.getRouter());
     this.getRouter().use(this.storageController.getRouter());
+    this.getRouter().use(this.transactionController.getRouter());
     this.getRouter().all("*", async (req, res, next) => {
       next(new AppError(ErrorCode.NOT_FOUND, "Not found"));
     });

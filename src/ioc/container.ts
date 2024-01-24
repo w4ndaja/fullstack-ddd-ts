@@ -26,6 +26,7 @@ import { FileStorageController } from "@/presentation/web/controllers/file-stora
 import { LiveTrainingController } from "@/presentation/web/controllers/live-training-controller";
 import { ChatSessionController } from "@/presentation/web/controllers/chat-session-controller";
 import { StorageController } from "@/presentation/web/controllers/storage-controller";
+import { TransactionController } from "@/presentation/web/controllers/transaction-controller";
 
 // REST Middleware
 import { AuthMiddleware } from "@/presentation/web/middlewares/auth-middleware";
@@ -105,6 +106,7 @@ container.bind<FileStorageController>(FileStorageController).toSelf();
 container.bind<LiveTrainingController>(LiveTrainingController).toSelf();
 container.bind<ChatSessionController>(ChatSessionController).toSelf();
 container.bind<StorageController>(StorageController).toSelf();
+container.bind<TransactionController>(TransactionController).toSelf();
 
 // REST Middleware Binding
 container.bind<AuthMiddleware>(AuthMiddleware).toSelf();

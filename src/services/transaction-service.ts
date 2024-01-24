@@ -24,6 +24,7 @@ import { INotifPermataVa } from "@/infra/midtrans/notification/model/permata-va"
 import { INotifQris } from "@/infra/midtrans/notification/model/qris";
 import { INotifShoopePay } from "@/infra/midtrans/notification/model/shoope-pay";
 import { TYPES } from "@/ioc/types";
+import axios from "axios";
 import { inject, injectable } from "inversify";
 import jsCrypto from "js-sha512";
 
@@ -48,7 +49,6 @@ export class TransactionService {
     return transactionEntity.unmarshall();
   }
   public async notification(
-    orderId: string,
     notification:
       | INotifAkulaku
       | INotifAlfamart
@@ -63,7 +63,7 @@ export class TransactionService {
       | INotifQris
       | INotifShoopePay
   ): Promise<ITransaction> {
-    let transactionDto = await this.transactionRepository.findByOrderId(orderId);
+    let transactionDto = await this.transactionRepository.findByOrderId(notification.order_id);
     if (!transactionDto) throw new AppError(ErrorCode.NOT_FOUND, "Order Not Found!");
     const transaction = Transaction.create(transactionDto);
     const ourSignature = jsCrypto.sha512(
@@ -93,6 +93,7 @@ export class TransactionService {
     bookDto = bookEntity.unmarshall();
     await this.bookRepository.save(bookDto);
     await this.transactionRepository.save(transactionDto);
+    axios.post("https://api-v2.camy.id/api/midtrans/notification-handling", notification);
     transactionDto = transaction.unmarshall();
     return transactionDto;
   }
