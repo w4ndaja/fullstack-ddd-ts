@@ -61,12 +61,14 @@ export class LiveTrainingBookRepository
           },
         ])
         .toArray()
-    ).map(({ _id, ...item }) =>
-      LiveTrainingBook.create(<ILiveTrainingBook>{
-        ...item,
-        liveTraining: item.liveTraining?.[0] || undefined,
-      }).unmarshall()
+    ).map(
+      ({ _id, ...item }) =>
+        <ILiveTrainingBook>{
+          ...item,
+          liveTraining: item.liveTraining?.[0] || undefined,
+        }
     );
+    this.logger.info(liveTrainingDto)
     const _liveTrainingCount = await this.collection.aggregate([
       {
         $lookup: {

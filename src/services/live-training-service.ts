@@ -163,7 +163,7 @@ export class LiveTrainingService {
         phone: "",
       },
     });
-    
+
     let transactionDto = transaction.unmarshall();
     if (liveTrainingBook.payment.total != 0) {
       transactionDto = await this.transactionRepository.createTransaction(transactionDto);
@@ -279,17 +279,16 @@ export class LiveTrainingService {
     endDate: number | undefined,
     status: string
   ) {
-    const liveTraining = GenericPaginatedData.create(
-      await this.liveTrainingBookRepository.findHistoryByMonthStatusAndUserId(
-        startDate,
-        endDate,
-        this.auth.userId,
-        param.page,
-        param.limit,
-        status
-      )
+    let liveTrainingDto = await this.liveTrainingBookRepository.findHistoryByMonthStatusAndUserId(
+      startDate,
+      endDate,
+      this.auth.userId,
+      param.page,
+      param.limit,
+      status
     );
-    const liveTrainingDto = liveTraining.unmarshall();
+    const liveTraining = GenericPaginatedData.create(liveTrainingDto);
+    liveTrainingDto = liveTraining.unmarshall();
     return liveTrainingDto;
   }
 

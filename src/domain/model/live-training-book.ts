@@ -58,6 +58,7 @@ export class LiveTrainingBook extends Entity<ILiveTrainingBook> {
   constructor({ payment, totalParticipant, status, ...props }: ILiveTrainingBookCreate) {
     super({
       payment: {
+        ...payment,
         method: payment.method,
         adminFee: payment.adminFee || 0,
         tax: payment.tax || 0,
