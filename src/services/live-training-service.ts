@@ -2,6 +2,7 @@ import { AppError } from "@/common/libs/error-handler";
 import { Logger } from "@/common/libs/logger";
 import { GenericPaginatedData, IBaseGetParam } from "@/common/libs/pagination";
 import { ErrorCode } from "@/common/utils";
+import { PaymentStatus } from "@/common/utils/payment-status";
 import { EROLES } from "@/common/utils/roles";
 import { Auth, User } from "@/domain/model";
 import { ILiveTraining, ILiveTrainingStatus, LiveTraining } from "@/domain/model/live-training";
@@ -11,11 +12,13 @@ import {
   LiveTraniningBookPayment,
 } from "@/domain/model/live-training-book";
 import { Mentor } from "@/domain/model/mentor";
+import { Transaction } from "@/domain/model/transaction";
 import {
   ILiveTrainingBookRepository,
   ILiveTrainingRepository,
   IMentorRepository,
   IParticipantRepository,
+  ITransactionRepository,
   IUserRepository,
 } from "@/domain/service";
 import { TYPES } from "@/ioc/types";
@@ -31,7 +34,8 @@ export class LiveTrainingService {
     @inject(TYPES.LiveTrainingBookRepository)
     private liveTrainingBookRepository: ILiveTrainingBookRepository,
     @inject(TYPES.MentorRepository) private mentorRepository: IMentorRepository,
-    @inject(TYPES.ParticipantRepository) private participantRepository: IParticipantRepository
+    @inject(TYPES.ParticipantRepository) private participantRepository: IParticipantRepository,
+    @inject(TYPES.TransactionRepository) private transactionRepository: ITransactionRepository
   ) {}
   public async create(
     title: string,
@@ -143,13 +147,41 @@ export class LiveTrainingService {
         })();
       })
     );
-    const liveTrainingParticipantDto = liveTrainingBook.unmarshall();
+    const [firstName, ...lastName] = this.auth.user.fullname.split(" ");
+    let transaction = Transaction.create({
+      transaction_details: {
+        order_id: liveTrainingBook.id,
+        gross_amount: liveTrainingBook.payment.total,
+      },
+      credit_card: {
+        secure: true,
+      },
+      customer_details: {
+        email: this.auth.user.email,
+        first_name: firstName,
+        last_name: lastName.join(" "),
+        phone: "",
+      },
+    });
+    let transactionDto = transaction.unmarshall();
+    if (liveTrainingBook.payment.total !== 0) {
+      transactionDto = await this.transactionRepository.createTransaction(transactionDto);
+      transaction = Transaction.create(transactionDto);
+      liveTrainingBook.payment = {
+        ...liveTrainingBook.payment,
+        url: transaction.redirect_url,
+        status: PaymentStatus.PENDING.toString(),
+      };
+    } else {
+      liveTrainingBook.setPaid();
+    }
+    let liveTrainingBookDto = liveTrainingBook.unmarshall();
     liveTrainingDto = liveTraining.unmarshall();
     await Promise.all([
       this.liveTrainingRepository.save(liveTrainingDto),
-      this.liveTrainingBookRepository.save(liveTrainingParticipantDto),
+      this.liveTrainingBookRepository.save(liveTrainingBookDto),
     ]);
-    return liveTrainingParticipantDto;
+    return liveTrainingBookDto;
   }
 
   public async getAllByStatus(param: IBaseGetParam, status: ILiveTrainingStatus) {
@@ -178,6 +210,7 @@ export class LiveTrainingService {
       this.auth.userId
     );
     if (!liveTrainingBookDto) {
+      this.logger.info(`user ${this.auth.userId} trying to join live ${liveTrainingId}`);
       throw new AppError(
         ErrorCode.FORBIDDEN,
         "Anda belum terdaftar di layanan ini, silahkan daftar untuk melanjutkan!"
@@ -209,11 +242,9 @@ export class LiveTrainingService {
   }
 
   public async finish(liveTrainingId: string) {
-    let liveTrainingDto = await this.liveTrainingRepository.findById(liveTrainingId)
-    if(!liveTrainingDto) throw new AppError(ErrorCode.NOT_FOUND, "Live Training Not Found");
-    const liveTraining = LiveTraining.create(
-      liveTrainingDto
-    );
+    let liveTrainingDto = await this.liveTrainingRepository.findById(liveTrainingId);
+    if (!liveTrainingDto) throw new AppError(ErrorCode.NOT_FOUND, "Live Training Not Found");
+    const liveTraining = LiveTraining.create(liveTrainingDto);
     liveTraining.finish();
     liveTrainingDto = liveTraining.unmarshall();
     await this.liveTrainingRepository.save(liveTrainingDto);
@@ -262,7 +293,7 @@ export class LiveTrainingService {
 
   public async getBookDetail(bookId: string) {
     let bookDto = await this.liveTrainingBookRepository.findById(bookId);
-    if(!bookDto){
+    if (!bookDto) {
       throw new AppError(ErrorCode.NOT_FOUND, "Book Not Found!");
     }
     const book = LiveTrainingBook.create(bookDto);

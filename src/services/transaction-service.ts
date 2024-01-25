@@ -8,8 +8,13 @@ import {
 import { ErrorCode, config } from "@/common/utils";
 import { PaymentStatus } from "@/common/utils/payment-status";
 import { Book } from "@/domain/model/book";
+import { LiveTrainingBook } from "@/domain/model/live-training-book";
 import { ITransaction, ITransactionCreate, Transaction } from "@/domain/model/transaction";
-import { IBookRepository, ITransactionRepository } from "@/domain/service";
+import {
+  IBookRepository,
+  ILiveTrainingBookRepository,
+  ITransactionRepository,
+} from "@/domain/service";
 import { Midtrans } from "@/infra/midtrans";
 import { INotifAkulaku } from "@/infra/midtrans/notification/model/akulaku";
 import { INotifAlfamart } from "@/infra/midtrans/notification/model/alfamart";
@@ -34,7 +39,9 @@ export class TransactionService {
     @inject(TYPES.Logger) private logger: Logger,
     @inject(TYPES.TransactionRepository) private transactionRepository: ITransactionRepository,
     @inject(TYPES.BookRepository) private bookRepository: IBookRepository,
-    @inject(Midtrans) private midtrans: Midtrans
+    @inject(Midtrans) private midtrans: Midtrans,
+    @inject(TYPES.LiveTrainingBookRepository)
+    private liveTrainingBookRepository: ILiveTrainingBookRepository
   ) {}
   public async findAll(param: IBaseGetParam): Promise<IGenericPaginatedData<ITransaction>> {
     const transactionsDto = await this.transactionRepository.findAll(param);
@@ -64,6 +71,7 @@ export class TransactionService {
       | INotifShoopePay
   ): Promise<ITransaction> {
     let transactionDto = await this.transactionRepository.findByOrderId(notification.order_id);
+    this.logger.info(`Midtrans trying to find transaction with order_id ${notification.order_id}`)
     if (!transactionDto) throw new AppError(ErrorCode.NOT_FOUND, "Order Not Found!");
     const transaction = Transaction.create(transactionDto);
     const ourSignature = jsCrypto.sha512(
@@ -74,24 +82,44 @@ export class TransactionService {
     }
     transaction.notification = notification;
     let bookDto = await this.bookRepository.findByOrderId(notification.order_id);
-    if (!bookDto) {
+    let liveTrainingBookDto = await this.liveTrainingBookRepository.findById(notification.order_id);
+    if (!bookDto && !liveTrainingBookDto) {
       throw new AppError(ErrorCode.NOT_FOUND, "Order Not Found");
     }
-    const bookEntity = Book.create(bookDto);
+    const bookEntity = bookDto ? Book.create(bookDto) : undefined;
+    const liveTrainingBookEntity = liveTrainingBookDto
+      ? LiveTrainingBook.create(liveTrainingBookDto)
+      : undefined;
+
     switch (notification.transaction_status) {
       case "settlement":
       case "capture":
-        bookEntity.setPaid();
+        if (bookEntity) bookEntity.setPaid();
+        if (liveTrainingBookEntity) liveTrainingBookEntity.setPaid();
         break;
       case "pending":
-        bookEntity.payment = { ...bookEntity.payment, status: PaymentStatus.PENDING.toString() };
+        if (bookEntity)
+          bookEntity.payment = { ...bookEntity.payment, status: PaymentStatus.PENDING.toString() };
+        if (liveTrainingBookEntity)
+          liveTrainingBookEntity.payment = {
+            ...liveTrainingBookEntity.payment,
+            status: PaymentStatus.PENDING.toString(),
+          };
         break;
       default:
-        bookEntity.payment = { ...bookEntity.payment, status: PaymentStatus.FAILED.toString() };
+        if (bookEntity)
+          bookEntity.payment = { ...bookEntity.payment, status: PaymentStatus.FAILED.toString() };
+        if (liveTrainingBookEntity)
+          liveTrainingBookEntity.payment = {
+            ...liveTrainingBookEntity.payment,
+            status: PaymentStatus.FAILED.toString(),
+          };
         break;
     }
-    bookDto = bookEntity.unmarshall();
-    await this.bookRepository.save(bookDto);
+    if (bookDto) bookDto = bookEntity.unmarshall();
+    if (liveTrainingBookDto) liveTrainingBookDto = liveTrainingBookEntity.unmarshall();
+    if (bookDto) await this.bookRepository.save(bookDto);
+    if (liveTrainingBookDto) await this.liveTrainingBookRepository.save(liveTrainingBookDto);
     await this.transactionRepository.save(transactionDto);
     axios.post("https://api-v2.camy.id/api/midtrans/notification-handling", notification);
     transactionDto = transaction.unmarshall();

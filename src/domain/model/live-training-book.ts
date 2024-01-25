@@ -23,6 +23,7 @@ export interface LiveTraniningBookPayment {
   expiredAt: number;
   paidAt?: any;
   status: string;
+  url: string | null;
 }
 
 export type ILiveTrainingBook = IEntity<{
