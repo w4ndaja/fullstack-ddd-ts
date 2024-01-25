@@ -11,6 +11,7 @@ import jwt from "jsonwebtoken";
 import { Participant, User } from "@/domain/model";
 import { Logger } from "@/common/libs/logger";
 import { EROLES } from "@/common/utils/roles";
+import { FirebaseAdmin } from "@/infra/firebase-admin";
 
 @injectable()
 export class AuthService {
@@ -18,7 +19,8 @@ export class AuthService {
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
     @inject(TYPES.ParticipantRepository) private participantRepository: IParticipantRepository,
     @inject(TYPES.AuthRepository) private authRepository: IAuthRepository,
-    @inject(TYPES.Logger) private logger: Logger
+    @inject(TYPES.Logger) private logger: Logger,
+    @inject(FirebaseAdmin) private firebase: FirebaseAdmin
   ) {}
   /**
    * validate client authority
@@ -130,5 +132,49 @@ export class AuthService {
    */
   private verifyToken(token: string): string {
     return String(jwt.verify(token, this.authRepository.publicKey));
+  }
+
+  async loginByGoogle(idToken: string): Promise<IAuth> {
+    this.logger.info(`Login by google with token ${idToken}`);
+    try {
+      const gauth = await this.firebase.auth.verifyIdToken(idToken);
+      if (!gauth) {
+        throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized!");
+      }
+      let userDto = await this.userRepository.findByUsernameOrEmail(gauth.email);
+      let user = userDto
+        ? User.create(userDto)
+        : User.create({
+            email: gauth.email,
+            avatarUrl: gauth.picture,
+          });
+      userDto = await this.userRepository.save(userDto);
+      let participantDto = await this.participantRepository.findByUserId(userDto.id);
+      let participant = participantDto
+        ? Participant.create(participantDto)
+        : Participant.create({
+            userId: user.id,
+            username: user.email.split("@")[0],
+            fullname: user.email.split("@")[0],
+            bio: "",
+            gender: "",
+          });
+      const auth = Auth.create({
+        userId: user.id,
+        expired: false,
+        user: userDto,
+      });
+      auth.token = await this.generateToken(auth.id);
+      const authDto = auth.unmarshall();
+      participantDto = participant.unmarshall();
+      await Promise.all([
+        this.userRepository.save(userDto),
+        this.authRepository.save(authDto),
+        this.participantRepository.save(participantDto),
+      ]);
+      return authDto;
+    } catch (error) {
+      throw new AppError(ErrorCode.UNAUTHORIZED, "Token Invalid!");
+    }
   }
 }

@@ -176,6 +176,20 @@ export class BookService {
           this.userRepository.findById(book.mentor.userId),
           this.userRepository.findById(book.participantId),
         ]);
+        const runningTime = (Date.now() - book.start) * 1000 * 60;
+        if (runningTime > book.duration) {
+          const bookEntity = Book.create(book);
+          if (bookEntity.status === EBookStatus.WAITINGPAYMENT.toString()) {
+            bookEntity.status = EBookStatus.CANCELED.toString();
+            bookEntity.payment.status = PaymentStatus.FAILED.toString();
+          } else if (bookEntity.status === EBookStatus.OCCURRING.toString()) {
+            bookEntity.finish(this.auth.userId, 5, "");
+          } else if (bookEntity.status === EBookStatus.PENDING.toString()) {
+            bookEntity.status = EBookStatus.REJECTED.toString();
+          }
+          book = bookEntity.unmarshall();
+          this.bookRepository.save(book)
+        }
         book.mentor.email = userMentorDto.email;
         book.participantEmail = userParticipantDto.email;
       })

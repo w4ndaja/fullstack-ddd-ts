@@ -24,8 +24,5 @@ export class FirebaseAdmin {
     });
     this.db = getFirestore();
     this.auth = getAuth(this.app);
-    this.auth.getUser("CNnW0NeBGtUXyVlLDakxtprSFw03").then(res => {
-      this.logger.info("user:leebarton.87767@gmail.com => ", res)
-    })
   }
 }

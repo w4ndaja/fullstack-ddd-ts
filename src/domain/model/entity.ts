@@ -79,6 +79,11 @@ export class Entity<I> {
     this._props.deletedAt = null;
   }
 
+  public set(data: Partial<IEntity<I>>) {
+    this._props = { ...this._props, ...data };
+    return this;
+  }
+
   get id(): string {
     return this._id;
   }

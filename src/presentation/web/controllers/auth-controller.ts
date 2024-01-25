@@ -19,6 +19,7 @@ export class AuthController extends Router {
   ) {
     super("/auth");
     this.routes.post(`/login`, asyncWrapper(this.login.bind(this)));
+    this.routes.post(`/login-by-google`, asyncWrapper(this.loginByGoogle.bind(this)));
     this.routes.get(
       `/check-token`,
       asyncWrapper(this.authMiddleware.authenticated.bind(this.authMiddleware)),
@@ -60,5 +61,9 @@ export class AuthController extends Router {
     this.profileService.setAuth(res.locals.auth);
     const profile = await this.profileService.updateProfile(req.body, <Boolean>req.body.reqMentor);
     return res.json(RestMapper.dtoToRest(<object>profile));
+  }
+  private async loginByGoogle(req: Request, res: Response, next: NextFunction) {
+    const result = await this.authService.loginByGoogle(<string>req.body.idToken);
+    return res.json(RestMapper.dtoToRest(result));
   }
 }
