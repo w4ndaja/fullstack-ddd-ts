@@ -7,12 +7,14 @@ import { Auth } from "@/domain/model/auth";
 import { TYPES } from "@/ioc/types";
 
 import { inject, injectable } from "inversify";
-import jwt from "jsonwebtoken";
-import { Participant, User } from "@/domain/model";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { IUser, Participant, User } from "@/domain/model";
 import { Logger } from "@/common/libs/logger";
 import { EROLES } from "@/common/utils/roles";
 import { FirebaseAdmin } from "@/infra/firebase-admin";
-
+import { DecodedIdToken } from "firebase-admin/auth";
+import axios from "axios";
+import { GAuthDecoded, IGAuthDecoded } from "@/domain/model/google-auth-decoded";
 @injectable()
 export class AuthService {
   constructor(
@@ -135,46 +137,58 @@ export class AuthService {
   }
 
   async loginByGoogle(idToken: string): Promise<IAuth> {
-    this.logger.info(`Login by google with token ${idToken}`);
+    let userDto: IUser;
+    let gAuthDto: IGAuthDecoded;
     try {
-      const gauth = await this.firebase.auth.verifyIdToken(idToken);
-      if (!gauth) {
-        throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized!");
+      const { data: keys } = await axios.get(
+        "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com"
+      );
+      gAuthDto = <IGAuthDecoded>jwt.decode(idToken);
+      const gAuth = GAuthDecoded.create(gAuthDto);
+      if (gAuth.exp > Date.now()) {
+        throw new AppError(ErrorCode.UNAUTHORIZED, "Session Expired!");
       }
-      let userDto = await this.userRepository.findByUsernameOrEmail(gauth.email);
-      let user = userDto
-        ? User.create(userDto)
-        : User.create({
-            email: gauth.email,
-            avatarUrl: gauth.picture,
-          });
-      userDto = await this.userRepository.save(userDto);
-      let participantDto = await this.participantRepository.findByUserId(userDto.id);
-      let participant = participantDto
-        ? Participant.create(participantDto)
-        : Participant.create({
-            userId: user.id,
-            username: user.email.split("@")[0],
-            fullname: user.email.split("@")[0],
-            bio: "",
-            gender: "",
-          });
-      const auth = Auth.create({
-        userId: user.id,
-        expired: false,
-        user: userDto,
-      });
-      auth.token = await this.generateToken(auth.id);
-      const authDto = auth.unmarshall();
-      participantDto = participant.unmarshall();
-      await Promise.all([
-        this.userRepository.save(userDto),
-        this.authRepository.save(authDto),
-        this.participantRepository.save(participantDto),
-      ]);
-      return authDto;
+      userDto = await this.userRepository.findByUsernameOrEmail(gAuth.email);
     } catch (error) {
+      this.logger.error(error);
       throw new AppError(ErrorCode.UNAUTHORIZED, "Token Invalid!");
     }
+    let user = userDto
+      ? User.create(userDto)
+      : User.create({
+          username: gAuthDto.email.split("@")[0],
+          email: gAuthDto.email,
+          avatarUrl: gAuthDto.picture,
+        });
+    user.username = gAuthDto.email.split("@")[0];
+    user.avatarUrl = gAuthDto.picture;
+    user.fullname = gAuthDto.name;
+    user.email = gAuthDto.email;
+    userDto = user.unmarshall();
+    userDto = await this.userRepository.save(userDto);
+    let participantDto = await this.participantRepository.findByUserId(userDto.id);
+    let participant = participantDto
+      ? Participant.create(participantDto)
+      : Participant.create({
+          userId: user.id,
+          username: user.email.split("@")[0],
+          fullname: user.fullname,
+          bio: "",
+          gender: "",
+        });
+    const auth = Auth.create({
+      userId: user.id,
+      expired: false,
+      user: userDto,
+    });
+    auth.token = await this.generateToken(auth.id);
+    const authDto = auth.unmarshall();
+    participantDto = participant.unmarshall();
+    await Promise.all([
+      this.userRepository.save(userDto),
+      this.authRepository.save(authDto),
+      this.participantRepository.save(participantDto),
+    ]);
+    return authDto;
   }
 }

@@ -23,6 +23,6 @@ export class FirebaseAdmin {
       credential: cert(config.connection.firebaseAdmin.serviceAccountPath),
     });
     this.db = getFirestore();
-    this.auth = getAuth(this.app);
+    this.auth = getAuth();
   }
 }
