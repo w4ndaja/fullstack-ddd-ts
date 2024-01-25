@@ -163,6 +163,7 @@ export class LiveTrainingService {
         phone: "",
       },
     });
+    
     let transactionDto = transaction.unmarshall();
     if (liveTrainingBook.payment.total != 0) {
       transactionDto = await this.transactionRepository.createTransaction(transactionDto);
