@@ -1,5 +1,5 @@
 import { Logger } from "@/common/libs/logger";
-import { IMentorRepository, IParticipantRepository, IUserRepository } from "@/domain/service";
+import { IBookRepository, IMentorRepository, IParticipantRepository, IUserRepository } from "@/domain/service";
 import { TYPES } from "@/ioc/types";
 import { inject, injectable } from "inversify";
 import { EROLES } from "@/common/utils/roles";
@@ -8,6 +8,7 @@ import { Auth, IAuth, IParticipant, IParticipantCreate, Participant, User } from
 import fs from "fs";
 import axios from "axios";
 import { request } from "https";
+import { EBookStatus } from "@/common/utils/book-status";
 
 @injectable()
 export class ProfileService {
@@ -16,12 +17,27 @@ export class ProfileService {
     @inject(TYPES.Logger) private logger: Logger,
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
     @inject(TYPES.MentorRepository) private mentorRepository: IMentorRepository,
-    @inject(TYPES.ParticipantRepository) private participantRepository: IParticipantRepository
+    @inject(TYPES.ParticipantRepository) private participantRepository: IParticipantRepository,
+    @inject(TYPES.BookRepository) private bookRepository: IBookRepository
   ) {}
   async getProfile() {
     if (!this.auth) return null;
     if (this.auth.user.roles.includes(EROLES.MENTOR)) {
       const mentor = await this.mentorRepository.findByUserId(this.auth.user.id);
+      mentor.reviews = (
+        await this.bookRepository.findAllByMentorId(
+          mentor.userId,
+          EBookStatus.FINISHED.toString()
+        )
+      ).map((review) => ({
+        avatarUrl: review.participantAvatar,
+        rating: review.rating,
+        review: review.review,
+      }));
+      mentor.rating =
+        (Math.ceil(mentor.reviews.reduce((a, b) => a + b.rating, 0) / mentor.reviews.length) *
+          2) /
+        2;
       return mentor;
     } else if (this.auth.user.roles.includes(EROLES.PARTICIPANT)) {
       const participant = await this.participantRepository.findByUserId(this.auth.user.id);

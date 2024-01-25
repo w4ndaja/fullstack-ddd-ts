@@ -57,7 +57,14 @@ export type IMentor = IEntity<{
   feeAcceptedAt: number | null;
   email: string;
   approvedAt: number | null;
+  reviews: IMentorReview[];
 }>;
+
+type IMentorReview = {
+  avatarUrl: string;
+  rating: number;
+  review: string;
+};
 
 export type IMentorCreate = IEntityCreate<{
   userId: string;
@@ -116,6 +123,7 @@ export type IMentorCreate = IEntityCreate<{
   feeAcceptedAt: number | null;
   email?: string;
   approvedAt?: number | null;
+  reviews?: IMentorReview[];
 }>;
 
 export class Mentor extends Entity<IMentor> {
@@ -127,39 +135,7 @@ export class Mentor extends Entity<IMentor> {
   }
   public unmarshall(): IEntity<IMentor> {
     return {
-      id: this.id,
-      userId: this.userId,
-      username: this.username,
-      fullname: this.fullname,
-      avatarUrl: this.avatarUrl,
-      className: this.className,
-      bankInfo: this.bankInfo,
-      introVideo: this.introVideo,
-      availableClasses: this.availableClasses,
-      upcomingClasses: this.upcomingClasses,
-      highlightedUpcomingClass: this.highlightedUpcomingClass,
-      liveClasses: this.liveClasses,
-      isOnline: this.isOnline,
-      reviewPoint: this.reviewPoint,
-      price: this.price,
-      isCertified: this.isCertified,
-      joinedAt: this.joinedAt,
-      certificates: this.certificates,
-      rating: this.rating,
-      schedules: this.schedules,
-      nickname: this.nickname,
-      bio: this.bio,
-      gender: this.gender,
-      lastEducation: this.lastEducation,
-      company: this.company,
-      providerFee: this.providerFee,
-      mentorFee: this.mentorFee,
-      feeAcceptedAt: this.feeAcceptedAt,
-      createdAt: this.createdAt.getTime(),
-      updatedAt: this.updatedAt.getTime(),
-      deletedAt: this.deletedAt?.getTime() || null,
-      email: this.email,
-      approvedAt: this.approvedAt,
+      ...super.unmarshall(),
     };
   }
   public approve() {
@@ -373,5 +349,11 @@ export class Mentor extends Entity<IMentor> {
   }
   set approvedAt(v: number | null) {
     this._props.approvedAt = v;
+  }
+  get reviews(): IMentorReview[] {
+    return this._props.reviews;
+  }
+  set reviews(v: IMentorReview[]) {
+    this._props.reviews = v;
   }
 }
