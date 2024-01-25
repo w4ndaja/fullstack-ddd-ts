@@ -164,13 +164,14 @@ export class LiveTrainingService {
       },
     });
     let transactionDto = transaction.unmarshall();
-    if (liveTrainingBook.payment.total !== 0) {
+    if (liveTrainingBook.payment.total != 0) {
       transactionDto = await this.transactionRepository.createTransaction(transactionDto);
       transaction = Transaction.create(transactionDto);
       liveTrainingBook.payment = {
         ...liveTrainingBook.payment,
         url: transaction.redirect_url,
         status: PaymentStatus.PENDING.toString(),
+        paidAt: null,
       };
     } else {
       liveTrainingBook.setPaid();
