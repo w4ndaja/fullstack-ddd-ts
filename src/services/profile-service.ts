@@ -1,5 +1,10 @@
 import { Logger } from "@/common/libs/logger";
-import { IBookRepository, IMentorRepository, IParticipantRepository, IUserRepository } from "@/domain/service";
+import {
+  IBookRepository,
+  IMentorRepository,
+  IParticipantRepository,
+  IUserRepository,
+} from "@/domain/service";
 import { TYPES } from "@/ioc/types";
 import { inject, injectable } from "inversify";
 import { EROLES } from "@/common/utils/roles";
@@ -25,18 +30,14 @@ export class ProfileService {
     if (this.auth.user.roles.includes(EROLES.MENTOR)) {
       const mentor = await this.mentorRepository.findByUserId(this.auth.user.id);
       mentor.reviews = (
-        await this.bookRepository.findAllByMentorId(
-          mentor.userId,
-          EBookStatus.FINISHED.toString()
-        )
+        await this.bookRepository.findAllByMentorId(mentor.userId, EBookStatus.FINISHED.toString())
       ).map((review) => ({
         avatarUrl: review.participantAvatar,
         rating: review.rating,
         review: review.review,
       }));
       mentor.rating =
-        (Math.ceil(mentor.reviews.reduce((a, b) => a + b.rating, 0) / mentor.reviews.length) *
-          2) /
+        (Math.ceil(mentor.reviews.reduce((a, b) => a + b.rating, 0) / mentor.reviews.length) * 2) /
         2;
       return mentor;
     } else if (this.auth.user.roles.includes(EROLES.PARTICIPANT)) {
@@ -174,11 +175,9 @@ export class ProfileService {
   }
   public async getAvatarFile(email: string) {
     const userDto = await this.userRepository.findByUsernameOrEmail(email);
-    let profileDto: IMentor | IParticipant = await this.participantRepository.findByUserId(
-      userDto.id
-    );
+    let profileDto: IMentor | IParticipant = await this.mentorRepository.findByUserId(userDto.id);
     if (!profileDto) {
-      profileDto = await this.mentorRepository.findByUserId(userDto.id);
+      profileDto = await this.participantRepository.findByUserId(userDto.id);
     }
     const response = await axios.get(
       profileDto?.avatarUrl ||
