@@ -207,6 +207,14 @@ export class LiveTrainingService {
   }
 
   public async join(liveTrainingId: string) {
+    let liveTrainingDto = await this.liveTrainingRepository.findById(liveTrainingId);
+    if (!liveTrainingDto) {
+      throw new AppError(ErrorCode.NOT_FOUND, "Live Training tidak ditemukan");
+    }
+    const liveTraining = LiveTraining.create(liveTrainingDto);
+    if (liveTraining.price === 0) {
+      return liveTrainingDto;
+    }
     let liveTrainingBookDto = await this.liveTrainingBookRepository.findByIdAndParticipantId(
       liveTrainingId,
       this.auth.userId
@@ -225,10 +233,6 @@ export class LiveTrainingService {
         );
       }
     }
-    const liveTraining = LiveTraining.create(
-      await this.liveTrainingRepository.findById(liveTrainingId)
-    );
-    const liveTrainingDto = liveTraining.unmarshall();
     return liveTrainingDto;
   }
 
