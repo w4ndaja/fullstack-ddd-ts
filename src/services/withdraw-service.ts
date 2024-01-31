@@ -34,7 +34,8 @@ export class WithdrawService {
   public async history(userId: string) {
     let withdrawsDto = await this.withdrawRepository.findAllByUserId(userId);
     let withdrawsEntity = withdrawsDto.map((item) => Withdraw.create(item));
-    return withdrawsEntity;
+    withdrawsDto = withdrawsEntity.map((item) => item.unmarshall());
+    return withdrawsDto;
   }
   public async process(withdrawId: string) {
     let withdrawDto = await this.withdrawRepository.findById(withdrawId);
