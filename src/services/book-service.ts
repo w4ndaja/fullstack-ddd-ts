@@ -163,14 +163,26 @@ export class BookService {
   async history(status: EBookStatus): Promise<IBook[]> {
     if (!this.auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
     let books: IBook[] = [];
-    if (this.auth.user.hasRole(EROLES.PARTICIPANT)) {
-      books = await this.bookRepository.findAllByParticipantId(this.auth.userId, status);
-    }
-    if (this.auth.user.hasRole(EROLES.MENTOR)) {
-      const mentorBooks = await this.bookRepository.findAllByMentorId(this.auth.userId, status);
-      books = [...books, ...mentorBooks.filter(item => !books.find(b => b.id === item.id))];
-    }
+    const [booksAsParticipant, booksAsMentor] = await Promise.all([
+      (async () => {
+        if (this.auth.user.hasRole(EROLES.PARTICIPANT)) {
+          return await this.bookRepository.findAllByParticipantId(this.auth.userId, status);
+        }
+      })(),
+      (async () => {
+        if (this.auth.user.hasRole(EROLES.MENTOR)) {
+          return await this.bookRepository.findAllByMentorId(this.auth.userId, status);
+        }
+      })(),
+    ]);
+    
+    books = [
+      ...booksAsParticipant,
+      ...booksAsMentor.filter((item) => !books.find((b) => b.id === item.id)),
+    ];
+
     books = books.sort((b, a) => a.createdAt - b.createdAt);
+    
     await Promise.all(
       books.map(async (book) => {
         const [userMentorDto, userParticipantDto] = await Promise.all([
