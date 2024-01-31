@@ -15,4 +15,5 @@ module.exports = {
     "zego-express-engine-webrtc",
     "zego-zim-web",
   ],
+  poweredByHeader: false,
 };

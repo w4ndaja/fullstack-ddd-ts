@@ -36,6 +36,7 @@ export class WebServer {
       dir: config.presentation.dir,
     });
     this.fePrepared = this.feServer.prepare();
+    this.restServer.disable("x-powered-by");
     this.restServer.use(
       config.app.apiUrlPrefix,
       (req: Request, res: Response, next: NextFunction) => {
