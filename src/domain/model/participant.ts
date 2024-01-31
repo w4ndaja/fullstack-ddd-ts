@@ -4,6 +4,7 @@ import { IUser, User } from "./user";
 export type IParticipant = IEntity<{
   userId: IUser["id"];
   username: string;
+  email: string;
   followerCount: number;
   followingCount: number;
   fullname: string;
@@ -22,6 +23,7 @@ export type IParticipant = IEntity<{
 export type IParticipantCreate = IEntityCreate<{
   userId: IUser["id"];
   username: string;
+  email?: string;
   followerCount?: number;
   followingCount?: number;
   fullname: string;
@@ -49,6 +51,7 @@ export class Participant extends Entity<IParticipant> {
       id: this.id,
       userId: this.userId,
       username: this.username,
+      email: this.email,
       followerCount: this.followerCount,
       followingCount: this.followingCount,
       fullname: this.fullname,
@@ -103,5 +106,11 @@ export class Participant extends Entity<IParticipant> {
   }
   get balance(): number {
     return this._props.balance;
+  }
+  get email(): string {
+    return this._props.email || "";
+  }
+  set email(v: string) {
+    this._props.email = v;
   }
 }

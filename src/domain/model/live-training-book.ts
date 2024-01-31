@@ -89,7 +89,7 @@ export class LiveTrainingBook extends Entity<ILiveTrainingBook> {
   }
   public setPaid() {
     this.payment.paidAt = Date.now();
-    this.payment.status = PaymentStatus.SETTLEMENT;
+    this.payment.status = PaymentStatus.SETTLEMENT.toString();
     this.status = EBookStatus.OCCURRING.toString();
     return this;
   }

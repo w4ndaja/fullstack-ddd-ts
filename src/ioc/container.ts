@@ -27,6 +27,8 @@ import { LiveTrainingController } from "@/presentation/web/controllers/live-trai
 import { ChatSessionController } from "@/presentation/web/controllers/chat-session-controller";
 import { StorageController } from "@/presentation/web/controllers/storage-controller";
 import { TransactionController } from "@/presentation/web/controllers/transaction-controller";
+import { WalletController } from "@/presentation/web/controllers/wallet-controller";
+import { WithdrawController } from "@/presentation/web/controllers/withdraw-controller";
 
 // REST Middleware
 import { AuthMiddleware } from "@/presentation/web/middlewares/auth-middleware";
@@ -54,6 +56,8 @@ import {
   ILiveTrainingBookRepository,
   IChatSessionRepository,
   ITransactionRepository,
+  IWalletRepository,
+  IWithdrawRepository
 } from "@/domain/service";
 
 // Repository Implementation
@@ -69,6 +73,8 @@ import {
   LiveTrainingBookRepository,
   ChatSessionRepository,
   TransactionRepository,
+  WalletRepository,
+  WithdrawRepository
 } from "@/infra/mongodb";
 // import { UserRepository, AuthRepository } from "@/infra/sqlite/repositories";
 
@@ -85,6 +91,8 @@ import {
   LiveTrainingService,
   ChatSesssionService,
   TransactionService,
+  WalletService,
+  WithdrawService
 } from "@/services";
 
 const container = new Container({ skipBaseClassChecks: true });
@@ -107,6 +115,8 @@ container.bind<LiveTrainingController>(LiveTrainingController).toSelf();
 container.bind<ChatSessionController>(ChatSessionController).toSelf();
 container.bind<StorageController>(StorageController).toSelf();
 container.bind<TransactionController>(TransactionController).toSelf();
+container.bind<WalletController>(WalletController).toSelf();
+container.bind<WithdrawController>(WithdrawController).toSelf();
 
 // REST Middleware Binding
 container.bind<AuthMiddleware>(AuthMiddleware).toSelf();
@@ -134,6 +144,8 @@ container
   .to(LiveTrainingBookRepository);
 container.bind<IChatSessionRepository>(TYPES.ChatSessionRespository).to(ChatSessionRepository);
 container.bind<ITransactionRepository>(TYPES.TransactionRepository).to(TransactionRepository);
+container.bind<IWalletRepository>(TYPES.WalletRepository).to(WalletRepository);
+container.bind<IWithdrawRepository>(TYPES.WithdrawRepository).to(WithdrawRepository);
 
 // Service Bind
 container.bind<AuthService>(AuthService).toSelf();
@@ -147,5 +159,7 @@ container.bind<FileStorageService>(FileStorageService).toSelf();
 container.bind<LiveTrainingService>(LiveTrainingService).toSelf();
 container.bind<ChatSesssionService>(ChatSesssionService).toSelf();
 container.bind<TransactionService>(TransactionService).toSelf();
+container.bind<WalletService>(WalletService).toSelf();
+container.bind<WithdrawService>(WithdrawService).toSelf();
 
 export { container };

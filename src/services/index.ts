@@ -9,3 +9,5 @@ export * from "./file-storage-service";
 export * from "./live-training-service";
 export * from "./chat-session-service";
 export * from "./transaction-service";
+export * from "./wallet-service";
+export * from "./withdraw-service";

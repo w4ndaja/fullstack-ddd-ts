@@ -7,6 +7,7 @@ import {
   IParticipantRepository,
   ITransactionRepository,
   IUserRepository,
+  IWalletRepository,
 } from "@/domain/service";
 import { TYPES } from "@/ioc/types";
 import { inject, injectable } from "inversify";
@@ -17,6 +18,7 @@ import { EROLES } from "@/common/utils/roles";
 import { Auth, IAuth, IParticipant, IUser } from "@/domain/model";
 import { IMentor, Mentor } from "@/domain/model/mentor";
 import { Transaction } from "@/domain/model/transaction";
+import { Wallet } from "@/domain/model/wallet";
 
 @injectable()
 export class BookService {
@@ -27,7 +29,8 @@ export class BookService {
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
     @inject(TYPES.BookRepository) private bookRepository: IBookRepository,
     @inject(TYPES.TransactionRepository) private transactionRepository: ITransactionRepository,
-    @inject(TYPES.Logger) private logger: Logger
+    @inject(TYPES.Logger) private logger: Logger,
+    @inject(TYPES.WalletRepository) private walletRepository: IWalletRepository
   ) {}
   async book(
     mentorId: string,
@@ -90,7 +93,7 @@ export class BookService {
         last_name: lastName.join(" "),
         email: this.auth.user.email,
         phone: "",
-      }
+      },
     });
     let transactionDto = transactionEntity.unmarshall();
     transactionDto = await this.transactionRepository.createTransaction(transactionDto);
@@ -226,10 +229,22 @@ export class BookService {
     if (!this.auth) throw new AppError(ErrorCode.UNAUTHORIZED, "Unauthorized");
     const bookDto = await this.bookRepository.findById(bookId);
     if (!bookDto) throw new AppError(ErrorCode.NOT_FOUND, "Not found");
+    let walletDto = await this.walletRepository.findByUserId(bookDto.mentor.userId);
+
     const bookEntity = Book.create(bookDto);
+    const walletEntity = Wallet.create(walletDto);
+
+    walletEntity.addIncome(Math.ceil(bookEntity.payment.total * (bookEntity.mentorFee / 100)));
     bookEntity.finish(this.auth.userId, rating, review);
+
     const bookUpdateDto = bookEntity.unmarshall();
-    await this.bookRepository.save(bookUpdateDto);
+    walletDto = walletEntity.unmarshall();
+
+    await Promise.all([
+      this.bookRepository.save(bookUpdateDto),
+      await this.walletRepository.save(walletDto),
+    ]);
+
     return bookUpdateDto;
   }
 

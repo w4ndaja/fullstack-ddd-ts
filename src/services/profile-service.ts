@@ -39,9 +39,11 @@ export class ProfileService {
       mentor.rating =
         (Math.ceil(mentor.reviews.reduce((a, b) => a + b.rating, 0) / mentor.reviews.length) * 2) /
         2;
-      return mentor;
-    } else if (this.auth.user.roles.includes(EROLES.PARTICIPANT)) {
-      const participant = await this.participantRepository.findByUserId(this.auth.user.id);
+        mentor.email = this.auth.user.email
+        return mentor;
+      } else if (this.auth.user.roles.includes(EROLES.PARTICIPANT)) {
+        const participant = await this.participantRepository.findByUserId(this.auth.user.id);
+        participant.email = this.auth.user.email
       return participant;
     }
   }

@@ -48,7 +48,7 @@ export class Repository<IData> implements IRepository<IData> {
   }
 
   async save(_data: Partial<IData>): Promise<IData> {
-    const data = <IEntity<IData>>{ ..._data };
+    let data = <IEntity<IData>>{ ..._data };
     const checkExist = await this.collection.findOne({ id: data.id });
     if (checkExist?._id) {
       await this.collection.updateOne(

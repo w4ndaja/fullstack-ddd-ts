@@ -3,6 +3,7 @@ import { Entity, IEntity, IEntityCreate } from "./entity";
 import { IParticipant, Participant } from "./participant";
 import { AppError } from "@/common/libs/error-handler";
 import { ErrorCode } from "@/common/utils";
+import { PaymentStatus } from "@/common/utils/payment-status";
 
 export type IBook = IEntity<{
   bookId: string;
@@ -207,6 +208,7 @@ export class Book extends Entity<IBook> {
     if (this.status !== EBookStatus.WAITINGPAYMENT.toString())
       throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Book is not waiting payment");
     this.payment.paidAt = Date.now();
+    this.payment.status = PaymentStatus.SETTLEMENT.toString();
     this.status = EBookStatus.OCCURRING.toString();
     return this;
   }
