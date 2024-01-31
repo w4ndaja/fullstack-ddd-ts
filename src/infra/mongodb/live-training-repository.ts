@@ -100,6 +100,9 @@ export class LiveTrainingRepository
         {
           limit: param.limit,
           skip,
+          sort : {
+            startAt : -1
+          }
         }
       )
       .toArray();
