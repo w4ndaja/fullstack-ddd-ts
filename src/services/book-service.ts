@@ -168,8 +168,7 @@ export class BookService {
     }
     if (this.auth.user.hasRole(EROLES.MENTOR)) {
       const mentorBooks = await this.bookRepository.findAllByMentorId(this.auth.userId, status);
-      mentorBooks.filter(item => !books.find(b => b.id === item.id))
-      books = [...books, ...mentorBooks];
+      books = [...books, ...mentorBooks.filter(item => !books.find(b => b.id === item.id))];
     }
     books = books.sort((b, a) => a.createdAt - b.createdAt);
     await Promise.all(
