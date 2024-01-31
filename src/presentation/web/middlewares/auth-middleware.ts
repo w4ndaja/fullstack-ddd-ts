@@ -1,6 +1,7 @@
 import { AppError } from "@/common/libs/error-handler";
 import { Logger } from "@/common/libs/logger";
 import { ErrorCode } from "@/common/utils";
+import { EPERMISSIONS } from "@/common/utils/permissions";
 import { EROLES } from "@/common/utils/roles";
 import { Auth, IAuth } from "@/domain/model";
 import { TYPES } from "@/ioc/types";
@@ -33,4 +34,16 @@ export class AuthMiddleware {
       next();
     };
   }
+  
+  hasPermission(permission: EPERMISSIONS) {
+    return async function (req: Request, res: Response, next: NextFunction) {
+      const authDto = <IAuth>res.locals.auth;
+      const auth = Auth.create(authDto);
+      if (!auth?.user.hasPermission(permission)) {
+        throw new AppError(ErrorCode.FORBIDDEN, "Forbidden");
+      }
+      next();
+    };
+  }
+  
 }

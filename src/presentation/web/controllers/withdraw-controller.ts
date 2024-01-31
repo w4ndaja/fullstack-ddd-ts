@@ -6,6 +6,7 @@ import { EROLES } from "@/common/utils/roles";
 import { NextFunction, Request, Response } from "express";
 import { IAuth } from "@/domain/model";
 import { RestMapper } from "@/dto/mappers/rest-mapper";
+import { EPERMISSIONS } from "@/common/utils/permissions";
 
 @injectable()
 export class WithdrawController extends Router {
@@ -22,17 +23,17 @@ export class WithdrawController extends Router {
     );
     this.routes.put(
       "/:withdrawId/process",
-      asyncWrapper(this.authMiddleware.hasRole(EROLES.FINANCE).bind(this.authMiddleware)),
+      asyncWrapper(this.authMiddleware.hasPermission(EPERMISSIONS.PROGRESS_WD).bind(this.authMiddleware)),
       asyncWrapper(this.processWithdraw.bind(this))
     );
     this.routes.put(
       "/:withdrawId/finish",
-      asyncWrapper(this.authMiddleware.hasRole(EROLES.FINANCE).bind(this.authMiddleware)),
+      asyncWrapper(this.authMiddleware.hasPermission(EPERMISSIONS.FINISH_WD).bind(this.authMiddleware)),
       asyncWrapper(this.finishWithdraw.bind(this))
     );
     this.routes.put(
       "/:withdrawId/reject",
-      asyncWrapper(this.authMiddleware.hasRole(EROLES.FINANCE).bind(this.authMiddleware)),
+      asyncWrapper(this.authMiddleware.hasPermission(EPERMISSIONS.REJECT_WD).bind(this.authMiddleware)),
       asyncWrapper(this.finishWithdraw.bind(this))
     );
   }

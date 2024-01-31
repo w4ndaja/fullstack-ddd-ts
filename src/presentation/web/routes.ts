@@ -28,8 +28,8 @@ export class Routes extends Router {
     private chatSesssionController: ChatSessionController,
     private storageController: StorageController,
     private transactionController: TransactionController,
-    private walletController:WalletController,
-    private withdrawController:WithdrawController
+    private walletController: WalletController,
+    private withdrawController: WithdrawController
   ) {
     super();
     this.getRouter().get("/health-check", async (req, res) => res.send("SERVER IS UP"));
