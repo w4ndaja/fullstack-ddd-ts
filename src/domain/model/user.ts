@@ -135,7 +135,7 @@ export class User extends Entity<IUser> {
   }
 
   public hasRole(role: EROLES): boolean {
-    if (role === EROLES.SUPER_ADMIN) return true;
+    if (this.roles.includes(EROLES.SUPER_ADMIN)) return true;
     return this.roles.includes(role);
   }
 

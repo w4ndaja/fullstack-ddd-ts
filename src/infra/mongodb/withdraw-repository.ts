@@ -10,7 +10,7 @@ export class WithdrawRepository extends Repository<IWithdraw> implements IWithdr
     super("withdraws");
   }
   async findAllByUserId(userId: string): Promise<IWithdraw[]> {
-    const mongo = await this.collection.find({ userId }, { sort: { createdAt: 1 } });
+    const mongo = await this.collection.find({ userId }, { sort: { createdAt: -1 } });
     const withdraws: IWithdraw[] = (await mongo.toArray()).map(
       ({ _id, ...item }) => <IWithdraw>item
     );

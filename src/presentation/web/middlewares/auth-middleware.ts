@@ -39,6 +39,7 @@ export class AuthMiddleware {
     return async function (req: Request, res: Response, next: NextFunction) {
       const authDto = <IAuth>res.locals.auth;
       const auth = Auth.create(authDto);
+      console.log(`!auth?.user.hasPermission(permission) ${!auth?.user.hasPermission(permission)}`)
       if (!auth?.user.hasPermission(permission)) {
         throw new AppError(ErrorCode.FORBIDDEN, "Forbidden");
       }

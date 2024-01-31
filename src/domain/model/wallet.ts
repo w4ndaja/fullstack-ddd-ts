@@ -39,6 +39,14 @@ export class Wallet extends Entity<IWallet> {
     if (this.balance < amount) {
       throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Insufficient Balance");
     }
+    this.balance -= amount;
+    this.payoutTotal += amount;
+    return this;
+  }
+  public refund(amount: number) {
+    this.balance += amount;
+    this.payoutTotal -= amount;
+    return this;
   }
   get userId(): string {
     return this._props.userId;

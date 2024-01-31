@@ -3,12 +3,14 @@ import { Entity, IEntity, IEntityCreate } from "./entity";
 
 export type IWithdraw = IEntity<{
   userId: string;
+  amount: number;
   status: string;
   receivedAt: number | null;
 }>;
 
 export type IWithdrawCreate = IEntityCreate<{
   userId: string;
+  amount: number;
   status: string;
   receivedAt?: number | null;
 }>;
@@ -43,5 +45,11 @@ export class Withdraw extends Entity<IWithdraw> {
   }
   set receivedAt(value: number) {
     this._props.receivedAt = value;
+  }
+  get amount(): number {
+    return this._props.amount;
+  }
+  set amount(v: number) {
+    this._props.amount = v;
   }
 }
