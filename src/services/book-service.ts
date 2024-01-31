@@ -90,7 +90,7 @@ export class BookService {
         last_name: lastName.join(" "),
         email: this.auth.user.email,
         phone: "",
-      },
+      }
     });
     let transactionDto = transactionEntity.unmarshall();
     transactionDto = await this.transactionRepository.createTransaction(transactionDto);

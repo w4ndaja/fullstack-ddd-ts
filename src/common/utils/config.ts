@@ -69,5 +69,7 @@ export const config = {
       process.env.MIDTRANS_CLIENT_KEY_PRODUCTION || "Mid-client-JzJIiu1Ymz7X4EAz",
     serverKeyProduction:
       process.env.MIDTRANS_SERVER_KEY_PRODUCTION || "Mid-server-uAk-NeS8dZkJfA_ecaS45NGq",
+    finishUrlSandbox: process.env.MIDTRANS_FINISH_URL_SANDBOX || "camyrtc://books",
+    finishUrlProduction: process.env.MIDTRANS_FINISH_URL_PRODUCTION || "camyrtc://books",
   },
 };

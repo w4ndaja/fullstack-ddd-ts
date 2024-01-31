@@ -2,7 +2,7 @@ import { config } from "@/common/utils";
 import { Entity, IEntity, IEntityCreate } from "./entity";
 import { ILiveTrainingBook, LiveTrainingBook } from "./live-training-book";
 
-export type ILiveTrainingStatus = "ONGOING" | "COMINGSOON" | "ONDEMAND";
+export type ILiveTrainingStatus = "ONGOING" | "COMINGSOON" | "ONDEMAND" | "ONGOINGCOMINGSOON";
 
 export type ILiveTraining = IEntity<{
   roomId: string;
@@ -109,7 +109,9 @@ export class LiveTraining extends Entity<ILiveTraining> {
   public unmarshall(): ILiveTraining {
     return {
       ...super.unmarshall(),
-      liveTrainingBooks : this.liveTrainingBooks ? this.liveTrainingBooks.map(item => item.unmarshall()) : undefined,
+      liveTrainingBooks: this.liveTrainingBooks
+        ? this.liveTrainingBooks.map((item) => item.unmarshall())
+        : undefined,
       startAt: this.startAt.getTime(),
       endAt: this.endAt?.getTime() || null,
     };
@@ -219,7 +221,7 @@ export class LiveTraining extends Entity<ILiveTraining> {
       return "ONDEMAND";
     } else if (this._props.startAt <= Date.now()) {
       return "ONGOING";
-    } else  {
+    } else {
       return this._props.status;
     }
   }

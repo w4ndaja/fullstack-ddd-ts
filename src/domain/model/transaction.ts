@@ -7,6 +7,7 @@ export type ITransaction = IEntity<{
   token: string | null;
   redirect_url: string | null;
   notification: Object | null;
+  callbacks: ICallbacks | null;
 }>;
 
 export type ITransactionCreate = IEntityCreate<{
@@ -16,7 +17,12 @@ export type ITransactionCreate = IEntityCreate<{
   token?: string | null;
   redirect_url?: string | null;
   notification?: Object | null;
+  callbacks?: ICallbacks | null;
 }>;
+
+interface ICallbacks {
+  finish: string;
+}
 
 interface Customerdetails {
   first_name: string;
@@ -35,11 +41,12 @@ interface Transactiondetails {
 }
 
 export class Transaction extends Entity<ITransaction> {
-  constructor({ token, redirect_url, notification, ...props }: ITransactionCreate) {
+  constructor({ token, redirect_url, notification, callbacks, ...props }: ITransactionCreate) {
     super({
       token: token || null,
       redirect_url: redirect_url || null,
       notification: notification || null,
+      callbacks: callbacks || null,
       ...props,
     });
   }
@@ -87,5 +94,11 @@ export class Transaction extends Entity<ITransaction> {
   }
   set notification(v: Object | null) {
     this._props.notification = v;
+  }
+  get callbacks(): ICallbacks | null {
+    return this._props.callbacks;
+  }
+  set callbacks(v: ICallbacks | null) {
+    this._props.callbacks = v;
   }
 }

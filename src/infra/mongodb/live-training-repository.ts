@@ -89,7 +89,12 @@ export class LiveTrainingRepository
     const liveTrainingDto = await this.collection
       .find(
         {
-          status: status.toString(),
+          ...(status !== "ONGOINGCOMINGSOON" && { status: status.toString() }),
+          ...(status == "ONGOINGCOMINGSOON" && {
+            status: {
+              $in: ["ONGOING", "COMINGSOON"],
+            },
+          }),
           authorized: true,
         },
         {
