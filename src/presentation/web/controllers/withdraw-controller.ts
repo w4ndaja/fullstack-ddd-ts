@@ -34,7 +34,7 @@ export class WithdrawController extends Router {
     this.routes.put(
       "/:withdrawId/reject",
       asyncWrapper(this.authMiddleware.hasPermission(EPERMISSIONS.REJECT_WD).bind(this.authMiddleware)),
-      asyncWrapper(this.finishWithdraw.bind(this))
+      asyncWrapper(this.rejectWithdraw.bind(this))
     );
   }
 
@@ -46,14 +46,20 @@ export class WithdrawController extends Router {
   }
 
   private async processWithdraw(req: Request, res: Response, next: NextFunction) {
-    const { withdrawId } = req.body;
+    const { withdrawId } = req.params;
     const result = await this.withdrawService.process(withdrawId);
     res.json(RestMapper.dtoToRest(result));
   }
 
   private async finishWithdraw(req: Request, res: Response, next: NextFunction) {
-    const { withdrawId } = req.body;
+    const { withdrawId } = req.params;
     const result = await this.withdrawService.finish(withdrawId);
+    res.json(RestMapper.dtoToRest(result));
+  }
+
+  private async rejectWithdraw(req: Request, res: Response, next: NextFunction) {
+    const { withdrawId } = req.params;
+    const result = await this.withdrawService.reject(withdrawId);
     res.json(RestMapper.dtoToRest(result));
   }
 }

@@ -1,6 +1,6 @@
 export enum EWithdrawStatus {
-  "PENDING",
-  "INPROGRESS",
-  "SUCCESS",
-  "REJECT"
+  "PENDING" = "PENDING",
+  "INPROGRESS" = "INPROGRESS",
+  "SUCCESS" = "SUCCESS",
+  "REJECT" = "REJECT",
 }
