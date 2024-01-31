@@ -16,6 +16,11 @@ export class WithdrawController extends Router {
   ) {
     super("/withdraw");
     this.routes.use(asyncWrapper(this.authMiddleware.authenticated.bind(this.authMiddleware)));
+    this.routes.get(
+      "/histories",
+      asyncWrapper(this.authMiddleware.hasRole(EROLES.MENTOR).bind(this.authMiddleware)),
+      asyncWrapper(this.histories.bind(this))
+    );
     this.routes.post(
       "/request",
       asyncWrapper(this.authMiddleware.hasRole(EROLES.MENTOR).bind(this.authMiddleware)),
@@ -38,6 +43,12 @@ export class WithdrawController extends Router {
     );
   }
 
+  private async histories(req: Request, res: Response, next: NextFunction) {
+    const auth = <IAuth>res.locals.auth;
+    const result = await this.withdrawService.history(auth.userId);
+    res.json(RestMapper.dtoToRest(result));
+  }
+  
   private async requestWithdraw(req: Request, res: Response, next: NextFunction) {
     const auth = <IAuth>res.locals.auth;
     const { amount } = req.body;
