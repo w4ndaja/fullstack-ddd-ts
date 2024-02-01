@@ -10,7 +10,6 @@ export class Midtrans {
   private env: "PRODUCTION" | "SANDBOX";
   private authString: string;
   public serverKey: string;
-  private finishUrl: string;
   constructor() {
     this.env = <"PRODUCTION" | "SANDBOX">config.midtrans.env;
     this.serverKey =
@@ -18,10 +17,6 @@ export class Midtrans {
         ? config.midtrans.serverKeyProduction
         : config.midtrans.serverKeySandbox;
     this.authString = Buffer.from(`${this.serverKey}:`, "base64").toString();
-    this.finishUrl =
-      this.env === "PRODUCTION"
-        ? config.midtrans.finishUrlProduction
-        : config.midtrans.finishUrlSandbox;
     this.snap = new Snap({
       // Set to true if you want Production Environment (accept real transaction).
       isProduction: this.env == "PRODUCTION",
@@ -34,9 +29,6 @@ export class Midtrans {
   public async createTransaction(transaction: ITransactionCreate): Promise<ITransaction> {
     const result = await this.snap.createTransaction({
       ...transaction,
-      callbacks: {
-        finish: this.finishUrl,
-      },
     });
     return <ITransaction>{
       ...transaction,

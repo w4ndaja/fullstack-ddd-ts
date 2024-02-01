@@ -94,6 +94,9 @@ export class BookService {
         email: this.auth.user.email,
         phone: "",
       },
+      callbacks: {
+        finish: "camyrtc://books/history",
+      },
     });
     let transactionDto = transactionEntity.unmarshall();
     transactionDto = await this.transactionRepository.createTransaction(transactionDto);
@@ -175,14 +178,14 @@ export class BookService {
         }
       })(),
     ]);
-    
+
     books = [
-      ...booksAsParticipant || [],
-      ...booksAsMentor?.filter((item) => !books.find((b) => b.id === item.id)) || [],
+      ...(booksAsParticipant || []),
+      ...(booksAsMentor?.filter((item) => !books.find((b) => b.id === item.id)) || []),
     ];
 
     books = books.sort((b, a) => a.createdAt - b.createdAt);
-    
+
     await Promise.all(
       books.map(async (book) => {
         const [userMentorDto, userParticipantDto] = await Promise.all([

@@ -162,6 +162,9 @@ export class LiveTrainingService {
         last_name: lastName.join(" "),
         phone: "",
       },
+      callbacks : {
+        finish : "camyrtc://live-training/user-histories"
+      }
     });
 
     let transactionDto = transaction.unmarshall();
