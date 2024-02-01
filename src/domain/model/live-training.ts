@@ -126,7 +126,8 @@ export class LiveTraining extends Entity<ILiveTraining> {
     return this;
   }
 
-  public finish() {
+  public finish(income:number) {
+    this.incomeTotal = income;
     this.endAt = Date.now();
     this.status = "ONDEMAND";
     return this;

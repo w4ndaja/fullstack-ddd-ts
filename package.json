@@ -58,7 +58,8 @@
     "bundle": "pkg -C GZip .",
     "typeorm": "typeorm-ts-node-esm",
     "typeorm:d": "typeorm-ts-node-esm -d src/infra/sqlite/index.ts",
-    "typeorm:migrate": "typeorm-ts-node-esm migration:run -d ./src/infra/sqlite/index.ts"
+    "typeorm:migrate": "typeorm-ts-node-esm migration:run -d ./src/infra/sqlite/index.ts",
+    "test":"ts-node ./src/test/test.ts"
   },
   "devDependencies": {
     "@swc/core": "^1.3.80",

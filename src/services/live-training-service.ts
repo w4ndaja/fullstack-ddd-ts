@@ -13,6 +13,7 @@ import {
 } from "@/domain/model/live-training-book";
 import { Mentor } from "@/domain/model/mentor";
 import { Transaction } from "@/domain/model/transaction";
+import { Wallet } from "@/domain/model/wallet";
 import {
   ILiveTrainingBookRepository,
   ILiveTrainingRepository,
@@ -20,6 +21,7 @@ import {
   IParticipantRepository,
   ITransactionRepository,
   IUserRepository,
+  IWalletRepository,
 } from "@/domain/service";
 import { TYPES } from "@/ioc/types";
 import { inject, injectable } from "inversify";
@@ -35,7 +37,8 @@ export class LiveTrainingService {
     private liveTrainingBookRepository: ILiveTrainingBookRepository,
     @inject(TYPES.MentorRepository) private mentorRepository: IMentorRepository,
     @inject(TYPES.ParticipantRepository) private participantRepository: IParticipantRepository,
-    @inject(TYPES.TransactionRepository) private transactionRepository: ITransactionRepository
+    @inject(TYPES.TransactionRepository) private transactionRepository: ITransactionRepository,
+    @inject(TYPES.WalletRepository) private walletRepository: IWalletRepository
   ) {}
   public async create(
     title: string,
@@ -162,9 +165,9 @@ export class LiveTrainingService {
         last_name: lastName.join(" "),
         phone: "",
       },
-      callbacks : {
-        finish : "camyrtc://live-training/user-histories"
-      }
+      callbacks: {
+        finish: "camyrtc://live-training/user-histories",
+      },
     });
 
     let transactionDto = transaction.unmarshall();
@@ -254,9 +257,19 @@ export class LiveTrainingService {
     let liveTrainingDto = await this.liveTrainingRepository.findById(liveTrainingId);
     if (!liveTrainingDto) throw new AppError(ErrorCode.NOT_FOUND, "Live Training Not Found");
     const liveTraining = LiveTraining.create(liveTrainingDto);
-    liveTraining.finish();
-    liveTrainingDto = liveTraining.unmarshall();
-    await this.liveTrainingRepository.save(liveTrainingDto);
+    if(liveTraining.status !== "ONGOING"){
+      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Live training not in ONGOING")
+    }
+    let [income, mentorDto] = await Promise.all([
+      this.liveTrainingBookRepository.calculateIncome(liveTrainingId),
+      this.mentorRepository.findById(liveTraining.mentorId),
+    ]);
+    const mentor = Mentor.create(mentorDto);
+    const wallet = Wallet.create(await this.walletRepository.findByUserId(mentor.userId));
+    liveTraining.finish(income);
+    wallet.addIncome(income);
+    this.walletRepository.save(wallet.unmarshall());
+    await this.liveTrainingRepository.save(liveTraining.unmarshall());
     return liveTrainingDto;
   }
 

@@ -19,6 +19,24 @@ export class LiveTrainingBookRepository
   constructor(@inject(TYPES.Logger) private logger: Logger) {
     super("liveTrainingBooks");
   }
+  async calculateIncome(liveTrainingId: string): Promise<number> {
+    const [{ paymentTotal }] = await this.collection
+      .aggregate([
+        {
+          $match: {
+            liveTrainingId: liveTrainingId,
+          },
+        },
+        {
+          $group: {
+            _id: 1,
+            paymentTotal: { $sum: "$payment.total" },
+          },
+        },
+      ])
+      .toArray();
+    return paymentTotal;
+  }
   async findHistoryByMonthStatusAndUserId(
     startDate: number | undefined,
     endDate: number | undefined,
@@ -68,7 +86,7 @@ export class LiveTrainingBookRepository
           liveTraining: item.liveTraining?.[0] || undefined,
         }
     );
-    this.logger.info(liveTrainingDto)
+    this.logger.info(liveTrainingDto);
     const _liveTrainingCount = await this.collection.aggregate([
       {
         $lookup: {

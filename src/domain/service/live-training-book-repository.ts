@@ -12,4 +12,5 @@ export interface ILiveTrainingBookRepository extends IRepository<ILiveTrainingBo
     limit: number,
     status: string
   ): Promise<IGenericPaginatedData<ILiveTrainingBook>>;
+  calculateIncome(liveTrainingId:string):Promise<number>;
 }
