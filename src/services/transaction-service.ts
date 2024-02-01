@@ -71,7 +71,7 @@ export class TransactionService {
       | INotifShoopePay
   ): Promise<ITransaction> {
     let transactionDto = await this.transactionRepository.findByOrderId(notification.order_id);
-    this.logger.info(`Midtrans trying to find transaction with order_id ${notification.order_id}`)
+    this.logger.info(`Midtrans trying to find transaction with order_id ${notification.order_id}`);
     if (!transactionDto) throw new AppError(ErrorCode.NOT_FOUND, "Order Not Found!");
     const transaction = Transaction.create(transactionDto);
     const ourSignature = jsCrypto.sha512(
@@ -121,7 +121,11 @@ export class TransactionService {
     if (bookDto) await this.bookRepository.save(bookDto);
     if (liveTrainingBookDto) await this.liveTrainingBookRepository.save(liveTrainingBookDto);
     await this.transactionRepository.save(transactionDto);
-    axios.post("https://api-v2.camy.id/api/midtrans/notification-handling", notification);
+    axios
+      .post("https://api-v2.camy.id/api/midtrans/notification-handling", notification)
+      .catch((e) =>
+        this.logger.error("Failed to forward midtrans notification to Camy OLD", e.response)
+      );
     transactionDto = transaction.unmarshall();
     return transactionDto;
   }
