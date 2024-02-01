@@ -177,8 +177,8 @@ export class BookService {
     ]);
     
     books = [
-      ...booksAsParticipant,
-      ...booksAsMentor?.filter((item) => !books.find((b) => b.id === item.id)),
+      ...booksAsParticipant || [],
+      ...booksAsMentor?.filter((item) => !books.find((b) => b.id === item.id)) || [],
     ];
 
     books = books.sort((b, a) => a.createdAt - b.createdAt);
