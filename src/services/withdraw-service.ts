@@ -16,6 +16,10 @@ export class WithdrawService {
     @inject(TYPES.WalletRepository) private walletRepository: IWalletRepository
   ) {}
   public async requestWithdraw(userId: string, amount: number) {
+    let wallet = Wallet.create(await this.walletRepository.findByUserId(userId));
+    if (wallet.balance < amount) {
+      throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "Insufficient balance");
+    }
     let withdraw = Withdraw.create({
       userId: userId,
       status: EWithdrawStatus.PENDING.toString(),
