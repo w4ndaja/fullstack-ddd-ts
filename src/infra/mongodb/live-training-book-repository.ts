@@ -20,7 +20,7 @@ export class LiveTrainingBookRepository
     super("liveTrainingBooks");
   }
   async calculateIncome(liveTrainingId: string): Promise<number> {
-    const [{ paymentTotal }] = await this.collection
+    const [{ paymentTotal } = { paymentTotal: 0 }] = await this.collection
       .aggregate([
         {
           $match: {
