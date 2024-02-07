@@ -48,19 +48,11 @@ export class User extends Entity<IUser> {
 
   public unmarshall(): IUser {
     return {
-      id: this.id,
-      fullname: this.fullname,
-      email: this.email,
-      username: this.username,
-      password: this.password,
+      ...super.unmarshall(),
       roles: this.roles.map((item) => item.toString()),
       permissions: this.permissions.map((item) => item.toString()),
       participant: this.participant?.unmarshall(),
       mentor: this.mentor?.unmarshall(), // Add mentor property
-      createdAt: this.createdAt.getTime(),
-      updatedAt: this.updatedAt.getTime(),
-      deletedAt: this.deletedAt?.getTime() || null,
-      avatarUrl: this.avatarUrl,
     };
   }
 
