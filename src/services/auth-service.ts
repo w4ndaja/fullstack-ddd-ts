@@ -168,11 +168,12 @@ export class AuthService {
     user.email = gAuthDto.email;
     let participantDto = await this.participantRepository.findByUserId(user.id);
     let participant = participantDto
-      ? Participant.create(participantDto)
+      ? Participant.create({ ...participantDto, avatarUrl: user.avatarUrl })
       : Participant.create({
           userId: user.id,
           username: user.email.split("@")[0],
           fullname: user.fullname,
+          avatarUrl: user.avatarUrl,
           bio: "",
           gender: "",
         });
