@@ -69,7 +69,7 @@ export class AuthService {
       followingCount: 0,
       bio: "",
       gender: null,
-      avatarUrl: "https://dummyimage.com/200x200",
+      avatarUrl: "https://img.icons8.com/?size=256&id=7819&format=png",
       introVideo: {
         service: "youtube",
         url: "https://www.youtube.com/watch?v=JGwWNGJdvx8",
