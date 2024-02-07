@@ -167,7 +167,6 @@ export class AuthService {
     user.email = gAuthDto.email;
     userDto = user.unmarshall();
     this.logger.info("Saving user with", userDto);
-    userDto = await this.userRepository.save(userDto);
     let participantDto = await this.participantRepository.findByUserId(userDto.id);
     let participant = participantDto
       ? Participant.create(participantDto)
