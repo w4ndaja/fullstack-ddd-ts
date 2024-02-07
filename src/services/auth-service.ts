@@ -165,9 +165,7 @@ export class AuthService {
     user.avatarUrl = gAuthDto.picture;
     user.fullname = gAuthDto.name;
     user.email = gAuthDto.email;
-    userDto = user.unmarshall();
-    this.logger.info("Saving user with", userDto);
-    let participantDto = await this.participantRepository.findByUserId(userDto.id);
+    let participantDto = await this.participantRepository.findByUserId(user.id);
     let participant = participantDto
       ? Participant.create(participantDto)
       : Participant.create({
@@ -177,6 +175,7 @@ export class AuthService {
           bio: "",
           gender: "",
         });
+    userDto = user.unmarshall();
     const auth = Auth.create({
       userId: user.id,
       expired: false,
