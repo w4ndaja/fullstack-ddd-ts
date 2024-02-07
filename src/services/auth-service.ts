@@ -159,6 +159,7 @@ export class AuthService {
           username: gAuthDto.email.split("@")[0],
           email: gAuthDto.email,
           avatarUrl: gAuthDto.picture,
+          roles: [EROLES.PARTICIPANT.toString()],
         });
     user.setRole(EROLES.PARTICIPANT);
     user.username = gAuthDto.email.split("@")[0];

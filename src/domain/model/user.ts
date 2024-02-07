@@ -140,8 +140,8 @@ export class User extends Entity<IUser> {
   }
 
   public setRole(role: EROLES): void {
-    if (!this.roles.includes(role)) {
-      this._props.roles.push(role.toString());
+    if (!this.hasRole(role)) {
+      this.roles.push(role);
     }
   }
 
