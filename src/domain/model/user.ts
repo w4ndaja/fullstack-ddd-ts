@@ -140,6 +140,8 @@ export class User extends Entity<IUser> {
   }
 
   public setRole(role: EROLES): void {
+    console.log("Roles =>", this.roles);
+    console.log(`Has Role (${role}) =>`, this.roles.includes(role));
     if (!this.roles.includes(role)) {
       this.roles.push(role);
     }
