@@ -160,12 +160,13 @@ export class AuthService {
           email: gAuthDto.email,
           avatarUrl: gAuthDto.picture,
         });
-    if (!user.hasRole(EROLES.PARTICIPANT)) user.setRole(EROLES.PARTICIPANT);
+    user.setRole(EROLES.PARTICIPANT);
     user.username = gAuthDto.email.split("@")[0];
     user.avatarUrl = gAuthDto.picture;
     user.fullname = gAuthDto.name;
     user.email = gAuthDto.email;
     userDto = user.unmarshall();
+    this.logger.info("Saving user with", userDto);
     userDto = await this.userRepository.save(userDto);
     let participantDto = await this.participantRepository.findByUserId(userDto.id);
     let participant = participantDto

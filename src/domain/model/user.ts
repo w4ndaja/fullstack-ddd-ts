@@ -140,7 +140,7 @@ export class User extends Entity<IUser> {
   }
 
   public setRole(role: EROLES): void {
-    if (!this.hasRole(role)) {
+    if (!this.roles.includes(role)) {
       this.roles.push(role);
     }
   }
