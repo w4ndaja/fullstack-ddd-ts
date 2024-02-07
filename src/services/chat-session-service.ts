@@ -143,6 +143,7 @@ export class ChatSesssionService {
           .sort((a, b) => a - b)[0]
       );
       if(startTime.getTime() > Date.now()){
+        this.logger.info("startTime =>"+startTime.toString(), "now => "+new Date().toString());
         throw new AppError(ErrorCode.PAYMENT_REQUIRED, "Konsultasi belum dimulai, mohon untuk bergabung sesuai jadwal")
       }
     }
