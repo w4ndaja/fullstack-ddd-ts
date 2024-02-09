@@ -19,16 +19,7 @@ import { Routes } from "@/presentation/web/routes";
 // REST Controller
 import { AuthController } from "@/presentation/web/controllers/auth-controller";
 import { UserController } from "@/presentation/web/controllers/user-controller";
-import { MentorController } from "@/presentation/web/controllers/mentor-controller";
-import { BookController } from "@/presentation/web/controllers/book-controller";
-import { BannerController } from "@/presentation/web/controllers/banner-controller";
-import { FileStorageController } from "@/presentation/web/controllers/file-storage-controller";
-import { LiveTrainingController } from "@/presentation/web/controllers/live-training-controller";
-import { ChatSessionController } from "@/presentation/web/controllers/chat-session-controller";
-import { StorageController } from "@/presentation/web/controllers/storage-controller";
-import { TransactionController } from "@/presentation/web/controllers/transaction-controller";
-import { WalletController } from "@/presentation/web/controllers/wallet-controller";
-import { WithdrawController } from "@/presentation/web/controllers/withdraw-controller";
+import { EmailController } from "@/presentation/web/controllers/email-controller";
 
 // REST Middleware
 import { AuthMiddleware } from "@/presentation/web/middlewares/auth-middleware";
@@ -39,61 +30,20 @@ import { AuthMiddleware } from "@/presentation/web/middlewares/auth-middleware";
 // Infrastructures
 // import { SQLiteDataSource } from "@/infra/sqlite/data-source";
 import { MongoDBConnection } from "@/infra/mongodb/connection";
-import { FirebaseAdmin } from "@/infra/firebase-admin";
-import { CamyMail } from "@/infra/camy-mail";
-import { Midtrans } from "@/infra/midtrans";
+import { WebmailBe } from "@/infra/webmail-be/webmail-be";
 
 // Repository Interfaces
-import {
-  IUserRepository,
-  IAuthRepository,
-  IBookRepository,
-  IMentorRepository,
-  IParticipantRepository,
-  IBannerRepository,
-  IFileStorageRepository,
-  ILiveTrainingRepository,
-  ILiveTrainingBookRepository,
-  IChatSessionRepository,
-  ITransactionRepository,
-  IWalletRepository,
-  IWithdrawRepository
-} from "@/domain/service";
+import { IUserRepository } from "@/domain/service/user-repository";
+import { IAuthRepository } from "@/domain/service/auth-repository";
 
 // Repository Implementation
-import {
-  UserRepository,
-  AuthRepository,
-  BookRepository,
-  MentorRepository,
-  ParticipantRepository,
-  BannerRepository,
-  FileStorageRepository,
-  LiveTrainingRepository,
-  LiveTrainingBookRepository,
-  ChatSessionRepository,
-  TransactionRepository,
-  WalletRepository,
-  WithdrawRepository
-} from "@/infra/mongodb";
-// import { UserRepository, AuthRepository } from "@/infra/sqlite/repositories";
+import { UserRepository } from "@/infra/mongodb/user-repository";
+import { AuthRepository } from "@/infra/mongodb/auth-repository";
 
 // Services
-import {
-  UserService,
-  AuthService,
-  ProfileService,
-  MentorService,
-  BookService,
-  BannerService,
-  ZegoService,
-  FileStorageService,
-  LiveTrainingService,
-  ChatSesssionService,
-  TransactionService,
-  WalletService,
-  WithdrawService
-} from "@/services";
+import { UserService } from "@/services/user-service";
+import { AuthService } from "@/services/auth-service";
+import { EmailService } from "@/services/email-service";
 
 const container = new Container({ skipBaseClassChecks: true });
 // Main App Binding
@@ -107,16 +57,7 @@ container.bind<Routes>(Routes).toSelf().inSingletonScope();
 // REST Controller Binding
 container.bind<AuthController>(AuthController).toSelf();
 container.bind<UserController>(UserController).toSelf();
-container.bind<MentorController>(MentorController).toSelf();
-container.bind<BookController>(BookController).toSelf();
-container.bind<BannerController>(BannerController).toSelf();
-container.bind<FileStorageController>(FileStorageController).toSelf();
-container.bind<LiveTrainingController>(LiveTrainingController).toSelf();
-container.bind<ChatSessionController>(ChatSessionController).toSelf();
-container.bind<StorageController>(StorageController).toSelf();
-container.bind<TransactionController>(TransactionController).toSelf();
-container.bind<WalletController>(WalletController).toSelf();
-container.bind<WithdrawController>(WithdrawController).toSelf();
+container.bind<EmailController>(EmailController).toSelf();
 
 // REST Middleware Binding
 container.bind<AuthMiddleware>(AuthMiddleware).toSelf();
@@ -126,40 +67,15 @@ container.bind<AuthMiddleware>(AuthMiddleware).toSelf();
 // Infrastructure Binding
 // container.bind<SQLiteDataSource>(SQLiteDataSource).toSelf().inSingletonScope();
 container.bind<MongoDBConnection>(MongoDBConnection).toSelf().inSingletonScope();
-container.bind<FirebaseAdmin>(FirebaseAdmin).toSelf().inSingletonScope();
-container.bind<CamyMail>(CamyMail).toSelf().inSingletonScope();
-container.bind<Midtrans>(Midtrans).toSelf().inSingletonScope();
+container.bind<WebmailBe>(WebmailBe).toSelf().inSingletonScope();
 
 // Repository Binding Sqlite
 container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
 container.bind<IAuthRepository>(TYPES.AuthRepository).to(AuthRepository);
-container.bind<IBookRepository>(TYPES.BookRepository).to(BookRepository);
-container.bind<IMentorRepository>(TYPES.MentorRepository).to(MentorRepository);
-container.bind<IParticipantRepository>(TYPES.ParticipantRepository).to(ParticipantRepository);
-container.bind<IBannerRepository>(TYPES.BannerRepository).to(BannerRepository);
-container.bind<IFileStorageRepository>(TYPES.FileStorageRepository).to(FileStorageRepository);
-container.bind<ILiveTrainingRepository>(TYPES.LiveTrainingRepository).to(LiveTrainingRepository);
-container
-  .bind<ILiveTrainingBookRepository>(TYPES.LiveTrainingBookRepository)
-  .to(LiveTrainingBookRepository);
-container.bind<IChatSessionRepository>(TYPES.ChatSessionRespository).to(ChatSessionRepository);
-container.bind<ITransactionRepository>(TYPES.TransactionRepository).to(TransactionRepository);
-container.bind<IWalletRepository>(TYPES.WalletRepository).to(WalletRepository);
-container.bind<IWithdrawRepository>(TYPES.WithdrawRepository).to(WithdrawRepository);
 
 // Service Bind
 container.bind<AuthService>(AuthService).toSelf();
 container.bind<UserService>(UserService).toSelf();
-container.bind<ProfileService>(ProfileService).toSelf();
-container.bind<MentorService>(MentorService).toSelf();
-container.bind<BookService>(BookService).toSelf();
-container.bind<BannerService>(BannerService).toSelf();
-container.bind<ZegoService>(ZegoService).toSelf();
-container.bind<FileStorageService>(FileStorageService).toSelf();
-container.bind<LiveTrainingService>(LiveTrainingService).toSelf();
-container.bind<ChatSesssionService>(ChatSesssionService).toSelf();
-container.bind<TransactionService>(TransactionService).toSelf();
-container.bind<WalletService>(WalletService).toSelf();
-container.bind<WithdrawService>(WithdrawService).toSelf();
+container.bind<EmailService>(EmailService).toSelf();
 
 export { container };

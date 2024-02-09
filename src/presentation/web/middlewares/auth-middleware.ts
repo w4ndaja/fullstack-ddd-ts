@@ -3,9 +3,9 @@ import { Logger } from "@/common/libs/logger";
 import { ErrorCode } from "@/common/utils";
 import { EPERMISSIONS } from "@/common/utils/permissions";
 import { EROLES } from "@/common/utils/roles";
-import { Auth, IAuth } from "@/domain/model";
+import { Auth, IAuth } from "@/domain/model/auth";
 import { TYPES } from "@/ioc/types";
-import { AuthService } from "@/services";
+import { AuthService } from "@/services/auth-service";
 import { NextFunction, Request, Response } from "express";
 import { inject, injectable } from "inversify";
 

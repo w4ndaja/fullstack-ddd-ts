@@ -1,5 +1,6 @@
 import type { IAuth } from "@/domain/model/auth";
-import type { IUserRepository, IAuthRepository, IParticipantRepository } from "@/domain/service";
+import type { IUserRepository } from "@/domain/service/user-repository";
+import type { IAuthRepository} from "@/domain/service/auth-repository";
 
 import { AppError } from "@/common/libs/error-handler";
 import { ErrorCode } from "@/common/utils/error-code";
@@ -8,21 +9,16 @@ import { TYPES } from "@/ioc/types";
 
 import { inject, injectable } from "inversify";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { IUser, Participant, User } from "@/domain/model";
+import { IUser, User } from "@/domain/model/user";
 import { Logger } from "@/common/libs/logger";
 import { EROLES } from "@/common/utils/roles";
-import { FirebaseAdmin } from "@/infra/firebase-admin";
-import { DecodedIdToken } from "firebase-admin/auth";
 import axios from "axios";
-import { GAuthDecoded, IGAuthDecoded } from "@/domain/model/google-auth-decoded";
 @injectable()
 export class AuthService {
   constructor(
     @inject(TYPES.UserRepository) private userRepository: IUserRepository,
-    @inject(TYPES.ParticipantRepository) private participantRepository: IParticipantRepository,
     @inject(TYPES.AuthRepository) private authRepository: IAuthRepository,
     @inject(TYPES.Logger) private logger: Logger,
-    @inject(FirebaseAdmin) private firebase: FirebaseAdmin
   ) {}
   /**
    * validate client authority
@@ -61,24 +57,7 @@ export class AuthService {
     const existUser = await this.userRepository.findByUsernameOrEmail(email);
     if (existUser) throw new AppError(ErrorCode.UNPROCESSABLE_ENTITY, "User Already Exist");
     const userDto = userEntity.unmarshall();
-    const participantEntity = Participant.create({
-      userId: userDto.id,
-      username: userDto.email,
-      fullname: userDto.fullname,
-      followerCount: 0,
-      followingCount: 0,
-      bio: "",
-      gender: null,
-      avatarUrl: "https://img.icons8.com/?size=256&id=7819&format=png",
-      introVideo: {
-        service: "youtube",
-        url: "https://www.youtube.com/watch?v=JGwWNGJdvx8",
-      },
-      hasUnreadNotif: false,
-    });
-    const participantDto = participantEntity.unmarshall();
     this.userRepository.save(userDto);
-    this.participantRepository.save(participantDto);
     const auth = Auth.create({
       userId: userDto.id,
       expired: false,
@@ -134,63 +113,5 @@ export class AuthService {
    */
   private verifyToken(token: string): string {
     return String(jwt.verify(token, this.authRepository.publicKey));
-  }
-
-  async loginByGoogle(idToken: string): Promise<IAuth> {
-    let userDto: IUser;
-    let gAuthDto: IGAuthDecoded;
-    try {
-      const { data: keys } = await axios.get(
-        "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com"
-      );
-      gAuthDto = <IGAuthDecoded>jwt.decode(idToken);
-      const gAuth = GAuthDecoded.create(gAuthDto);
-      if (gAuth.exp > Date.now()) {
-        throw new AppError(ErrorCode.UNAUTHORIZED, "Session Expired!");
-      }
-      userDto = await this.userRepository.findByUsernameOrEmail(gAuth.email);
-    } catch (error) {
-      this.logger.error(error);
-      throw new AppError(ErrorCode.UNAUTHORIZED, "Token Invalid!");
-    }
-    let user = userDto
-      ? User.create(userDto)
-      : User.create({
-          username: gAuthDto.email.split("@")[0],
-          email: gAuthDto.email,
-          avatarUrl: gAuthDto.picture,
-          roles: [EROLES.PARTICIPANT.toString()],
-        });
-    user.setRole(EROLES.PARTICIPANT);
-    user.username = gAuthDto.email.split("@")[0];
-    user.avatarUrl = gAuthDto.picture;
-    user.fullname = gAuthDto.name;
-    user.email = gAuthDto.email;
-    let participantDto = await this.participantRepository.findByUserId(user.id);
-    let participant = participantDto
-      ? Participant.create({ ...participantDto, avatarUrl: user.avatarUrl })
-      : Participant.create({
-          userId: user.id,
-          username: user.email.split("@")[0],
-          fullname: user.fullname,
-          avatarUrl: user.avatarUrl,
-          bio: "",
-          gender: "",
-        });
-    userDto = user.unmarshall();
-    const auth = Auth.create({
-      userId: user.id,
-      expired: false,
-      user: userDto,
-    });
-    auth.token = await this.generateToken(auth.id);
-    const authDto = auth.unmarshall();
-    participantDto = participant.unmarshall();
-    await Promise.all([
-      this.userRepository.save(userDto),
-      this.authRepository.save(authDto),
-      this.participantRepository.save(participantDto),
-    ]);
-    return authDto;
   }
 }

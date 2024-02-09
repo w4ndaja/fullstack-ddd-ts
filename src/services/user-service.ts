@@ -1,11 +1,11 @@
 import type { IUserRepository } from "@/domain/service/user-repository";
-import { IUserCreate, IUser, Auth, IAuth } from "@/domain/model";
+import { IUserCreate, IUser, User } from "@/domain/model/user";
+import { Auth, IAuth } from "@/domain/model/auth";
 import { GenericPaginatedData, IBaseGetParam } from "@/common/libs/pagination";
 import type { Logger } from "@/common/libs/logger/logger";
 import type { IGenericPaginatedData } from "@/common/libs/pagination";
 import { inject, injectable } from "inversify";
 import { TYPES } from "@/ioc/types";
-import { User } from "@/domain/model";
 import { AppError } from "@/common/libs/error-handler";
 import { ErrorCode } from "@/common/utils";
 

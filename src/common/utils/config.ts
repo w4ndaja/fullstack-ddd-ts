@@ -27,9 +27,6 @@ export const config = {
     firebaseAdmin: {
       serviceAccountPath: process.env.SERVICE_ACCOUNT_PATH,
     },
-    ahmIt: {
-      baseUrl: process.env.AHM_REST_BASE_URL,
-    },
     sqlite: {
       database:
         process.env.SQLITE_PATH ||
@@ -43,33 +40,12 @@ export const config = {
       process.env.NODE_ENV === "production" ? "dist/presentation/web" : "src/presentation/web"
     ),
   },
-  zego: {
-    appId: process.env.ZEGO_APP_ID || "",
-    secret: process.env.ZEGO_SECRET || "",
+  imap: {
+    host: process.env.IMAP_HOST || "whm-admin.rexhoster.id",
+    port: Number(process.env.IMAP_PORT || "993"),
+    tls: process.env.IMAP_TLS == "true" || true,
   },
-  camy: {
-    email: {
-      username: process.env.CAMY_EMAIL_USERNAME || "developer@rexhoster.id",
-      password: process.env.CAMY_EMAIL_PASSWORD || "123123123",
-      host: process.env.CAMY_EMAIL_HOST || "mail.rexhoster.id",
-    },
-    liveRoomUrl: process.env.LIVE_ROOM_URL || "https://camy-dev.pentarex.id",
-  },
-  midtrans: {
-    env: process.env.MIDTRANS_ENV || "SANDBOX",
-    chargeUrlSandbox:
-      process.env.MIDTRANS_CHARGE_URL_SANDBOX ||
-      "https://app.sandbox.midtrans.com/snap/v1/transactions",
-    clientKeySandbox: process.env.MIDTRANS_CLIENT_KEY_SANDBOX || "SB-Mid-client-AmHndSJPH05XStfJ",
-    serverKeySandbox:
-      process.env.MIDTRANS_SERVER_KEY_SANDBOX || "SB-Mid-server-1eY5p54sKVB6kWQSl87xCtAf",
-    chargeUrlProduction:
-      process.env.MIDTRANS_CHARGE_URL_PRODUCTION || "https://app.midtrans.com/snap/v1/transactions",
-    clientKeyProduction:
-      process.env.MIDTRANS_CLIENT_KEY_PRODUCTION || "Mid-client-JzJIiu1Ymz7X4EAz",
-    serverKeyProduction:
-      process.env.MIDTRANS_SERVER_KEY_PRODUCTION || "Mid-server-uAk-NeS8dZkJfA_ecaS45NGq",
-    finishUrlSandbox: process.env.MIDTRANS_FINISH_URL_SANDBOX || "camyrtc://books",
-    finishUrlProduction: process.env.MIDTRANS_FINISH_URL_PRODUCTION || "camyrtc://books",
-  },
+  webmailBe: {
+    baseUrl : process.env.WEBMAIL_BE_BASE_URL || "http://localhost:8000/api"
+  }
 };

@@ -1,6 +1,6 @@
 import { inject, injectable } from "inversify";
 import { Router, asyncWrapper } from "../libs";
-import { UserService } from "@/services";
+import { UserService } from "@/services/user-service";
 import { NextFunction, Request, Response } from "express";
 import { RestMapper } from "@/dto/mappers/rest-mapper";
 import { AuthMiddleware } from "../middlewares/auth-middleware";

@@ -2,8 +2,6 @@ import { EROLES } from "@/common/utils/roles";
 import { Entity, IEntityCreate, IEntity } from "./entity";
 import bcrypt from "bcrypt";
 import { EPERMISSIONS } from "@/common/utils/permissions";
-import { IParticipant, Participant } from "@/domain/model/participant";
-import { IMentor, Mentor } from "@/domain/model/mentor";
 export type IUser = IEntity<{
   fullname: string | null;
   username: string | null;
@@ -11,8 +9,6 @@ export type IUser = IEntity<{
   password: string;
   roles: string[];
   permissions: string[];
-  participant?: IParticipant;
-  mentor?: IMentor;
   avatarUrl?: string;
 }>;
 
@@ -23,8 +19,6 @@ export type IUserCreate = IEntityCreate<{
   password?: string;
   roles?: string[];
   permissions?: string[];
-  participant?: IParticipant;
-  mentor?: IMentor; // Add mentor property
   avatarUrl?: string;
 }>;
 
@@ -51,8 +45,6 @@ export class User extends Entity<IUser> {
       ...super.unmarshall(),
       roles: this.roles.map((item) => item.toString()),
       permissions: this.permissions.map((item) => item.toString()),
-      participant: this.participant?.unmarshall(),
-      mentor: this.mentor?.unmarshall(), // Add mentor property
     };
   }
 
@@ -99,24 +91,6 @@ export class User extends Entity<IUser> {
 
   set permissions(permissions: EROLES[]) {
     this._props.permissions = permissions;
-  }
-
-  get participant(): Participant | undefined {
-    return this._props.participant ? Participant.create(this._props.participant) : undefined;
-  }
-
-  set participant(participant: Participant | undefined) {
-    this._props.participant = participant?.unmarshall();
-  }
-
-  get mentor(): Mentor | undefined {
-    // Add mentor getter
-    return this._props.mentor ? Mentor.create(this._props.mentor) : undefined;
-  }
-
-  set mentor(mentor: Mentor | undefined) {
-    // Add mentor setter
-    this._props.mentor = mentor?.unmarshall();
   }
 
   get avatarUrl(): string | undefined {
