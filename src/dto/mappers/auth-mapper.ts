@@ -1,4 +1,4 @@
-import { IAuth } from "@/domain/model";
+import { IAuth } from "@/domain/model/auth";
 import { IAuthLoginDto, IAuthValidateDto } from "../auth-dto";
 
 export class AuthMapper {

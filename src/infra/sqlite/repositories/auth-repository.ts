@@ -1,8 +1,8 @@
 import { injectable } from "inversify";
 import { Repository } from "./repository";
 import fs from "fs";
-import { IAuth } from "@/domain/model";
-import { IAuthRepository } from "@/domain/service";
+import { IAuth } from "@/domain/model/auth";
+import { IAuthRepository } from "@/domain/service/auth-repository";
 import { Auth as AuthSqlite } from "../models";
 import { ErrorCode, config } from "@/common/utils";
 import { AppError } from "@/common/libs/error-handler";

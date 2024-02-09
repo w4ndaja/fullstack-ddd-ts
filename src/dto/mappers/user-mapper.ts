@@ -1,4 +1,4 @@
-import { User } from "@/domain/model";
+import { User } from "@/domain/model/user";
 import { object } from "zod";
 
 export class UserMapper {

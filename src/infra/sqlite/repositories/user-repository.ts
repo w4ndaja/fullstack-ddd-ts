@@ -1,5 +1,5 @@
-import { IUser } from "@/domain/model";
-import { IUserRepository } from "@/domain/service";
+import { IUser } from "@/domain/model/user";
+import { IUserRepository } from "@/domain/service/user-repository";
 import { injectable } from "inversify";
 import { User as UserSqlite } from "../models";
 import { Repository } from "./repository";
